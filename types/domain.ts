@@ -72,6 +72,35 @@ export interface NewAppointmentInput {
   notes: string;
 }
 
+export interface AppointmentNote {
+  id: string;
+  tenantId: string;
+  appointmentId: string;
+  customerId: string;
+  customerName: string;
+  service: string;
+  rawNote: string;
+  customerSummary: string;
+  internalNote: string;
+  nextAction: string;
+  followUpDate: string;
+  reminderChannel: ReminderChannel;
+  createdAt?: unknown;
+  updatedAt?: unknown;
+}
+
+export interface NewAppointmentNoteInput {
+  tenantId: string;
+  appointment: Appointment;
+  rawNote: string;
+  customerSummary: string;
+  internalNote: string;
+  nextAction: string;
+  followUpDate: string;
+  reminderChannel: ReminderChannel;
+  createReminder: boolean;
+}
+
 export interface AiSuggestion {
   id: string;
   title: string;
@@ -81,19 +110,31 @@ export interface AiSuggestion {
 
 export interface Reminder {
   id: string;
+  tenantId?: string;
+  appointmentId?: string;
+  customerId?: string;
   time: string;
   dateLabel: string;
+  dueDate?: string;
   title: string;
   description: string;
   channel: ReminderChannel;
+  status?: "Bekliyor" | "Gönderildi" | "İptal";
+  createdAt?: unknown;
 }
 
 export interface FollowUp {
   id: string;
+  tenantId?: string;
+  appointmentId?: string;
+  customerId?: string;
   customerName: string;
   description: string;
   dueLabel: string;
+  dueDate?: string;
   tone: "red" | "orange" | "green" | "blue";
+  status?: "Açık" | "Tamamlandı" | "İptal";
+  createdAt?: unknown;
 }
 
 export interface UserProfile {

@@ -1,5 +1,5 @@
 import type { Appointment } from "@/types/domain";
-import { CalendarDays, MoreVertical } from "lucide-react";
+import { CalendarDays, FileText, MoreVertical } from "lucide-react";
 
 interface AppointmentTableProps {
   title: string;
@@ -7,6 +7,7 @@ interface AppointmentTableProps {
   serviceColumnLabel: string;
   appointments: Appointment[];
   showResourceColumn?: boolean;
+  onAddNote?: (appointment: Appointment) => void;
 }
 
 function statusClass(status: string) {
@@ -16,7 +17,7 @@ function statusClass(status: string) {
   return "status approved";
 }
 
-export function AppointmentTable({ title, customerLabel, serviceColumnLabel, appointments, showResourceColumn }: AppointmentTableProps) {
+export function AppointmentTable({ title, customerLabel, serviceColumnLabel, appointments, showResourceColumn, onAddNote }: AppointmentTableProps) {
   const gridClass = showResourceColumn ? "appointmentGrid appointmentGridWithResource" : "appointmentGrid";
 
   return (
@@ -56,7 +57,13 @@ export function AppointmentTable({ title, customerLabel, serviceColumnLabel, app
           </div>
           <div className="statusCell">
             <span className={statusClass(item.status)}>{item.status}</span>
-            <MoreVertical size={18} />
+            {onAddNote && item.customerId ? (
+              <button className="noteActionButton" onClick={() => onAddNote(item)} title="İşlem notu ekle">
+                <FileText size={16} /> Not
+              </button>
+            ) : (
+              <MoreVertical size={18} />
+            )}
           </div>
         </div>
       ))}

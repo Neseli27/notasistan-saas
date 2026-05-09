@@ -1,10 +1,11 @@
 "use client";
 
 import { AiSuggestions } from "@/components/AiSuggestions";
+import { AppointmentFormModal } from "@/components/AppointmentFormModal";
+import { AppointmentNoteModal } from "@/components/AppointmentNoteModal";
 import { AppointmentTable } from "@/components/AppointmentTable";
 import { CalendarCard } from "@/components/CalendarCard";
 import { CustomerCard } from "@/components/CustomerCard";
-import { AppointmentFormModal } from "@/components/AppointmentFormModal";
 import { CustomerFormModal } from "@/components/CustomerFormModal";
 import { FollowUpsCard } from "@/components/FollowUpsCard";
 import { Header } from "@/components/Header";
@@ -12,13 +13,14 @@ import { RemindersCard } from "@/components/RemindersCard";
 import { Sidebar } from "@/components/Sidebar";
 import { StatCard } from "@/components/StatCard";
 import { listenAppointments } from "@/lib/services/appointment-service";
+import { listenAppointmentNotes, listenFollowUps, listenReminders } from "@/lib/services/appointment-note-service";
 import { listenCustomers } from "@/lib/services/customer-service";
 import { getSectorPreset } from "@/lib/sector-presets";
-import type { Appointment, Customer, UserProfile } from "@/types/domain";
+import type { Appointment, AppointmentNote, Customer, FollowUp, Reminder, UserProfile } from "@/types/domain";
 import type { User } from "firebase/auth";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import { Bell, CalendarDays, Clock3, LogOut, Plus, Sparkles, UserPlus, UsersRound } from "lucide-react";
+import { Bell, CalendarDays, Clock3, LogOut, Plus, Sparkles, StickyNote, UserPlus, UsersRound } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 interface DashboardProps {
@@ -28,18 +30,33 @@ interface DashboardProps {
 
 const statIcons = [CalendarDays, Bell, Clock3, UsersRound];
 
+function buildNoteSuggestions(notes: AppointmentNote[]) {
+  return notes.slice(0, 4).map((note, index) => ({
+    id: `note_ai_${note.id}`,
+    title: `${note.customerName} için işlem özeti hazır`,
+    description: note.nextAction || note.customerSummary || "Sonraki takip adımı oluşturuldu.",
+    tone: (["green", "blue", "purple", "orange"] as const)[index] ?? "green",
+  }));
+}
+
 export function Dashboard({ user, profile }: DashboardProps) {
   const displayName = profile?.displayName || user?.displayName || "Murat Yılmaz";
   const firstName = displayName.split(" ")[0] || "Murat";
   const preset = getSectorPreset(profile?.sector);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [appointmentNotes, setAppointmentNotes] = useState<AppointmentNote[]>([]);
+  const [realFollowUps, setRealFollowUps] = useState<FollowUp[]>([]);
+  const [realReminders, setRealReminders] = useState<Reminder[]>([]);
   const [customersLoading, setCustomersLoading] = useState(false);
   const [appointmentsLoading, setAppointmentsLoading] = useState(false);
+  const [notesLoading, setNotesLoading] = useState(false);
   const [customerError, setCustomerError] = useState("");
   const [appointmentError, setAppointmentError] = useState("");
+  const [noteError, setNoteError] = useState("");
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
   const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
+  const [selectedAppointmentForNote, setSelectedAppointmentForNote] = useState<Appointment | null>(null);
 
   useEffect(() => {
     if (!profile?.tenantId) return;
@@ -83,11 +100,48 @@ export function Dashboard({ user, profile }: DashboardProps) {
     return unsubscribe;
   }, [profile?.tenantId]);
 
+  useEffect(() => {
+    if (!profile?.tenantId) return;
+
+    setNotesLoading(true);
+    setNoteError("");
+
+    const unsubscribeNotes = listenAppointmentNotes(
+      profile.tenantId,
+      (records) => {
+        setAppointmentNotes(records);
+        setNotesLoading(false);
+      },
+      () => {
+        setNoteError("İşlem notları okunamadı. Firestore bağlantısını kontrol edin.");
+        setNotesLoading(false);
+      }
+    );
+
+    const unsubscribeFollowUps = listenFollowUps(profile.tenantId, setRealFollowUps, () => {
+      setNoteError("Takip kayıtları okunamadı. Firestore bağlantısını kontrol edin.");
+    });
+
+    const unsubscribeReminders = listenReminders(profile.tenantId, setRealReminders, () => {
+      setNoteError("Hatırlatma kayıtları okunamadı. Firestore bağlantısını kontrol edin.");
+    });
+
+    return () => {
+      unsubscribeNotes();
+      unsubscribeFollowUps();
+      unsubscribeReminders();
+    };
+  }, [profile?.tenantId]);
+
   const historyLabel = preset.sector === "auto" ? "Servis Geçmişi" : preset.sector === "clinic" ? "Tedavi Geçmişi" : preset.sector === "education" ? "Görüşme Geçmişi" : "Hizmet Geçmişi";
   const featuredCustomer = customers[0] ?? preset.featuredCustomer;
   const realCustomerCount = customers.length;
   const realAppointmentCount = appointments.length;
+  const realNoteCount = appointmentNotes.length;
   const visibleAppointments = realAppointmentCount > 0 ? appointments : preset.appointments;
+  const visibleFollowUps = realFollowUps.length > 0 ? realFollowUps : preset.followUps;
+  const visibleReminders = realReminders.length > 0 ? realReminders : preset.reminders;
+  const visibleSuggestions = realNoteCount > 0 ? buildNoteSuggestions(appointmentNotes) : preset.aiSuggestions;
 
   const stats = useMemo(() => {
     return preset.stats.map((stat, index) => {
@@ -96,6 +150,13 @@ export function Dashboard({ user, profile }: DashboardProps) {
           ...stat,
           value: String(realAppointmentCount),
           detail: `Firestore’da ${realAppointmentCount} randevu`,
+        };
+      }
+      if (index === 2 && visibleFollowUps.length > 0 && realFollowUps.length > 0) {
+        return {
+          ...stat,
+          value: String(realFollowUps.length),
+          detail: `Gerçek takip kaydı`,
         };
       }
       if (index === 3 && realCustomerCount > 0) {
@@ -107,7 +168,7 @@ export function Dashboard({ user, profile }: DashboardProps) {
       }
       return stat;
     });
-  }, [preset.stats, realCustomerCount, realAppointmentCount]);
+  }, [preset.stats, realCustomerCount, realAppointmentCount, realFollowUps.length, visibleFollowUps.length]);
 
   return (
     <div className={`appShell theme-${preset.sector}`}>
@@ -130,8 +191,17 @@ export function Dashboard({ user, profile }: DashboardProps) {
 
           {customerError && <p className="formMessage errorMessage dashboardMessage">{customerError}</p>}
           {appointmentError && <p className="formMessage errorMessage dashboardMessage">{appointmentError}</p>}
+          {noteError && <p className="formMessage errorMessage dashboardMessage">{noteError}</p>}
           {customersLoading && <p className="formMessage successMessage dashboardMessage">Firestore müşteri kayıtları okunuyor...</p>}
           {appointmentsLoading && <p className="formMessage successMessage dashboardMessage">Firestore randevu kayıtları okunuyor...</p>}
+          {notesLoading && <p className="formMessage successMessage dashboardMessage">İşlem notları ve takipler okunuyor...</p>}
+
+          {realNoteCount > 0 && (
+            <div className="noteInsightBanner">
+              <StickyNote size={20} />
+              <span><b>{realNoteCount} işlem notu</b> kaydedildi. Takip ve hatırlatma kartları gerçek kayıtlarla güncelleniyor.</span>
+            </div>
+          )}
 
           <div className="statsGrid">
             {stats.map((stat, index) => {
@@ -147,12 +217,13 @@ export function Dashboard({ user, profile }: DashboardProps) {
               serviceColumnLabel={preset.serviceColumnLabel}
               appointments={visibleAppointments}
               showResourceColumn={preset.sector === "auto"}
+              onAddNote={setSelectedAppointmentForNote}
             />
-            <AiSuggestions suggestions={preset.aiSuggestions} sector={preset.sector} />
+            <AiSuggestions suggestions={visibleSuggestions} sector={preset.sector} />
             <CustomerCard customer={featuredCustomer} customerLabel={preset.sector === "auto" ? "Müşteri & Araç" : preset.customerLabel} historyLabel={historyLabel} />
             <CalendarCard />
-            <RemindersCard reminders={preset.reminders} />
-            <FollowUpsCard followUps={preset.followUps} />
+            <RemindersCard reminders={visibleReminders} />
+            <FollowUpsCard followUps={visibleFollowUps} />
           </div>
         </section>
       </main>
@@ -171,6 +242,15 @@ export function Dashboard({ user, profile }: DashboardProps) {
           sector={preset.sector}
           customers={customers}
           onClose={() => setIsAppointmentModalOpen(false)}
+        />
+      )}
+
+      {selectedAppointmentForNote && profile?.tenantId && (
+        <AppointmentNoteModal
+          tenantId={profile.tenantId}
+          sector={preset.sector}
+          appointment={selectedAppointmentForNote}
+          onClose={() => setSelectedAppointmentForNote(null)}
         />
       )}
     </div>

@@ -448,3 +448,82 @@ h1 { font-size: 36px; line-height: 1.1; margin: 0 0 8px; letter-spacing: -1px; }
   display: grid;
   gap: 14px;
 }
+
+/* v0.6 - İşlem notu, takip ve hatırlatma akışı */
+.noteActionButton {
+  min-height: 34px;
+  border: 1px solid color-mix(in srgb, var(--theme-primary, #0c48c7) 22%, #d8e0ee);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--theme-primary, #0c48c7);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  font-weight: 850;
+  font-size: 12px;
+}
+.noteActionButton:hover {
+  background: var(--theme-soft, #eef6ff);
+}
+.noteInsightBanner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: -8px 0 18px;
+  padding: 14px 16px;
+  border: 1px solid color-mix(in srgb, var(--theme-accent, #23d3ee) 28%, #d8e0ee);
+  background: var(--theme-soft, #eef6ff);
+  color: var(--theme-primary-dark, #061b4f);
+  border-radius: 16px;
+  font-weight: 700;
+}
+.noteModalCard {
+  width: min(940px, 100%);
+}
+.appointmentSummaryBox {
+  display: grid;
+  grid-template-columns: 48px 1fr auto;
+  gap: 14px;
+  align-items: center;
+  border: 1px solid var(--line);
+  background: #f8fbff;
+  border-radius: 18px;
+  padding: 15px;
+  margin-bottom: 18px;
+}
+.appointmentSummaryBox p {
+  margin: 4px 0 0;
+  color: var(--muted);
+}
+.smartSummaryButton {
+  min-height: 52px;
+  border: 1px dashed color-mix(in srgb, var(--theme-accent, #23d3ee) 60%, #d8e0ee);
+  background: color-mix(in srgb, var(--theme-soft, #eef6ff) 70%, #fff);
+  color: var(--theme-primary-dark, #061b4f);
+  border-radius: 15px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-weight: 900;
+}
+.checkboxField {
+  min-height: 54px;
+  justify-content: center;
+  border: 1px solid #d7e1f0;
+  border-radius: 15px;
+  padding: 0 16px;
+  background: #fff;
+}
+.checkboxField input {
+  width: auto;
+  margin: 0 9px 0 0;
+  accent-color: var(--theme-primary, #0c48c7);
+}
+
+@media (max-width: 760px) {
+  .appointmentSummaryBox { grid-template-columns: 42px 1fr; }
+  .appointmentSummaryBox .status { grid-column: 1 / -1; width: max-content; }
+  .noteActionButton { width: max-content; }
+}

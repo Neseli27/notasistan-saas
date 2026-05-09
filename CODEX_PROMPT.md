@@ -1,4 +1,4 @@
-# Not Asistan v0.5 Geliştirme Özeti
+# Not Asistan v0.6 Geliştirme Özeti
 
 Bu proje Firebase + GitHub + Vercel üzerinde çalışan Next.js tabanlı çok sektörlü SaaS uygulamasıdır.
 
@@ -6,7 +6,7 @@ Bu proje Firebase + GitHub + Vercel üzerinde çalışan Next.js tabanlı çok s
 
 - Next.js App Router
 - TypeScript
-- Tailwind kullanılmadan özel CSS tasarım sistemi
+- Özel CSS tasarım sistemi
 - Firebase Authentication
 - Cloud Firestore
 - Vercel deploy uyumu
@@ -14,18 +14,28 @@ Bu proje Firebase + GitHub + Vercel üzerinde çalışan Next.js tabanlı çok s
 - Sektöre göre dashboard presetleri
 - Gerçek müşteri ekleme
 - Gerçek randevu ekleme
+- Gerçek işlem notu / takip / hatırlatma oluşturma
 
-## v0.5 ile Eklenenler
+## v0.6 ile Eklenenler
 
-- `components/AppointmentFormModal.tsx`
-- `lib/services/appointment-service.ts`
-- `appointments` koleksiyonuna Firestore kaydı
-- Dashboard üzerinden “Yeni Randevu” modalı
-- Randevu formunda müşteri seçimi
-- Sektöre göre hizmet/işlem önerileri
-- Otomotivde araç/plaka bilgisinin seçilen müşteriden otomatik randevuya taşınması
-- Randevu listesinin gerçek Firestore verisinden okunması
+- `components/AppointmentNoteModal.tsx`
+- `lib/services/appointment-note-service.ts`
+- `appointmentNotes` koleksiyonuna Firestore kaydı
+- `followUps` koleksiyonuna Firestore kaydı
+- `reminders` koleksiyonuna Firestore kaydı
+- Randevu tablosunda gerçek randevular için `Not` butonu
+- İşlem notu yazma, müşteri özeti oluşturma, iç not, sonraki aksiyon ve takip tarihi alanları
+- İşlem notu kaydedilince randevu durumu `Tamamlandı` olarak güncellenir
+- Müşteri kartında son ziyaret, işlem sayısı, not ve sonraki aksiyon güncellenir
+- Dashboard’daki takip, hatırlatma ve AI önerileri kartları gerçek kayıtlardan beslenebilir
 
 ## Sonraki Hedef
 
-v0.6 için önerilen geliştirme: işlem notu / randevu sonrası özet ekleme ve takip tarihi oluşturma.
+v0.7 için önerilen geliştirme:
+
+- Randevu durumu değiştirme menüsü
+- Müşteri listesi sayfası
+- Randevular sayfası
+- İşlem notları sayfası
+- AI ile mesaj taslağı oluşturma modalı
+- WhatsApp/SMS için kopyalanabilir mesaj akışı
