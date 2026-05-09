@@ -3,7 +3,7 @@
 import { createPublicBookingRequest, getPublicTenantBySlug } from "@/lib/services/public-booking-service";
 import { getSectorPreset } from "@/lib/sector-presets";
 import type { PublicTenant } from "@/types/domain";
-import { CalendarDays, CheckCircle2, Clock3, Loader2, Mail, Phone, Send, Sparkles, UserRound } from "lucide-react";
+import { CalendarDays, CheckCircle2, Clock3, Loader2, LogIn, Mail, Phone, Send, Sparkles, UserRound } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 interface PublicBookingPageProps {
@@ -162,6 +162,9 @@ export function PublicBookingPage({ slug }: PublicBookingPageProps) {
             <span><Clock3 size={16} /> Hızlı dönüş</span>
             <span><CheckCircle2 size={16} /> Takipli hizmet</span>
           </div>
+          <a className="publicCustomerLogin" href={`/musteri/${tenant.slug}`}>
+            <LogIn size={17} /> Müşteri paneline giriş yap
+          </a>
         </div>
 
         <form className="publicBookingForm" onSubmit={handleSubmit}>
@@ -229,6 +232,7 @@ export function PublicBookingPage({ slug }: PublicBookingPageProps) {
           </button>
 
           <p className="publicPrivacyNote">Bu form randevu talebi oluşturur. Kesin randevu saati işletme tarafından onaylandıktan sonra geçerli olur.</p>
+          <a className="publicInlineLogin" href={`/musteri/${tenant.slug}`}>Müşteri hesabınız varsa panelinize giriş yapın →</a>
         </form>
       </section>
     </main>

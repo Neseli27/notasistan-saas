@@ -55,3 +55,9 @@ Bu sürümde eklenen önemli dosyalar:
 - `components/StatusHistoryCard.tsx`
 - `lib/services/appointment-service.ts`
 - `types/domain.ts`
+
+## v1.4 geliştirme notu
+
+Müşteri paneli eklendi. `/musteri/[slug]` rotası işletmeye bağlı müşteri giriş/kayıt ekranı ve müşteri paneli sunar. Müşteri hesabı Firebase Authentication ile açılır, `users` koleksiyonunda `role: "customer"` profili oluşturulur ve `customers` kaydıyla `customerId` üzerinden eşleşir.
+
+Sonraki geliştirme hedefi: müşteri erteleme/iptal taleplerini işletme panelinde kabul/ret yönetimine bağlamak ve tenant bazlı Firestore rules kurallarını sıkılaştırmak.

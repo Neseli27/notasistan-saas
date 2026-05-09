@@ -1,4 +1,4 @@
-export type Role = "super_admin" | "owner" | "manager" | "staff";
+export type Role = "super_admin" | "owner" | "manager" | "staff" | "customer";
 export type Sector = "beauty" | "clinic" | "auto" | "education" | "consulting";
 export type AppointmentStatus = "Onaylandı" | "Bekliyor" | "Tamamlandı" | "İptal" | "Gelmedi";
 export type ReminderChannel = "WhatsApp" | "SMS" | "E-posta";
@@ -192,6 +192,24 @@ export interface FollowUp {
   createdAt?: unknown;
 }
 
+export interface CustomerActionRequest {
+  id: string;
+  tenantId: string;
+  tenantSlug: string;
+  customerId: string;
+  customerName: string;
+  customerPhone: string;
+  appointmentId?: string;
+  appointmentService?: string;
+  appointmentDate?: string;
+  appointmentTime?: string;
+  type: "Erteleme" | "İptal";
+  message: string;
+  status: "Yeni Talep" | "Görüldü" | "Tamamlandı" | "Reddedildi";
+  createdAt?: unknown;
+  updatedAt?: unknown;
+}
+
 export interface UserProfile {
   uid: string;
   email: string;
@@ -200,4 +218,7 @@ export interface UserProfile {
   tenantId: string;
   tenantName: string;
   sector: Sector;
+  tenantSlug?: string;
+  customerId?: string;
+  customerPhone?: string;
 }

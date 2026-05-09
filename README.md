@@ -95,3 +95,37 @@ Bu sürümde randevu durum yönetimi daha profesyonel hale getirildi.
 - Geçmiş kayıtlardaki mesajlar tekrar kopyalanabilir.
 
 Not: Firestore kurallarında genel geliştirme kuralı giriş yapan kullanıcıya izin verdiği için bu sürümde ek rules değişikliği zorunlu değildir.
+
+## v1.4 - Müşteri Paneli ve Müşteri Hesabı
+
+Bu sürümde işletme müşterileri için ayrı bir müşteri paneli eklendi.
+
+### Yeni müşteri paneli adresi
+
+```text
+/musteri/[isletme-slug]
+```
+
+Örnek:
+
+```text
+/musteri/gulizar-guzellik-merkezi
+/musteri/servet-oto-bakim
+```
+
+### Eklenenler
+
+- Müşteri kayıt / giriş ekranı
+- Firebase Authentication ile müşteri hesabı
+- Mevcut müşteri kaydı telefon/e-posta ile eşleştirme
+- Müşterinin kendi randevularını görmesi
+- Bekleyen randevu taleplerini görmesi
+- Müşteriye açık işlem özetlerini görmesi
+- Erteleme ve iptal talebi oluşturması
+- İşletme panelinde müşteri erteleme/iptal talepleri kartı
+- Public randevu sayfasından müşteri paneline yönlendirme
+- PWA müşteri deneyimine uygun mobil arayüz
+
+### Önemli
+
+Bu sürümde Firestore kuralları hâlâ geliştirme aşaması kolaylığı için giriş yapmış kullanıcıya geniş izin verir. Canlı ve ücretli kullanıma geçmeden önce tenant ve müşteri bazlı güvenlik kuralları sıkılaştırılmalıdır.

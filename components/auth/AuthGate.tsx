@@ -56,6 +56,20 @@ export function AuthGate() {
     return <AuthForm />;
   }
 
+  if (profile?.role === "customer") {
+    const portalHref = profile.tenantSlug ? `/musteri/${profile.tenantSlug}` : "/";
+    return (
+      <main className="authPage">
+        <section className="authCard authLoadingCard">
+          <div className="authLogo">✦</div>
+          <h1>Bu hesap müşteri paneli için oluşturulmuş.</h1>
+          <p>İşletme yönetim paneline yalnızca işletme kullanıcıları girebilir.</p>
+          <a className="authSubmit" href={portalHref}>Müşteri Panelime Git</a>
+        </section>
+      </main>
+    );
+  }
+
   if (!profile?.tenantId) {
     return (
       <TenantSetup

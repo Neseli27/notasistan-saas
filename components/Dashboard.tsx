@@ -7,6 +7,7 @@ import { AppointmentTable } from "@/components/AppointmentTable";
 import { BookingRequestsCard } from "@/components/BookingRequestsCard";
 import { CalendarCard } from "@/components/CalendarCard";
 import { CustomerCard } from "@/components/CustomerCard";
+import { CustomerActionRequestsCard } from "@/components/CustomerActionRequestsCard";
 import { CustomerFormModal } from "@/components/CustomerFormModal";
 import { FollowUpsCard } from "@/components/FollowUpsCard";
 import { Header } from "@/components/Header";
@@ -19,8 +20,9 @@ import { listenAppointments, listenAppointmentStatusLogs, updateAppointmentStatu
 import { listenAppointmentNotes, listenFollowUps, listenReminders } from "@/lib/services/appointment-note-service";
 import { listenCustomers } from "@/lib/services/customer-service";
 import { convertBookingRequestToAppointment, ensurePublicTenant, listenBookingRequests, rejectBookingRequest } from "@/lib/services/public-booking-service";
+import { listenTenantCustomerActionRequests } from "@/lib/services/customer-portal-service";
 import { getSectorPreset } from "@/lib/sector-presets";
-import type { Appointment, AppointmentNote, AppointmentStatus, AppointmentStatusLog, BookingRequest, Customer, FollowUp, Reminder, UserProfile } from "@/types/domain";
+import type { Appointment, AppointmentNote, AppointmentStatus, AppointmentStatusLog, BookingRequest, Customer, CustomerActionRequest, FollowUp, Reminder, UserProfile } from "@/types/domain";
 import type { User } from "firebase/auth";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
@@ -54,6 +56,7 @@ export function Dashboard({ user, profile }: DashboardProps) {
   const [realReminders, setRealReminders] = useState<Reminder[]>([]);
   const [bookingRequests, setBookingRequests] = useState<BookingRequest[]>([]);
   const [statusLogs, setStatusLogs] = useState<AppointmentStatusLog[]>([]);
+  const [customerActionRequests, setCustomerActionRequests] = useState<CustomerActionRequest[]>([]);
   const [publicSlug, setPublicSlug] = useState("");
   const [appOrigin, setAppOrigin] = useState("");
   const [customersLoading, setCustomersLoading] = useState(false);
@@ -110,6 +113,18 @@ export function Dashboard({ user, profile }: DashboardProps) {
       profile.tenantId,
       setBookingRequests,
       () => setBookingError("Müşteri randevu talepleri okunamadı. Firestore kurallarını kontrol edin.")
+    );
+
+    return unsubscribe;
+  }, [profile?.tenantId]);
+
+  useEffect(() => {
+    if (!profile?.tenantId) return;
+
+    const unsubscribe = listenTenantCustomerActionRequests(
+      profile.tenantId,
+      setCustomerActionRequests,
+      () => setBookingError("Müşteri erteleme/iptal talepleri okunamadı. Firestore bağlantısını kontrol edin.")
     );
 
     return unsubscribe;
@@ -212,6 +227,7 @@ export function Dashboard({ user, profile }: DashboardProps) {
   const visibleReminders = realReminders.length > 0 ? realReminders : preset.reminders;
   const visibleSuggestions = realNoteCount > 0 ? buildNoteSuggestions(appointmentNotes) : preset.aiSuggestions;
   const publicBookingUrl = publicSlug && appOrigin ? `${appOrigin}/randevu/${publicSlug}` : "";
+  const customerPortalUrl = publicSlug && appOrigin ? `${appOrigin}/musteri/${publicSlug}` : "";
 
   const stats = useMemo(() => {
     return preset.stats.map((stat, index) => {
@@ -352,10 +368,14 @@ export function Dashboard({ user, profile }: DashboardProps) {
             <div className="publicLinkBanner">
               <Sparkles size={20} />
               <div>
-                <b>Müşteri randevu sayfanız hazır.</b>
+                <b>Müşteri randevu sayfanız ve müşteri paneliniz hazır.</b>
                 <span>{publicBookingUrl}</span>
+                {customerPortalUrl && <span>{customerPortalUrl}</span>}
               </div>
-              <a href={publicBookingUrl} target="_blank" rel="noreferrer">Sayfayı Aç</a>
+              <div className="publicLinkActions">
+                <a href={publicBookingUrl} target="_blank" rel="noreferrer">Randevu Sayfası</a>
+                {customerPortalUrl && <a href={customerPortalUrl} target="_blank" rel="noreferrer">Müşteri Paneli</a>}
+              </div>
             </div>
           )}
 
@@ -388,6 +408,7 @@ export function Dashboard({ user, profile }: DashboardProps) {
               onReject={handleRejectBookingRequest}
               rejectingRequestId={rejectingRequestId}
             />
+            <CustomerActionRequestsCard requests={customerActionRequests} />
             <StatusHistoryCard logs={statusLogs} />
             <CalendarCard />
             <RemindersCard reminders={visibleReminders} />
