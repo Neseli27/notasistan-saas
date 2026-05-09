@@ -8,16 +8,17 @@ import {
   listenSuperAdminCustomers,
   listenSuperAdminTenants,
   listenSuperAdminUsers,
+  updateTenantPlan,
   updateTenantStatus,
   type SuperAdminAppointment,
   type SuperAdminCustomer,
   type SuperAdminTenant,
   type SuperAdminUser,
 } from "@/lib/services/super-admin-service";
-import type { BookingRequest, CustomerActionRequest, Sector, UserProfile } from "@/types/domain";
+import type { BookingRequest, CustomerActionRequest, Sector, TenantPlan, TenantPlanStatus, UserProfile } from "@/types/domain";
 import type { User } from "firebase/auth";
 import { signOut } from "firebase/auth";
-import { Activity, Building2, CalendarClock, CheckCircle2, Copy, Database, LogOut, Search, ShieldCheck, Sparkles, UsersRound, XCircle } from "lucide-react";
+import { Activity, Building2, CalendarClock, CheckCircle2, Copy, CreditCard, Crown, Database, LogOut, Search, ShieldCheck, Sparkles, UsersRound, XCircle } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 interface SuperAdminPanelProps {
@@ -25,7 +26,7 @@ interface SuperAdminPanelProps {
   profile?: UserProfile;
 }
 
-type AdminTab = "overview" | "tenants" | "users" | "requests" | "system";
+type AdminTab = "overview" | "tenants" | "users" | "requests" | "plans" | "system";
 
 const sectorLabels: Record<Sector, string> = {
   beauty: "Güzellik",
@@ -33,6 +34,36 @@ const sectorLabels: Record<Sector, string> = {
   auto: "Otomotiv",
   education: "Eğitim",
   consulting: "Danışmanlık",
+};
+
+const planOptions: TenantPlan[] = ["Starter", "Pro", "Klinik", "Enterprise"];
+const planStatusOptions: TenantPlanStatus[] = ["Deneme", "Aktif", "Askıda", "İptal"];
+
+const planConfig: Record<TenantPlan, { label: string; price: string; description: string; limits: string[] }> = {
+  Starter: {
+    label: "Başlangıç",
+    price: "₺0 / deneme",
+    description: "Tek kişi veya küçük işletme demosu için temel kullanım.",
+    limits: ["1 işletme kullanıcısı", "50 müşteri", "100 randevu", "Demo AI metinleri"],
+  },
+  Pro: {
+    label: "Profesyonel",
+    price: "₺799 / ay",
+    description: "Randevulu çalışan küçük işletmeler için tam operasyon paketi.",
+    limits: ["5 kullanıcı", "1.000 müşteri", "Sınırsız randevu", "PWA müşteri paneli"],
+  },
+  Klinik: {
+    label: "Klinik",
+    price: "₺1.499 / ay",
+    description: "Klinik, diyetisyen, danışmanlık ve hassas takip isteyen işletmeler.",
+    limits: ["10 kullanıcı", "Gelişmiş kayıt takibi", "KVKK hazırlık alanları", "Özel işlem notları"],
+  },
+  Enterprise: {
+    label: "Kurumsal",
+    price: "Özel teklif",
+    description: "Çok şubeli veya özel entegrasyon isteyen yapılar için.",
+    limits: ["Çok şube", "Özel rol/yetki", "API hazırlığı", "Özel destek"],
+  },
 };
 
 function getOpenRequestCount(requests: BookingRequest[]) {
@@ -64,6 +95,7 @@ export function SuperAdminPanel({ user, profile }: SuperAdminPanelProps) {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [busyTenantId, setBusyTenantId] = useState("");
+  const [busyPlanTenantId, setBusyPlanTenantId] = useState("");
   const [appOrigin, setAppOrigin] = useState("");
 
   useEffect(() => {
@@ -118,6 +150,9 @@ export function SuperAdminPanel({ user, profile }: SuperAdminPanelProps) {
   const recentRequests = [...bookingRequests.slice(0, 4), ...customerActionRequests.slice(0, 4)].slice(0, 6);
   const totalOpenRequests = getOpenRequestCount(bookingRequests) + getOpenActionCount(customerActionRequests);
   const activeTenants = tenants.filter((tenant) => tenant.isActive !== false).length;
+  const planCounts = planOptions.reduce((acc, plan) => ({ ...acc, [plan]: tenants.filter((tenant) => (tenant.plan || "Starter") === plan).length }), {} as Record<TenantPlan, number>);
+  const trialTenants = tenants.filter((tenant) => (tenant.planStatus || "Deneme") === "Deneme").length;
+  const paidTenants = tenants.filter((tenant) => (tenant.planStatus || "Deneme") === "Aktif").length;
   const customerUsers = users.filter((item) => item.role === "customer").length;
   const ownerUsers = users.filter((item) => item.role === "owner" || item.role === "manager" || item.role === "staff").length;
 
@@ -137,6 +172,22 @@ export function SuperAdminPanel({ user, profile }: SuperAdminPanelProps) {
     }
   }
 
+  async function handleTenantPlan(tenant: SuperAdminTenant, plan: TenantPlan, planStatus: TenantPlanStatus) {
+    setBusyPlanTenantId(tenant.id);
+    setError("");
+    setNotice("");
+
+    try {
+      await updateTenantPlan(tenant.id, plan, planStatus);
+      setNotice(`${tenant.name} paketi ${planConfig[plan].label} / ${planStatus} olarak güncellendi.`);
+    } catch (err) {
+      console.error("İşletme paketi güncellenemedi:", err);
+      setError("İşletme paketi güncellenemedi. Firestore kurallarını kontrol edin.");
+    } finally {
+      setBusyPlanTenantId("");
+    }
+  }
+
   return (
     <main className="superAdminShell">
       <aside className="superAdminSidebar">
@@ -153,6 +204,7 @@ export function SuperAdminPanel({ user, profile }: SuperAdminPanelProps) {
           <button className={activeTab === "tenants" ? "active" : ""} onClick={() => setActiveTab("tenants")}><Building2 size={18} /> İşletmeler</button>
           <button className={activeTab === "users" ? "active" : ""} onClick={() => setActiveTab("users")}><UsersRound size={18} /> Kullanıcılar</button>
           <button className={activeTab === "requests" ? "active" : ""} onClick={() => setActiveTab("requests")}><CalendarClock size={18} /> Talepler</button>
+          <button className={activeTab === "plans" ? "active" : ""} onClick={() => setActiveTab("plans")}><CreditCard size={18} /> Paketler</button>
           <button className={activeTab === "system" ? "active" : ""} onClick={() => setActiveTab("system")}><Database size={18} /> Sistem</button>
         </nav>
 
@@ -186,6 +238,7 @@ export function SuperAdminPanel({ user, profile }: SuperAdminPanelProps) {
           <article><span>Müşteri Kaydı</span><strong>{customers.length}</strong><small>Tüm tenant kayıtları</small></article>
           <article><span>Randevu</span><strong>{appointments.length}</strong><small>{appointments.filter((item) => item.status === "Bekliyor").length} bekleyen</small></article>
           <article><span>Açık Talep</span><strong>{totalOpenRequests}</strong><small>Randevu + erteleme/iptal</small></article>
+          <article><span>Aktif Paket</span><strong>{paidTenants}</strong><small>{trialTenants} deneme · {planCounts.Pro + planCounts.Klinik + planCounts.Enterprise} ücretli aday</small></article>
         </div>
 
         {activeTab === "overview" && (
@@ -200,6 +253,8 @@ export function SuperAdminPanel({ user, profile }: SuperAdminPanelProps) {
                 appOrigin={appOrigin}
                 busyTenantId={busyTenantId}
                 onStatusChange={handleTenantStatus}
+                busyPlanTenantId={busyPlanTenantId}
+                onPlanChange={handleTenantPlan}
               />
             </section>
 
@@ -234,7 +289,7 @@ export function SuperAdminPanel({ user, profile }: SuperAdminPanelProps) {
         {activeTab === "tenants" && (
           <section className="superAdminPanel wideOnly">
             <div className="superAdminPanelHeader"><h2>İşletmeler</h2><span>{filteredTenants.length} kayıt</span></div>
-            <TenantTable tenants={filteredTenants} appOrigin={appOrigin} busyTenantId={busyTenantId} onStatusChange={handleTenantStatus} />
+            <TenantTable tenants={filteredTenants} appOrigin={appOrigin} busyTenantId={busyTenantId} onStatusChange={handleTenantStatus} busyPlanTenantId={busyPlanTenantId} onPlanChange={handleTenantPlan} />
           </section>
         )}
 
@@ -280,6 +335,33 @@ export function SuperAdminPanel({ user, profile }: SuperAdminPanelProps) {
           </section>
         )}
 
+        {activeTab === "plans" && (
+          <section className="superAdminPanel wideOnly">
+            <div className="superAdminPanelHeader"><h2>Paket ve Abonelik Yönetimi</h2><span>{tenants.length} işletme</span></div>
+            <div className="planSummaryGrid">
+              {planOptions.map((plan) => (
+                <article key={plan} className="planSummaryCard">
+                  <div className="planSummaryIcon"><Crown size={18} /></div>
+                  <span>{planConfig[plan].label}</span>
+                  <strong>{planCounts[plan]}</strong>
+                  <small>{planConfig[plan].price}</small>
+                  <p>{planConfig[plan].description}</p>
+                  <ul>{planConfig[plan].limits.map((limit) => <li key={limit}>{limit}</li>)}</ul>
+                </article>
+              ))}
+            </div>
+            <div className="superAdminPanelHeader planTableHeader"><h2>İşletme Paketleri</h2><span>Plan ve durum güncelle</span></div>
+            <TenantTable
+              tenants={filteredTenants}
+              appOrigin={appOrigin}
+              busyTenantId={busyTenantId}
+              onStatusChange={handleTenantStatus}
+              busyPlanTenantId={busyPlanTenantId}
+              onPlanChange={handleTenantPlan}
+            />
+          </section>
+        )}
+
         {activeTab === "system" && (
           <section className="superAdminPanel wideOnly">
             <div className="superAdminPanelHeader"><h2>Sistem Kontrol Listesi</h2></div>
@@ -300,16 +382,18 @@ interface TenantTableProps {
   tenants: Array<SuperAdminTenant & { userCount: number; customerCount: number; appointmentCount: number; openRequestCount: number }>;
   appOrigin: string;
   busyTenantId: string;
+  busyPlanTenantId: string;
   onStatusChange: (tenant: SuperAdminTenant, isActive: boolean) => Promise<void> | void;
+  onPlanChange: (tenant: SuperAdminTenant, plan: TenantPlan, planStatus: TenantPlanStatus) => Promise<void> | void;
 }
 
-function TenantTable({ tenants, appOrigin, busyTenantId, onStatusChange }: TenantTableProps) {
+function TenantTable({ tenants, appOrigin, busyTenantId, busyPlanTenantId, onStatusChange, onPlanChange }: TenantTableProps) {
   if (tenants.length === 0) return <p className="superAdminEmpty">Gösterilecek işletme yok.</p>;
 
   return (
     <div className="superAdminTable tenantTable">
       <div className="superAdminTableHeader">
-        <span>İşletme</span><span>Sektör</span><span>Kayıtlar</span><span>Linkler</span><span>Durum</span>
+        <span>İşletme</span><span>Sektör</span><span>Kayıtlar</span><span>Paket</span><span>Linkler</span><span>Durum</span>
       </div>
       {tenants.map((tenant) => {
         const bookingUrl = tenant.slug && appOrigin ? `${appOrigin}/randevu/${tenant.slug}` : "";
@@ -324,6 +408,23 @@ function TenantTable({ tenants, appOrigin, busyTenantId, onStatusChange }: Tenan
             <span>
               <b>{tenant.customerCount} müşteri · {tenant.appointmentCount} randevu</b>
               <small>{tenant.userCount} kullanıcı · {tenant.openRequestCount} açık talep</small>
+            </span>
+            <span className="tenantPlanControls">
+              <select
+                value={tenant.plan || "Starter"}
+                disabled={busyPlanTenantId === tenant.id}
+                onChange={(event) => onPlanChange(tenant, event.target.value as TenantPlan, tenant.planStatus || "Deneme")}
+              >
+                {planOptions.map((plan) => <option key={plan} value={plan}>{planConfig[plan].label}</option>)}
+              </select>
+              <select
+                value={tenant.planStatus || "Deneme"}
+                disabled={busyPlanTenantId === tenant.id}
+                onChange={(event) => onPlanChange(tenant, tenant.plan || "Starter", event.target.value as TenantPlanStatus)}
+              >
+                {planStatusOptions.map((status) => <option key={status} value={status}>{status}</option>)}
+              </select>
+              <small>{planConfig[tenant.plan || "Starter"].price}</small>
             </span>
             <span className="superAdminLinks">
               {bookingUrl ? <button onClick={() => copyToClipboard(bookingUrl)}><Copy size={14} /> Randevu</button> : <small>Link yok</small>}

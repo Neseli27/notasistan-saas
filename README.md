@@ -168,3 +168,24 @@ sector = consulting
 Sonra uygulamadan çıkış yapıp tekrar giriş yapın. Root panel otomatik olarak Süper Admin Paneli açacaktır.
 
 > Not: Canlı/ücretli kullanıma geçmeden önce Firestore Rules tenant bazlı olarak sıkılaştırılmalıdır.
+
+
+## v1.7 - Süper Admin Paket ve Abonelik Yönetimi
+
+Bu sürümde Süper Admin paneline Paketler sekmesi eklendi. Süper admin artık her işletmenin planını ve plan durumunu merkezi olarak yönetebilir.
+
+Paketler:
+
+- Starter / Başlangıç
+- Pro / Profesyonel
+- Klinik
+- Enterprise / Kurumsal
+
+Plan durumları:
+
+- Deneme
+- Aktif
+- Askıda
+- İptal
+
+Firestore tarafında `tenants` belgelerine `plan` ve `planStatus` alanları yazılır. Mevcut işletmelerde bu alanlar yoksa sistem varsayılan olarak `Starter` ve `Deneme` kabul eder.

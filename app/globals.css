@@ -2385,7 +2385,7 @@ h1 { font-size: 36px; line-height: 1.1; margin: 0 0 8px; letter-spacing: -1px; }
 
 .superAdminStats {
   display: grid;
-  grid-template-columns: repeat(5, minmax(150px, 1fr));
+  grid-template-columns: repeat(6, minmax(150px, 1fr));
   gap: 16px;
   margin-bottom: 20px;
 }
@@ -2445,7 +2445,7 @@ h1 { font-size: 36px; line-height: 1.1; margin: 0 0 8px; letter-spacing: -1px; }
 .superAdminTableHeader { color: #65718d; font-weight: 900; background: #f7f9fd; }
 .superAdminTableRow:last-child { border-bottom: 0; }
 .tenantTable .superAdminTableHeader,
-.tenantTable .superAdminTableRow { grid-template-columns: 1.25fr .75fr 1.15fr 1.05fr 1fr; }
+.tenantTable .superAdminTableRow { grid-template-columns: 1.15fr .65fr 1.05fr 1.1fr .9fr 1fr; }
 .userTable .superAdminTableHeader,
 .userTable .superAdminTableRow { grid-template-columns: 1.35fr .55fr 1fr .7fr; }
 .superAdminTableRow b { display: block; }
@@ -2517,6 +2517,118 @@ h1 { font-size: 36px; line-height: 1.1; margin: 0 0 8px; letter-spacing: -1px; }
 .superAdminAlert.error { color: #b4162c; background: #ffe9ee; }
 .superAdminAlert.success { color: #0b7e5f; background: #e7f7ef; }
 .superAdminEmpty { color: var(--muted); margin: 0; padding: 16px; }
+
+
+/* v1.7 - Süper admin paket ve abonelik yönetimi */
+.planSummaryGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.planSummaryCard {
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  box-shadow: var(--shadow);
+  padding: 18px;
+  min-height: 250px;
+}
+
+.planSummaryIcon {
+  width: 42px;
+  height: 42px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  color: #0c48c7;
+  background: #eef4ff;
+  margin-bottom: 14px;
+}
+
+.planSummaryCard span {
+  display: block;
+  color: #0f172a;
+  font-weight: 900;
+  font-size: 18px;
+}
+
+.planSummaryCard strong {
+  display: block;
+  color: #0c48c7;
+  font-size: 36px;
+  line-height: 1;
+  margin: 10px 0 4px;
+}
+
+.planSummaryCard small {
+  display: block;
+  color: #0b7e5f;
+  font-weight: 900;
+  margin-bottom: 10px;
+}
+
+.planSummaryCard p {
+  margin: 0 0 12px;
+  color: var(--muted);
+  line-height: 1.45;
+  font-size: 13px;
+}
+
+.planSummaryCard ul {
+  margin: 0;
+  padding-left: 18px;
+  color: #475569;
+  font-size: 12px;
+  line-height: 1.7;
+  font-weight: 750;
+}
+
+.planTableHeader {
+  margin-top: 4px;
+}
+
+.tenantPlanControls {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+}
+
+.tenantPlanControls select {
+  width: 100%;
+  min-height: 34px;
+  border: 1px solid #d7e1f0;
+  border-radius: 11px;
+  background: #fff;
+  color: #10245d;
+  font-weight: 850;
+  padding: 0 9px;
+  outline: none;
+}
+
+.tenantPlanControls select:disabled {
+  opacity: .65;
+  cursor: progress;
+}
+
+.tenantPlanControls small {
+  color: #0b7e5f;
+  font-weight: 900;
+  margin-top: 0;
+}
+
+@media (max-width: 1380px) {
+  .planSummaryGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tenantTable .superAdminTableHeader,
+  .tenantTable .superAdminTableRow { grid-template-columns: 1.05fr .62fr 1fr 1fr .82fr .96fr; }
+}
+
+@media (max-width: 780px) {
+  .planSummaryGrid { grid-template-columns: 1fr; }
+  .superAdminTableHeader,
+  .superAdminTableRow { min-width: 1120px; }
+}
 
 @media (max-width: 1200px) {
   .superAdminShell { grid-template-columns: 92px 1fr; }

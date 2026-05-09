@@ -75,3 +75,8 @@ Sonraki geliştirme hedefi: müşteri erteleme/iptal taleplerini işletme paneli
 ## v1.6 Süper Admin Paneli Görevi
 
 Süper admin paneli eklendi. `role === "super_admin"` olan kullanıcılar normal işletme paneli yerine `SuperAdminPanel` bileşenine yönlendirilir. Panel tüm tenant, user, customer, appointment ve request koleksiyonlarını okur; SaaS sahibine merkezi izleme sunar. Sonraki adımda tenant bazlı Firestore Rules sıkılaştırılmalı ve işletme paket/abonelik yönetimi eklenmelidir.
+
+
+## v1.7 Notu
+
+Süper Admin paneline paket ve abonelik yönetimi eklendi. `components/super-admin/SuperAdminPanel.tsx` içinde Paketler sekmesi, plan özet kartları ve işletme bazlı plan/durum seçicileri bulunur. `lib/services/super-admin-service.ts` içindeki `updateTenantPlan` fonksiyonu tenants belgesini günceller.

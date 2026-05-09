@@ -1,5 +1,7 @@
 export type Role = "super_admin" | "owner" | "manager" | "staff" | "customer";
 export type Sector = "beauty" | "clinic" | "auto" | "education" | "consulting";
+export type TenantPlan = "Starter" | "Pro" | "Klinik" | "Enterprise";
+export type TenantPlanStatus = "Deneme" | "Aktif" | "Askıda" | "İptal";
 export type AppointmentStatus = "Onaylandı" | "Bekliyor" | "Tamamlandı" | "İptal" | "Gelmedi";
 export type ReminderChannel = "WhatsApp" | "SMS" | "E-posta";
 
@@ -8,6 +10,8 @@ export interface Tenant {
   name: string;
   sector: Sector;
   slug: string;
+  plan?: TenantPlan;
+  planStatus?: TenantPlanStatus;
 }
 
 export interface Customer {

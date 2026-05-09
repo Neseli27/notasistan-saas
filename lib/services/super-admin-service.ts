@@ -1,5 +1,5 @@
 import { db } from "@/lib/firebase";
-import type { AppointmentStatus, BookingRequest, CustomerActionRequest, Role, Sector } from "@/types/domain";
+import type { AppointmentStatus, BookingRequest, CustomerActionRequest, Role, Sector, TenantPlan, TenantPlanStatus } from "@/types/domain";
 import { collection, doc, onSnapshot, serverTimestamp, updateDoc } from "firebase/firestore";
 
 export interface SuperAdminTenant {
@@ -9,7 +9,9 @@ export interface SuperAdminTenant {
   slug: string;
   ownerUid: string;
   isActive?: boolean;
-  plan?: string;
+  plan?: TenantPlan;
+  planStatus?: TenantPlanStatus;
+  trialEndsAt?: unknown;
   createdAt?: unknown;
   updatedAt?: unknown;
 }
@@ -58,6 +60,23 @@ function normalizeSector(value: unknown): Sector {
   return "beauty";
 }
 
+
+function normalizePlan(value: unknown): TenantPlan {
+  const plan = String(value || "Starter");
+  if (["Starter", "Pro", "Klinik", "Enterprise"].includes(plan)) {
+    return plan as TenantPlan;
+  }
+  return "Starter";
+}
+
+function normalizePlanStatus(value: unknown): TenantPlanStatus {
+  const status = String(value || "Deneme");
+  if (["Deneme", "Aktif", "Askıda", "İptal"].includes(status)) {
+    return status as TenantPlanStatus;
+  }
+  return "Deneme";
+}
+
 function normalizeRole(value: unknown): Role {
   const role = String(value || "owner");
   if (["super_admin", "owner", "manager", "staff", "customer"].includes(role)) {
@@ -79,7 +98,9 @@ export function listenSuperAdminTenants(onChange: (items: SuperAdminTenant[]) =>
           slug: String(data.slug ?? ""),
           ownerUid: String(data.ownerUid ?? ""),
           isActive: data.isActive === false ? false : true,
-          plan: String(data.plan ?? "Starter"),
+          plan: normalizePlan(data.plan),
+          planStatus: normalizePlanStatus(data.planStatus),
+          trialEndsAt: data.trialEndsAt,
           createdAt: data.createdAt,
           updatedAt: data.updatedAt,
         } satisfies SuperAdminTenant;
@@ -255,6 +276,15 @@ export function listenSuperAdminCustomerActionRequests(onChange: (items: Custome
 export async function updateTenantStatus(tenantId: string, isActive: boolean) {
   await updateDoc(doc(db, "tenants", tenantId), {
     isActive,
+    updatedAt: serverTimestamp(),
+  });
+}
+
+
+export async function updateTenantPlan(tenantId: string, plan: TenantPlan, planStatus: TenantPlanStatus) {
+  await updateDoc(doc(db, "tenants", tenantId), {
+    plan,
+    planStatus,
     updatedAt: serverTimestamp(),
   });
 }
