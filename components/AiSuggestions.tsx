@@ -1,9 +1,20 @@
-import { aiSuggestions } from "@/lib/mock-data";
-import { ChevronRight, Gift, Leaf, Sparkles, UserRound } from "lucide-react";
+import type { AiSuggestion } from "@/types/domain";
+import { Car, ChevronRight, ClipboardList, Gift, Leaf, MessageSquareText, Sparkles, UserRound, Wrench } from "lucide-react";
 
-const iconMap = [UserRound, Gift, Leaf, Sparkles];
+interface AiSuggestionsProps {
+  suggestions: AiSuggestion[];
+  sector?: string;
+}
 
-export function AiSuggestions() {
+function getIconMap(sector?: string) {
+  if (sector === "auto") return [Car, Wrench, UserRound, ClipboardList];
+  if (sector === "clinic") return [UserRound, ClipboardList, MessageSquareText, Sparkles];
+  return [UserRound, Gift, Leaf, Sparkles];
+}
+
+export function AiSuggestions({ suggestions, sector }: AiSuggestionsProps) {
+  const iconMap = getIconMap(sector);
+
   return (
     <section className="panel aiPanel">
       <div className="panelHeader">
@@ -11,7 +22,7 @@ export function AiSuggestions() {
         <a href="#">Tümünü Gör →</a>
       </div>
       <div className="suggestionList">
-        {aiSuggestions.map((suggestion, index) => {
+        {suggestions.map((suggestion, index) => {
           const Icon = iconMap[index] ?? Sparkles;
           return (
             <button className="suggestionItem" key={suggestion.id}>

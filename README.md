@@ -1,18 +1,16 @@
-# Not Asistan SaaS MVP
+# Not Asistan SaaS Starter
 
-Not Asistan; randevulu çalışan işletmeler için müşteri kartı, randevu, işlem notu, hatırlatma, takip ve AI öneri altyapısı olan başlangıç SaaS projesidir.
+Not Asistan; randevulu çalışan işletmeler için randevu, müşteri notu, işlem hafızası, hatırlatma ve takip yönetimi sunan SaaS başlangıç projesidir.
 
-Bu paket ilk prototip içindir. Ekranlar demo veriyle çalışır; Firebase bağlantı dosyası ve güvenlik kuralları hazırdır. Gerçek veri yazma/okuma ve kullanıcı girişi sonraki geliştirme adımında bağlanacaktır.
+## v0.2 ile gelenler
 
-## Teknolojiler
-
-- Next.js App Router
-- React
-- TypeScript
-- Firebase Web SDK hazırlığı
-- Cloud Firestore güvenlik kuralları hazırlığı
-- Vercel deploy uyumlu yapı
-- GitHub repo yapısına uygun klasörleme
+- Firebase Authentication bağlantısı
+- Giriş / kayıt ekranı
+- İlk işletme oluşturma ekranı
+- Firestore `users`, `tenants`, `services`, `customers` başlangıç kayıtları
+- Dashboard giriş koruması
+- Kullanıcı adı ve işletme adına göre kişiselleştirilmiş panel başlığı
+- Çıkış yapma butonu
 
 ## Kurulum
 
@@ -21,67 +19,70 @@ npm install
 npm run dev
 ```
 
-Tarayıcıda açın:
+Tarayıcı:
+
+```text
+http://localhost:3000
+```
+
+## Environment Variables
+
+`.env.example` dosyasını `.env.local` olarak kopyalayın ve Firebase Web App config bilgilerinizi girin.
 
 ```bash
-http://localhost:3000
+copy .env.example .env.local
+```
+
+Gerekli değişkenler:
+
+```env
+NEXT_PUBLIC_FIREBASE_API_KEY=
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
+NEXT_PUBLIC_FIREBASE_APP_ID=
+NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=
 ```
 
 ## Firebase ayarları
 
-1. Firebase Console üzerinden yeni proje oluşturun.
-2. Web app ekleyin.
-3. Firebase config bilgilerini alın.
-4. `.env.example` dosyasını `.env.local` olarak kopyalayın.
-5. Bilgileri `.env.local` içine girin.
+1. Authentication > Sign-in method > Email/Password aktif olmalı.
+2. Firestore Database oluşturulmuş olmalı.
+3. Geliştirme aşaması için geçici Firestore rule:
 
-Örnek:
+```js
+rules_version = '2';
 
-```bash
-cp .env.example .env.local
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    match /{document=**} {
+      allow read, write: if isSignedIn();
+    }
+  }
+}
 ```
 
-## Firestore koleksiyon mantığı
+## GitHub / Vercel
 
-Başlangıç veri modeli şu koleksiyonları hedefler:
+Projeyi GitHub'a gönderin. Vercel'de aynı Firebase env değerlerini Project Settings > Environment Variables bölümüne ekleyin ve Redeploy yapın.
 
-- tenants
-- users
-- customers
-- appointments
-- appointmentNotes
-- followUps
-- reminders
-- messages
-- loyalty
-- aiLogs
-- settings
+## Notlar
 
-Her iş verisinde `tenantId` bulunmalıdır. SaaS izolasyonunun temeli budur.
+Bu sürüm hâlâ MVP başlangıç sürümüdür. Dashboard kartları büyük ölçüde demo verilerle görünür; ancak kullanıcı kaydı, işletme oluşturma ve başlangıç koleksiyon kayıtları Firestore'a yazılır. Sonraki sürümde müşteri ekleme, randevu ekleme ve gerçek dashboard verileri bağlanacaktır.
 
-## Roller
+## v0.3 - Sektöre göre dashboard düzeltmesi
 
-Başlangıçta planlanan roller:
+Bu sürümde onboarding sırasında seçilen sektör dashboard'a yansıtılır.
 
-- super_admin
-- owner
-- manager
-- staff
+- Güzellik seçilirse güzellik salonu verileri görünür.
+- Klinik seçilirse hasta/klinik dili görünür.
+- Otomotiv seçilirse araç, plaka, bakım ve servis dili görünür.
+- Eğitim seçilirse öğrenci/veli/görüşme dili görünür.
+- Danışmanlık seçilirse danışan/görüşme/takip dili görünür.
 
-## İlk geliştirme hedefleri
-
-1. Firebase Authentication bağlanacak.
-2. Kullanıcı kaydından sonra tenant oluşturulacak.
-3. Demo veriler Firestore seed fonksiyonuna taşınacak.
-4. Randevu ekleme formu gerçek kayıt yapacak.
-5. Müşteri ekleme formu gerçek kayıt yapacak.
-6. AI mesaj üretici önce mock, sonra gerçek API ile bağlanacak.
-7. Hatırlatmalar önce manuel/dahili, sonra SMS/WhatsApp API ile otomatikleşecek.
-
-## Vercel deploy
-
-GitHub reposunu Vercel’e bağlayın. Vercel proje ayarlarında `.env.local` içindeki değişkenleri Environment Variables bölümüne ekleyin.
-
-## Not
-
-Bu sürüm sağlık verisi işlemek için henüz yeterli güvenlik ve KVKK katmanına sahip değildir. Sağlık/Klinik paketi açılmadan önce açık rıza, audit log, rol bazlı erişim, veri maskeleme ve insan onaylı AI akışı eklenmelidir.
+Ana dosya: `lib/sector-presets.ts`

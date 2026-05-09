@@ -1,5 +1,13 @@
+import type { Appointment } from "@/types/domain";
 import { CalendarDays, MoreVertical } from "lucide-react";
-import { appointments } from "@/lib/mock-data";
+
+interface AppointmentTableProps {
+  title: string;
+  customerLabel: string;
+  serviceColumnLabel: string;
+  appointments: Appointment[];
+  showResourceColumn?: boolean;
+}
 
 function statusClass(status: string) {
   if (status === "Bekliyor") return "status waiting";
@@ -8,23 +16,26 @@ function statusClass(status: string) {
   return "status approved";
 }
 
-export function AppointmentTable() {
+export function AppointmentTable({ title, customerLabel, serviceColumnLabel, appointments, showResourceColumn }: AppointmentTableProps) {
+  const gridClass = showResourceColumn ? "appointmentGrid appointmentGridWithResource" : "appointmentGrid";
+
   return (
     <section className="panel appointmentPanel">
       <div className="panelHeader">
-        <h2><CalendarDays size={20} /> Bugünkü Randevular</h2>
+        <h2><CalendarDays size={20} /> {title}</h2>
         <a href="#">Tümünü Gör →</a>
       </div>
 
-      <div className="tableHeader appointmentGrid">
+      <div className={`tableHeader ${gridClass}`}>
         <span>Saat</span>
-        <span>Müşteri</span>
-        <span>Hizmet</span>
+        <span>{customerLabel}</span>
+        {showResourceColumn && <span>Araç</span>}
+        <span>{serviceColumnLabel}</span>
         <span>Durum</span>
       </div>
 
       {appointments.map((item) => (
-        <div className="appointmentGrid tableRow" key={item.id}>
+        <div className={`${gridClass} tableRow`} key={item.id}>
           <strong>{item.time}</strong>
           <div className="personCell">
             <div className="avatar smallAvatar">{item.avatar}</div>
@@ -33,6 +44,12 @@ export function AppointmentTable() {
               <p>{item.customerPhone}</p>
             </div>
           </div>
+          {showResourceColumn && (
+            <div>
+              <b>{item.resourceName}</b>
+              <p>{item.resourceDetail}</p>
+            </div>
+          )}
           <div>
             <b>{item.service}</b>
             <p>{item.subService}</p>
@@ -43,7 +60,7 @@ export function AppointmentTable() {
           </div>
         </div>
       ))}
-      <button className="moreLink">+ 3 randevu daha⌄</button>
+      <button className="moreLink">+ {showResourceColumn ? "2" : "3"} randevu daha⌄</button>
     </section>
   );
 }

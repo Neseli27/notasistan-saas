@@ -1,11 +1,27 @@
 import { Bell, ChevronDown, Search } from "lucide-react";
 
-export function Header() {
+interface HeaderProps {
+  displayName: string;
+  roleLabel: string;
+  searchPlaceholder: string;
+}
+
+function initials(name: string) {
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toLocaleUpperCase("tr-TR") || "NA";
+}
+
+export function Header({ displayName, roleLabel, searchPlaceholder }: HeaderProps) {
   return (
     <header className="topbar">
       <div className="searchBox">
         <Search size={21} />
-        <input placeholder="Ara... (müşteri, randevu, işlem notu)" />
+        <input placeholder={searchPlaceholder} />
       </div>
 
       <div className="profileArea">
@@ -13,10 +29,10 @@ export function Header() {
           <Bell size={22} />
           <span>3</span>
         </div>
-        <div className="avatar avatarPhoto">MY</div>
+        <div className="avatar avatarPhoto">{initials(displayName)}</div>
         <div>
-          <strong>Murat Yılmaz</strong>
-          <p>Yönetici</p>
+          <strong>{displayName}</strong>
+          <p>{roleLabel}</p>
         </div>
         <ChevronDown size={18} />
       </div>

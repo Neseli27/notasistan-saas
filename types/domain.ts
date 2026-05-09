@@ -1,11 +1,12 @@
 export type Role = "super_admin" | "owner" | "manager" | "staff";
+export type Sector = "beauty" | "clinic" | "auto" | "education" | "consulting";
 export type AppointmentStatus = "Onaylandı" | "Bekliyor" | "Tamamlandı" | "İptal" | "Gelmedi";
 export type ReminderChannel = "WhatsApp" | "SMS" | "E-posta";
 
 export interface Tenant {
   id: string;
   name: string;
-  sector: "beauty" | "clinic" | "auto" | "education" | "consulting";
+  sector: Sector;
   slug: string;
 }
 
@@ -32,6 +33,10 @@ export interface Appointment {
   avatar: string;
   service: string;
   subService: string;
+  /** Otomotiv gibi sektörlerde araç adı; eğitimde sınıf/konu gibi ek kaynak bilgisi. */
+  resourceName?: string;
+  /** Otomotiv gibi sektörlerde plaka; diğer sektörlerde ek açıklama. */
+  resourceDetail?: string;
   status: AppointmentStatus;
 }
 
@@ -57,4 +62,14 @@ export interface FollowUp {
   description: string;
   dueLabel: string;
   tone: "red" | "orange" | "green" | "blue";
+}
+
+export interface UserProfile {
+  uid: string;
+  email: string;
+  displayName: string;
+  role: Role;
+  tenantId: string;
+  tenantName: string;
+  sector: Sector;
 }

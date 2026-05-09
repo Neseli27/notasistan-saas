@@ -1,64 +1,15 @@
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
-    function signedIn() {
+    function isSignedIn() {
       return request.auth != null;
     }
 
-    function userDoc() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid));
-    }
-
-    function userTenantId() {
-      return userDoc().data.tenantId;
-    }
-
-    function userRole() {
-      return userDoc().data.role;
-    }
-
-    function isSuperAdmin() {
-      return signedIn() && userRole() == 'super_admin';
-    }
-
-    function sameTenant(tenantId) {
-      return signedIn() && tenantId == userTenantId();
-    }
-
-    function canReadTenantDoc() {
-      return isSuperAdmin() || sameTenant(resource.data.tenantId);
-    }
-
-    function canCreateTenantDoc() {
-      return isSuperAdmin() || sameTenant(request.resource.data.tenantId);
-    }
-
-    function canUpdateTenantDoc() {
-      return isSuperAdmin() || (
-        sameTenant(resource.data.tenantId) &&
-        request.resource.data.tenantId == resource.data.tenantId
-      );
-    }
-
-    match /users/{userId} {
-      allow read: if signedIn() && (request.auth.uid == userId || isSuperAdmin() || sameTenant(resource.data.tenantId));
-      allow create: if signedIn() && request.auth.uid == userId;
-      allow update: if signedIn() && (request.auth.uid == userId || isSuperAdmin());
-      allow delete: if isSuperAdmin();
-    }
-
-    match /tenants/{tenantId} {
-      allow read: if isSuperAdmin() || sameTenant(tenantId);
-      allow create: if signedIn();
-      allow update: if isSuperAdmin() || sameTenant(tenantId);
-      allow delete: if isSuperAdmin();
-    }
-
-    match /{collectionName}/{docId} {
-      allow read: if canReadTenantDoc();
-      allow create: if canCreateTenantDoc();
-      allow update: if canUpdateTenantDoc();
-      allow delete: if isSuperAdmin() || (sameTenant(resource.data.tenantId) && userRole() in ['owner', 'manager']);
+    // Geçici geliştirme kuralı:
+    // Sadece Firebase Authentication ile giriş yapan kullanıcılar okuyabilir/yazabilir.
+    match /{document=**} {
+      allow read, write: if isSignedIn();
     }
   }
 }

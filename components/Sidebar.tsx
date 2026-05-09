@@ -1,30 +1,40 @@
 import {
   Bell,
+  BriefcaseBusiness,
   CalendarDays,
+  Car,
   ChartNoAxesColumnIncreasing,
   FileText,
   Gift,
+  GraduationCap,
   Home,
   Settings,
   Sparkles,
   Target,
   UsersRound
 } from "lucide-react";
+import type { SectorPreset } from "@/lib/sector-presets";
 
-const items = [
-  { label: "Ana Panel", icon: Home, active: true },
-  { label: "Randevular", icon: CalendarDays },
-  { label: "Müşteriler", icon: UsersRound },
-  { label: "İşlem Notları", icon: FileText },
-  { label: "Hatırlatmalar", icon: Bell },
-  { label: "Takipler", icon: Target },
-  { label: "Sadakat", icon: Gift },
-  { label: "AI Asistan", icon: Sparkles },
-  { label: "Raporlar", icon: ChartNoAxesColumnIncreasing },
-  { label: "Ayarlar", icon: Settings }
-];
+interface SidebarProps {
+  preset: SectorPreset;
+}
 
-export function Sidebar() {
+export function Sidebar({ preset }: SidebarProps) {
+  const extraIcon = preset.sidebarExtra?.type === "vehicle" ? Car : preset.sidebarExtra?.type === "student" ? GraduationCap : BriefcaseBusiness;
+  const baseItems = [
+    { label: "Ana Panel", icon: Home, active: true },
+    { label: "Randevular", icon: CalendarDays },
+    { label: preset.customerPluralLabel, icon: UsersRound },
+    ...(preset.sidebarExtra ? [{ label: preset.sidebarExtra.label, icon: extraIcon }] : []),
+    { label: "İşlem Notları", icon: FileText },
+    { label: "Hatırlatmalar", icon: Bell },
+    { label: "Takipler", icon: Target },
+    { label: "Sadakat", icon: Gift },
+    { label: "AI Asistan", icon: Sparkles },
+    { label: "Raporlar", icon: ChartNoAxesColumnIncreasing },
+    { label: "Ayarlar", icon: Settings }
+  ];
+
   return (
     <aside className="sidebar">
       <div className="brand">
@@ -35,7 +45,7 @@ export function Sidebar() {
       </div>
 
       <nav className="navList">
-        {items.map((item) => {
+        {baseItems.map((item) => {
           const Icon = item.icon;
           return (
             <a className={`navItem ${item.active ? "active" : ""}`} href="#" key={item.label}>
@@ -48,7 +58,7 @@ export function Sidebar() {
 
       <div className="sidebarCta">
         <Sparkles size={20} />
-        <p>Not Asistan ile zaman kazanın, müşterilerinizi mutlu edin.</p>
+        <p>{preset.ctaText}</p>
         <a href="#">AI Asistan’ı Keşfet →</a>
       </div>
     </aside>

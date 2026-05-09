@@ -1,7 +1,11 @@
-import { followUps } from "@/lib/mock-data";
+import type { FollowUp } from "@/types/domain";
 import { Target } from "lucide-react";
 
-export function FollowUpsCard() {
+interface FollowUpsCardProps {
+  followUps: FollowUp[];
+}
+
+export function FollowUpsCard({ followUps }: FollowUpsCardProps) {
   return (
     <section className="panel followUpsCard">
       <div className="panelHeader">

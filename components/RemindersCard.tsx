@@ -1,7 +1,11 @@
-import { reminders } from "@/lib/mock-data";
+import type { Reminder } from "@/types/domain";
 import { Bell } from "lucide-react";
 
-export function RemindersCard() {
+interface RemindersCardProps {
+  reminders: Reminder[];
+}
+
+export function RemindersCard({ reminders }: RemindersCardProps) {
   return (
     <section className="panel remindersCard">
       <div className="panelHeader">
