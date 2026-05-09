@@ -16,7 +16,7 @@ import { StatCard } from "@/components/StatCard";
 import { listenAppointments } from "@/lib/services/appointment-service";
 import { listenAppointmentNotes, listenFollowUps, listenReminders } from "@/lib/services/appointment-note-service";
 import { listenCustomers } from "@/lib/services/customer-service";
-import { convertBookingRequestToAppointment, ensurePublicTenant, listenBookingRequests } from "@/lib/services/public-booking-service";
+import { convertBookingRequestToAppointment, ensurePublicTenant, listenBookingRequests, rejectBookingRequest } from "@/lib/services/public-booking-service";
 import { getSectorPreset } from "@/lib/sector-presets";
 import type { Appointment, AppointmentNote, BookingRequest, Customer, FollowUp, Reminder, UserProfile } from "@/types/domain";
 import type { User } from "firebase/auth";
@@ -62,6 +62,7 @@ export function Dashboard({ user, profile }: DashboardProps) {
   const [bookingError, setBookingError] = useState("");
   const [bookingSuccess, setBookingSuccess] = useState("");
   const [convertingRequestId, setConvertingRequestId] = useState<string | null>(null);
+  const [rejectingRequestId, setRejectingRequestId] = useState<string | null>(null);
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
   const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
   const [selectedAppointmentForNote, setSelectedAppointmentForNote] = useState<Appointment | null>(null);
@@ -243,6 +244,28 @@ export function Dashboard({ user, profile }: DashboardProps) {
     }
   }
 
+
+  async function handleRejectBookingRequest(request: BookingRequest) {
+    if (!request.id) return;
+
+    const approved = window.confirm(`${request.customerName} talebini reddedildi olarak işaretlemek istiyor musunuz?`);
+    if (!approved) return;
+
+    setBookingError("");
+    setBookingSuccess("");
+    setRejectingRequestId(request.id);
+
+    try {
+      await rejectBookingRequest(request.id);
+      setBookingSuccess(`${request.customerName} talebi reddedildi olarak işaretlendi.`);
+    } catch (error) {
+      console.error("Randevu talebi reddedilemedi:", error);
+      setBookingError("Randevu talebi reddedilemedi. Firestore kurallarını ve bağlantıyı kontrol edin.");
+    } finally {
+      setRejectingRequestId(null);
+    }
+  }
+
   return (
     <div className={`appShell theme-${preset.sector}`}>
       <Sidebar preset={preset} />
@@ -313,6 +336,8 @@ export function Dashboard({ user, profile }: DashboardProps) {
               tenantName={profile?.tenantName}
               onConvert={handleConvertBookingRequest}
               convertingRequestId={convertingRequestId}
+              onReject={handleRejectBookingRequest}
+              rejectingRequestId={rejectingRequestId}
             />
             <CalendarCard />
             <RemindersCard reminders={visibleReminders} />

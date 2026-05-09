@@ -1,48 +1,35 @@
-# Codex Görevi - Not Asistan v0.9
+# Not Asistan - Codex Görev Notu
 
-Bu proje Next.js, TypeScript, Firebase Authentication, Firestore ve Vercel üzerinde çalışan çok sektörlü bir SaaS uygulamasıdır.
+Proje: Not Asistan SaaS
+Teknoloji: Next.js App Router, TypeScript, Firebase Authentication, Cloud Firestore, Vercel.
 
-## Ürün amacı
+## Güncel sürüm: v1.1
 
-Not Asistan; randevulu çalışan işletmeler için müşteri notu, randevu, işlem özeti, takip, hatırlatma ve müşteri tarafı randevu talep yönetimi sağlar.
+Bu sürümde müşteri public randevu talepleri için yönetim kartı güçlendirildi.
 
-## Mevcut özellikler
+### Korunacak mimari ilkeler
 
-- Firebase Authentication ile giriş/kayıt
-- Tenant/işletme kurulumu
-- Sektöre göre dashboard ve demo veri dili
-- Gerçek müşteri ekleme
-- Gerçek randevu ekleme
-- İşlem notu, takip ve hatırlatma kayıtları
-- PWA manifest ve telefona ekleme bannerı
-- Public randevu talep sayfası: `/randevu/[slug]`
-- Public randevu taleplerinin admin panelde listelenmesi
-- Gelen talebi tek tıkla gerçek randevuya dönüştürme
-- Teyit mesajı kopyalama
+- Her veride `tenantId` bulunmalı.
+- Çok kiracılı SaaS mantığı bozulmamalı.
+- Public müşteri randevu sayfası sadece gerekli public veriyi okumalı.
+- Booking request create işlemi girişsiz yapılabilir; yönetim işlemleri giriş gerektirir.
+- `.env.local` asla repoya eklenmemeli.
 
-## Dikkat edilecek mimari ilkeler
+### Bu sürümde yapılanlar
 
-- Her iş verisinde `tenantId` bulunmalıdır.
-- Public sayfada yalnızca güvenli işletme profili (`publicTenants`) okunmalıdır.
-- Public kullanıcı sadece `bookingRequests` içine yeni talep oluşturabilmelidir.
-- Yönetim panelindeki okuma/yazma işlemleri giriş yapan kullanıcıyla sınırlandırılmalıdır.
-- Sektöre göre alanlar `lib/sector-presets.ts` ve ilgili form bileşenleriyle yönetilmelidir.
-- Firestore erişimleri `lib/services/*` dosyaları üzerinden yapılmalıdır.
+- `BookingRequestsCard.tsx` filtreli karar merkezi hâline getirildi.
+- Açık / Randevu / Red / Tümü filtreleri eklendi.
+- Talep reddetme butonu ve red metni kopyalama eklendi.
+- `rejectBookingRequest` servisi eklendi.
+- Dashboard içinde reddetme işlem durumu yönetildi.
+- BookingRequest status tipine `Reddedildi` eklendi.
+- UI stilleri `globals.css` içinde v1.1 notuyla eklendi.
 
-## Sonraki geliştirilecek özellikler
+### Sonraki önerilen görev
 
-- İşletme ayarlarından renk/tema seçimi
-- İşletme logosu ve kapak görseli
-- Public randevu sayfasında hizmet listesi/fiyat/süre gösterimi
-- Randevu talebi onaylandıktan sonra WhatsApp/SMS gönderim entegrasyonu
-- Randevu durumlarının ayrı panelden yönetilmesi
-- Yetki/rol sisteminin tenantId bazlı sıkılaştırılması
+v1.2 için talep kabul/red akışı müşteri mesaj geçmişine bağlanabilir:
 
-
-## v1.0 Notları
-
-- Randevu tablosunda sütun genişlikleri ve aksiyon alanı düzeltildi.
-- Durum rozeti ve Not butonu aynı hizaya alındı.
-- Uzun araç, plaka, servis ve açıklama metinleri tablo düzenini bozmayacak şekilde sınırlandırıldı.
-- Randevu talebi kartları daha düzenli ve okunabilir hâle getirildi.
-- Dar ekranlarda randevu listesi taşma yapmadan kullanılacak şekilde iyileştirildi.
+- `messages` koleksiyonuna kopyalanan/oluşturulan mesaj taslaklarını kaydet.
+- Randevuya çevrilen taleplerden otomatik reminder oluştur.
+- Public randevu talebinde otomotiv için plaka/araç bilgisi opsiyonel alınsın.
+- İşletme ayarlarından public form alanları özelleştirilsin.

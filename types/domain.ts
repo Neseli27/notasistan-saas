@@ -122,7 +122,7 @@ export interface BookingRequest {
   preferredDate: string;
   preferredTime: string;
   notes: string;
-  status: "Yeni Talep" | "Görüldü" | "Randevuya Çevrildi" | "İptal";
+  status: "Yeni Talep" | "Görüldü" | "Randevuya Çevrildi" | "Reddedildi" | "İptal";
   source?: string;
   createdAt?: unknown;
   updatedAt?: unknown;

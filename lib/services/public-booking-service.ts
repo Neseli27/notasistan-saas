@@ -262,3 +262,12 @@ export async function markBookingRequestSeen(requestId: string) {
     updatedAt: serverTimestamp(),
   });
 }
+
+
+export async function rejectBookingRequest(requestId: string) {
+  await updateDoc(doc(db, "bookingRequests", requestId), {
+    status: "Reddedildi",
+    rejectedAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
+}

@@ -1338,3 +1338,108 @@ h1 { font-size: 36px; line-height: 1.1; margin: 0 0 8px; letter-spacing: -1px; }
     min-width: 560px;
   }
 }
+
+/* v1.1 - Randevu talebi karar merkezi */
+.bookingHeaderWithMeta {
+  align-items: flex-start;
+}
+
+.requestFilterBar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0 14px;
+  padding: 9px;
+  border: 1px solid rgba(226, 232, 240, .9);
+  border-radius: 16px;
+  background: #f8fafc;
+}
+
+.requestFilterBar span,
+.requestFilterBar button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.requestFilterBar span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 900;
+  padding: 0 4px;
+}
+
+.requestFilterBar button {
+  min-height: 32px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: #fff;
+  color: #334155;
+  padding: 0 11px;
+  font-size: 12px;
+  font-weight: 900;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, .04);
+}
+
+.requestFilterBar button.active {
+  color: var(--theme-primary, #0c48c7);
+  border-color: rgba(12, 72, 199, .22);
+  background: #eef7ff;
+}
+
+.requestFilterBar b {
+  min-width: 20px;
+  height: 20px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #1e3a8a;
+  font-size: 11px;
+}
+
+.managedRequestItem {
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+  align-items: flex-start;
+}
+
+.managedRequestItem .requestInfo {
+  min-width: 0;
+}
+
+.managedRequestItem .requestInfo span,
+.managedRequestItem .requestInfo small {
+  overflow-wrap: anywhere;
+}
+
+.dangerRequestAction {
+  color: #b91c1c;
+  border-color: #fecaca;
+  background: #fff7f7;
+}
+
+.rejectedPill {
+  color: #991b1b;
+  background: #fee2e2;
+}
+
+.seenPill {
+  color: #1d4ed8;
+  background: #dbeafe;
+}
+
+.bookingRequestItem .statusPill {
+  max-width: 128px;
+  text-align: center;
+}
+
+@media (max-width: 760px) {
+  .managedRequestItem {
+    grid-template-columns: 1fr;
+  }
+
+  .bookingRequestItem .statusPill {
+    width: max-content;
+  }
+}
