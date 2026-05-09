@@ -20,7 +20,7 @@ import { listenAppointments, listenAppointmentStatusLogs, updateAppointmentStatu
 import { listenAppointmentNotes, listenFollowUps, listenReminders } from "@/lib/services/appointment-note-service";
 import { listenCustomers } from "@/lib/services/customer-service";
 import { convertBookingRequestToAppointment, ensurePublicTenant, listenBookingRequests, rejectBookingRequest } from "@/lib/services/public-booking-service";
-import { listenTenantCustomerActionRequests } from "@/lib/services/customer-portal-service";
+import { buildCustomerActionResponseMessage, listenTenantCustomerActionRequests, updateCustomerActionRequestStatus } from "@/lib/services/customer-portal-service";
 import { getSectorPreset } from "@/lib/sector-presets";
 import type { Appointment, AppointmentNote, AppointmentStatus, AppointmentStatusLog, BookingRequest, Customer, CustomerActionRequest, FollowUp, Reminder, UserProfile } from "@/types/domain";
 import type { User } from "firebase/auth";
@@ -72,6 +72,7 @@ export function Dashboard({ user, profile }: DashboardProps) {
   const [updatingAppointmentId, setUpdatingAppointmentId] = useState<string | null>(null);
   const [convertingRequestId, setConvertingRequestId] = useState<string | null>(null);
   const [rejectingRequestId, setRejectingRequestId] = useState<string | null>(null);
+  const [processingActionRequestId, setProcessingActionRequestId] = useState<string | null>(null);
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
   const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
   const [selectedAppointmentForNote, setSelectedAppointmentForNote] = useState<Appointment | null>(null);
@@ -321,6 +322,46 @@ export function Dashboard({ user, profile }: DashboardProps) {
     }
   }
 
+
+  async function handleCustomerActionDecision(request: CustomerActionRequest, status: CustomerActionRequest["status"]) {
+    const actionLabel = status === "Tamamlandı" ? "tamamlandı" : "reddedildi";
+    const approved = window.confirm(`${request.customerName} tarafından gönderilen ${request.type.toLocaleLowerCase("tr-TR")} talebini ${actionLabel} olarak işaretlemek istiyor musunuz?`);
+    if (!approved) return;
+
+    setBookingError("");
+    setBookingSuccess("");
+    setProcessingActionRequestId(request.id);
+
+    try {
+      await updateCustomerActionRequestStatus({
+        request,
+        status,
+        handledBy: profile?.displayName || user?.email || "",
+      });
+      setBookingSuccess(`${request.customerName} ${request.type.toLocaleLowerCase("tr-TR")} talebi ${actionLabel} olarak işaretlendi.`);
+    } catch (error) {
+      console.error("Müşteri işlem talebi güncellenemedi:", error);
+      setBookingError("Müşteri işlem talebi güncellenemedi. Firestore bağlantısını kontrol edin.");
+    } finally {
+      setProcessingActionRequestId(null);
+    }
+  }
+
+  async function handleCopyCustomerActionMessage(request: CustomerActionRequest, approved: boolean) {
+    const message = buildCustomerActionResponseMessage({
+      request,
+      tenantName: profile?.tenantName,
+      approved,
+    });
+
+    try {
+      await navigator.clipboard.writeText(message);
+      setBookingSuccess(`${request.customerName} için dönüş metni panoya kopyalandı.`);
+    } catch {
+      setStatusDraftMessage({ customerName: request.customerName, message });
+    }
+  }
+
   return (
     <div className={`appShell theme-${preset.sector}`}>
       <Sidebar preset={preset} />
@@ -408,7 +449,13 @@ export function Dashboard({ user, profile }: DashboardProps) {
               onReject={handleRejectBookingRequest}
               rejectingRequestId={rejectingRequestId}
             />
-            <CustomerActionRequestsCard requests={customerActionRequests} />
+            <CustomerActionRequestsCard
+              requests={customerActionRequests}
+              processingRequestId={processingActionRequestId}
+              onApprove={(request) => handleCustomerActionDecision(request, "Tamamlandı")}
+              onReject={(request) => handleCustomerActionDecision(request, "Reddedildi")}
+              onCopyMessage={handleCopyCustomerActionMessage}
+            />
             <StatusHistoryCard logs={statusLogs} />
             <CalendarCard />
             <RemindersCard reminders={visibleReminders} />

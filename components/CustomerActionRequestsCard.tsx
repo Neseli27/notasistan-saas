@@ -1,8 +1,12 @@
 import type { CustomerActionRequest } from "@/types/domain";
-import { RefreshCw } from "lucide-react";
+import { CheckCircle2, Copy, RefreshCw, XCircle } from "lucide-react";
 
 interface CustomerActionRequestsCardProps {
   requests: CustomerActionRequest[];
+  onApprove?: (request: CustomerActionRequest) => void;
+  onReject?: (request: CustomerActionRequest) => void;
+  onCopyMessage?: (request: CustomerActionRequest, approved: boolean) => void;
+  processingRequestId?: string | null;
 }
 
 function statusTone(status: CustomerActionRequest["status"]) {
@@ -12,8 +16,14 @@ function statusTone(status: CustomerActionRequest["status"]) {
   return "orange";
 }
 
-export function CustomerActionRequestsCard({ requests }: CustomerActionRequestsCardProps) {
-  const visibleRequests = requests.slice(0, 4);
+export function CustomerActionRequestsCard({
+  requests,
+  onApprove,
+  onReject,
+  onCopyMessage,
+  processingRequestId,
+}: CustomerActionRequestsCardProps) {
+  const visibleRequests = requests.slice(0, 5);
 
   return (
     <section className="panel customerActionRequestsCard">
@@ -29,16 +39,67 @@ export function CustomerActionRequestsCard({ requests }: CustomerActionRequestsC
         </div>
       ) : (
         <div className="customerActionRequestList">
-          {visibleRequests.map((request) => (
-            <article key={request.id} className="customerActionRequestItem">
-              <div>
-                <strong>{request.customerName}</strong>
-                <span>{request.type} talebi • {request.appointmentService || "Randevu"}</span>
-                <p>{request.message}</p>
-              </div>
-              <em className={`statusBadge ${statusTone(request.status)}`}>{request.status}</em>
-            </article>
-          ))}
+          {visibleRequests.map((request) => {
+            const isClosed = request.status === "Tamamlandı" || request.status === "Reddedildi";
+            const isProcessing = processingRequestId === request.id;
+
+            return (
+              <article key={request.id} className="customerActionRequestItem">
+                <div className="customerActionRequestMain">
+                  <strong>{request.customerName}</strong>
+                  <span>{request.type} talebi • {request.appointmentService || "Randevu"}</span>
+                  <p>{request.message}</p>
+                  {request.appointmentDate && (
+                    <small>{request.appointmentDate} {request.appointmentTime ? `• ${request.appointmentTime}` : ""}</small>
+                  )}
+                </div>
+
+                <div className="customerActionDecisionColumn">
+                  <em className={`statusBadge ${statusTone(request.status)}`}>{request.status}</em>
+                  <div className="customerActionDecisionButtons">
+                    <button
+                      type="button"
+                      onClick={() => onCopyMessage?.(request, true)}
+                      title="Müşteriye olumlu dönüş metnini kopyala"
+                    >
+                      <Copy size={14} /> Olumlu Metin
+                    </button>
+                    {!isClosed && (
+                      <>
+                        <button
+                          type="button"
+                          disabled={isProcessing}
+                          onClick={() => onApprove?.(request)}
+                          className="approveActionButton"
+                          title="Talebi tamamlandı olarak işaretle"
+                        >
+                          <CheckCircle2 size={14} /> Onayla
+                        </button>
+                        <button
+                          type="button"
+                          disabled={isProcessing}
+                          onClick={() => onReject?.(request)}
+                          className="rejectActionButton"
+                          title="Talebi reddedildi olarak işaretle"
+                        >
+                          <XCircle size={14} /> Reddet
+                        </button>
+                      </>
+                    )}
+                    {request.status === "Reddedildi" && (
+                      <button
+                        type="button"
+                        onClick={() => onCopyMessage?.(request, false)}
+                        title="Müşteriye red/uygunluk metnini kopyala"
+                      >
+                        <Copy size={14} /> Red Metni
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </article>
+            );
+          })}
         </div>
       )}
     </section>

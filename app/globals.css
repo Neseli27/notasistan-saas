@@ -2181,3 +2181,70 @@ h1 { font-size: 36px; line-height: 1.1; margin: 0 0 8px; letter-spacing: -1px; }
   line-height: 1.35;
   margin: 7px 0 0;
 }
+
+.customerActionRequestMain small {
+  display: inline-flex;
+  margin-top: 7px;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.customerActionDecisionColumn {
+  display: grid;
+  justify-items: end;
+  gap: 8px;
+  min-width: 170px;
+}
+
+.customerActionDecisionButtons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.customerActionDecisionButtons button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid #dbe6f5;
+  background: #fff;
+  color: #0f2c73;
+  border-radius: 999px;
+  padding: 7px 10px;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.customerActionDecisionButtons button:disabled {
+  cursor: not-allowed;
+  opacity: .55;
+}
+
+.customerActionDecisionButtons .approveActionButton {
+  border-color: rgba(16, 185, 129, .35);
+  background: rgba(16, 185, 129, .10);
+  color: #047857;
+}
+
+.customerActionDecisionButtons .rejectActionButton {
+  border-color: rgba(239, 68, 68, .35);
+  background: rgba(239, 68, 68, .10);
+  color: #b91c1c;
+}
+
+@media (max-width: 760px) {
+  .customerActionRequestItem {
+    grid-template-columns: 1fr;
+  }
+  .customerActionDecisionColumn {
+    justify-items: start;
+    min-width: 0;
+  }
+  .customerActionDecisionButtons {
+    justify-content: flex-start;
+  }
+}

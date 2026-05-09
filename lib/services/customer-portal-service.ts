@@ -376,3 +376,38 @@ export function listenTenantCustomerActionRequests(
     }
   );
 }
+
+export async function updateCustomerActionRequestStatus(input: {
+  request: CustomerActionRequest;
+  status: CustomerActionRequest["status"];
+  handledBy?: string;
+}) {
+  await updateDoc(doc(db, "customerActionRequests", input.request.id), {
+    status: input.status,
+    handledBy: input.handledBy || "",
+    updatedAt: serverTimestamp(),
+  });
+}
+
+export function buildCustomerActionResponseMessage(input: {
+  request: CustomerActionRequest;
+  tenantName?: string;
+  approved: boolean;
+}) {
+  const { request, tenantName, approved } = input;
+  const brand = tenantName || "İşletmemiz";
+
+  if (approved) {
+    if (request.type === "İptal") {
+      return `Merhaba ${request.customerName}, ${request.appointmentDate || ""} ${request.appointmentTime || ""} tarihli ${request.appointmentService || "randevu"} için ilettiğiniz iptal talebi alınmış ve işleme alınmıştır. ${brand} olarak sizi yeniden ağırlamaktan memnuniyet duyarız.`;
+    }
+
+    return `Merhaba ${request.customerName}, ${request.appointmentDate || ""} ${request.appointmentTime || ""} tarihli ${request.appointmentService || "randevu"} için ilettiğiniz erteleme talebi alınmıştır. Size uygun yeni saat için işletmemiz en kısa sürede dönüş yapacaktır. ${brand}`;
+  }
+
+  if (request.type === "İptal") {
+    return `Merhaba ${request.customerName}, ${request.appointmentService || "randevu"} için ilettiğiniz iptal talebini aldık. İşletmemiz uygunluk durumunu kontrol ederek sizinle ayrıca iletişime geçecektir. ${brand}`;
+  }
+
+  return `Merhaba ${request.customerName}, ${request.appointmentService || "randevu"} için ilettiğiniz erteleme talebini aldık. Şu an uygunluk kontrolü yapılmaktadır; net bilgi için sizinle iletişime geçeceğiz. ${brand}`;
+}

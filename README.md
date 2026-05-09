@@ -129,3 +129,12 @@ Bu sürümde işletme müşterileri için ayrı bir müşteri paneli eklendi.
 ### Önemli
 
 Bu sürümde Firestore kuralları hâlâ geliştirme aşaması kolaylığı için giriş yapmış kullanıcıya geniş izin verir. Canlı ve ücretli kullanıma geçmeden önce tenant ve müşteri bazlı güvenlik kuralları sıkılaştırılmalıdır.
+
+
+## v1.5 - Erteleme / İptal Talebi Karar Merkezi
+
+- Müşteri panelinden gelen erteleme ve iptal talepleri işletme panelinde yönetilebilir.
+- İşletme talebi Tamamlandı veya Reddedildi olarak işaretleyebilir.
+- Her talep için müşteriye gönderilecek olumlu/red dönüş metni hazırlanır ve panoya kopyalanabilir.
+- Talep kartları mobilde ve dar ekranda daha düzenli görünür.
+- Firestore `customerActionRequests` kayıtlarında `status`, `handledBy`, `updatedAt` alanları güncellenir.

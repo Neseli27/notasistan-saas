@@ -61,3 +61,12 @@ Bu sürümde eklenen önemli dosyalar:
 Müşteri paneli eklendi. `/musteri/[slug]` rotası işletmeye bağlı müşteri giriş/kayıt ekranı ve müşteri paneli sunar. Müşteri hesabı Firebase Authentication ile açılır, `users` koleksiyonunda `role: "customer"` profili oluşturulur ve `customers` kaydıyla `customerId` üzerinden eşleşir.
 
 Sonraki geliştirme hedefi: müşteri erteleme/iptal taleplerini işletme panelinde kabul/ret yönetimine bağlamak ve tenant bazlı Firestore rules kurallarını sıkılaştırmak.
+
+
+## v1.5 - Erteleme / İptal Talebi Karar Merkezi
+
+- Müşteri panelinden gelen erteleme ve iptal talepleri işletme panelinde yönetilebilir.
+- İşletme talebi Tamamlandı veya Reddedildi olarak işaretleyebilir.
+- Her talep için müşteriye gönderilecek olumlu/red dönüş metni hazırlanır ve panoya kopyalanabilir.
+- Talep kartları mobilde ve dar ekranda daha düzenli görünür.
+- Firestore `customerActionRequests` kayıtlarında `status`, `handledBy`, `updatedAt` alanları güncellenir.
