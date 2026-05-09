@@ -32,7 +32,7 @@ export function AppointmentTable({ title, customerLabel, serviceColumnLabel, app
         <span>{customerLabel}</span>
         {showResourceColumn && <span>Araç</span>}
         <span>{serviceColumnLabel}</span>
-        <span className="alignRight">Durum / İşlem</span>
+        <span className="alignRight">Durum</span>
       </div>
 
       {appointments.map((item) => (
