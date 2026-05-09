@@ -20,7 +20,7 @@ import { listenAppointments, listenAppointmentStatusLogs, updateAppointmentStatu
 import { listenAppointmentNotes, listenFollowUps, listenReminders } from "@/lib/services/appointment-note-service";
 import { listenCustomers } from "@/lib/services/customer-service";
 import { convertBookingRequestToAppointment, ensurePublicTenant, listenBookingRequests, rejectBookingRequest } from "@/lib/services/public-booking-service";
-import { buildCustomerActionResponseMessage, completeCustomerRescheduleRequest, listenTenantCustomerActionRequests, updateCustomerActionRequestStatus } from "@/lib/services/customer-portal-service";
+import { buildCustomerActionResponseMessage, completeCustomerCancellationRequest, completeCustomerRescheduleRequest, listenTenantCustomerActionRequests, updateCustomerActionRequestStatus } from "@/lib/services/customer-portal-service";
 import { getSectorPreset } from "@/lib/sector-presets";
 import type { Appointment, AppointmentNote, AppointmentStatus, AppointmentStatusLog, BookingRequest, Customer, CustomerActionRequest, FollowUp, Reminder, UserProfile } from "@/types/domain";
 import type { User } from "firebase/auth";
@@ -325,7 +325,10 @@ export function Dashboard({ user, profile }: DashboardProps) {
 
   async function handleCustomerActionDecision(request: CustomerActionRequest, status: CustomerActionRequest["status"]) {
     const actionLabel = status === "Tamamlandı" ? "tamamlandı" : "reddedildi";
-    const approved = window.confirm(`${request.customerName} tarafından gönderilen ${request.type.toLocaleLowerCase("tr-TR")} talebini ${actionLabel} olarak işaretlemek istiyor musunuz?`);
+    const confirmationText = request.type === "İptal" && status === "Tamamlandı"
+      ? `${request.customerName} iptal talebini onaylayıp randevuyu İptal durumuna almak istiyor musunuz?`
+      : `${request.customerName} tarafından gönderilen ${request.type.toLocaleLowerCase("tr-TR")} talebini ${actionLabel} olarak işaretlemek istiyor musunuz?`;
+    const approved = window.confirm(confirmationText);
     if (!approved) return;
 
     setBookingError("");
@@ -333,6 +336,17 @@ export function Dashboard({ user, profile }: DashboardProps) {
     setProcessingActionRequestId(request.id);
 
     try {
+      if (request.type === "İptal" && status === "Tamamlandı") {
+        const message = await completeCustomerCancellationRequest({
+          request,
+          tenantName: profile?.tenantName,
+          handledBy: profile?.displayName || user?.email || "",
+        });
+        setBookingSuccess(`${request.customerName} iptal talebi onaylandı ve randevu iptal edildi.`);
+        setStatusDraftMessage({ customerName: request.customerName, message });
+        return;
+      }
+
       await updateCustomerActionRequestStatus({
         request,
         status,
@@ -341,7 +355,7 @@ export function Dashboard({ user, profile }: DashboardProps) {
       setBookingSuccess(`${request.customerName} ${request.type.toLocaleLowerCase("tr-TR")} talebi ${actionLabel} olarak işaretlendi.`);
     } catch (error) {
       console.error("Müşteri işlem talebi güncellenemedi:", error);
-      setBookingError("Müşteri işlem talebi güncellenemedi. Firestore bağlantısını kontrol edin.");
+      setBookingError("Müşteri işlem talebi güncellenemedi. Firestore bağlantısını ve randevu kaydını kontrol edin.");
     } finally {
       setProcessingActionRequestId(null);
     }

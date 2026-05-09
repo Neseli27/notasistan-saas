@@ -134,9 +134,9 @@ export function CustomerActionRequestsCard({
                             disabled={isProcessing}
                             onClick={() => onApprove?.(request)}
                             className="approveActionButton"
-                            title="Talebi tamamlandı olarak işaretle"
+                            title={request.type === "İptal" ? "Randevuyu iptal durumuna al ve talebi tamamla" : "Talebi tamamlandı olarak işaretle"}
                           >
-                            <CheckCircle2 size={14} /> Onayla
+                            <CheckCircle2 size={14} /> {request.type === "İptal" ? "İptali Onayla" : "Onayla"}
                           </button>
                         )}
                         <button

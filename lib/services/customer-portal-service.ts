@@ -485,3 +485,60 @@ export async function completeCustomerRescheduleRequest(input: {
 
   return message;
 }
+
+export async function completeCustomerCancellationRequest(input: {
+  request: CustomerActionRequest;
+  tenantName?: string;
+  handledBy?: string;
+}) {
+  if (!input.request.appointmentId) {
+    throw new Error("İptal talebine bağlı randevu bulunamadı.");
+  }
+
+  const appointmentRef = doc(db, "appointments", input.request.appointmentId);
+  const appointmentSnap = await getDoc(appointmentRef);
+
+  if (!appointmentSnap.exists()) {
+    throw new Error("İptal edilecek randevu kaydı bulunamadı.");
+  }
+
+  const appointmentData = appointmentSnap.data();
+  const previousStatus = String(appointmentData.status ?? "Bekliyor");
+  const service = String(appointmentData.service ?? input.request.appointmentService ?? "Randevu");
+  const appointmentDate = String(appointmentData.date ?? input.request.appointmentDate ?? "");
+  const appointmentTime = String(appointmentData.time ?? input.request.appointmentTime ?? "");
+  const brand = input.tenantName || "İşletmemiz";
+  const message = `Merhaba ${input.request.customerName}, ${brand} için ${appointmentDate} ${appointmentTime} tarihli ${service} randevunuza ait iptal talebiniz onaylanmıştır. Yeni bir randevu planlamak isterseniz bizimle yeniden iletişime geçebilirsiniz.`;
+
+  await updateDoc(appointmentRef, {
+    status: "İptal",
+    updatedAt: serverTimestamp(),
+  });
+
+  await updateDoc(doc(db, "customerActionRequests", input.request.id), {
+    status: "Tamamlandı",
+    handledBy: input.handledBy || "",
+    decisionMessage: message,
+    updatedAt: serverTimestamp(),
+  });
+
+  await addDoc(collection(db, "appointmentStatusLogs"), {
+    tenantId: input.request.tenantId,
+    appointmentId: input.request.appointmentId,
+    customerId: input.request.customerId || "",
+    customerName: input.request.customerName,
+    customerPhone: input.request.customerPhone,
+    service,
+    previousStatus,
+    newStatus: "İptal",
+    previousDate: appointmentDate,
+    previousTime: appointmentTime,
+    message,
+    updatedBy: input.handledBy || "",
+    actionType: "İptal Talebi Onayı",
+    createdAt: serverTimestamp(),
+  });
+
+  return message;
+}
+

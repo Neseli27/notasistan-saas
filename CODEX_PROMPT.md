@@ -1,45 +1,24 @@
-# Not Asistan v1.8 - Codex Görev Notu
+# Not Asistan v1.9 Codex Notu
 
-Bu proje Next.js + Firebase tabanlı çok kiracılı SaaS uygulamasıdır.
+Bu sürümde müşteri panelinden gelen iptal talepleri gerçek randevu durumuna bağlandı.
 
-## Mevcut durum
+## Beklenen davranış
 
-- Firebase Auth ile owner/customer/super_admin rolleri vardır.
-- İşletme paneli, müşteri paneli ve süper admin paneli vardır.
-- Public randevu talep sayfası vardır.
-- Müşteri panelinden erteleme/iptal talebi oluşturulabilir.
-- Süper admin tarafında paket yönetimi vardır.
+1. Müşteri panelinden randevu için iptal talebi gönderilir.
+2. İşletme panelinde Erteleme / İptal Talepleri kartında talep görünür.
+3. İşletme **İptali Onayla** butonuna basar.
+4. İlgili `appointments` belgesinde `status` değeri `İptal` olur.
+5. `customerActionRequests` belgesi `Tamamlandı` olur.
+6. `appointmentStatusLogs` koleksiyonuna iptal geçmişi yazılır.
+7. Müşteriye gönderilecek bilgilendirme metni panelde gösterilir ve kopyalanabilir.
 
-## v1.8’de yapılan iş
+## Kontrol edilecek dosyalar
 
-Erteleme talepleri gerçek randevu güncellemesine bağlandı.
-
-### Değişen ana dosyalar
-
-- `components/CustomerActionRequestsCard.tsx`
 - `components/Dashboard.tsx`
+- `components/CustomerActionRequestsCard.tsx`
 - `lib/services/customer-portal-service.ts`
 - `types/domain.ts`
-- `app/globals.css`
-- `package.json`
 
-### Yeni davranış
+## Sonraki önerilen adım
 
-İşletme panelindeki Erteleme / İptal Talepleri kartında:
-
-- Erteleme talebi açıksa yeni tarih ve saat alanları görünür.
-- `Ertele ve Onayla` butonu randevu kaydını Firestore’da günceller.
-- İlgili `customerActionRequests` kaydı `Tamamlandı` olur.
-- `appointmentStatusLogs` kaydı oluşur.
-- Müşteri için mesaj metni üretilir.
-
-### Sonraki önerilen görev
-
-v1.9: İptal talebini gerçek randevu durumuna bağla.
-
-Beklenen iş:
-
-- İptal talebi onaylanınca ilgili appointment `status: "İptal"` olmalı.
-- `appointmentStatusLogs` kaydı oluşmalı.
-- Müşteriye gönderilecek iptal onay metni hazırlanmalı.
-- Müşteri panelinde iptal sonucu görünmeli.
+v2.0 kapsamında müşteri paneli mobil/PWA deneyimini güçlendirmek, ardından müşteri listesi ve müşteri detay sayfalarını geliştirmek.

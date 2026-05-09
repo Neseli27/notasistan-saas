@@ -2,18 +2,18 @@
 
 Randevu, müşteri notu, işlem hafızası, takip, müşteri paneli ve SaaS yönetimi için Firebase + Vercel + GitHub tabanlı başlangıç uygulaması.
 
-## v1.8 Yenilikleri
+## v1.9 Yenilikleri
 
-Bu sürümde öncelik sırasındaki ilk büyük iş tamamlandı:
+Bu sürümde yol haritasındaki ikinci kritik iş tamamlandı:
 
-- Müşteri panelinden gelen **erteleme talebi** artık gerçek randevu güncellemesine bağlandı.
-- İşletme panelindeki **Erteleme / İptal Talepleri** kartında erteleme talepleri için yeni tarih ve saat seçilebilir.
-- **Ertele ve Onayla** butonu randevunun `date`, `time` ve `status` alanlarını Firestore’da günceller.
-- Erteleme talebi `Tamamlandı` durumuna alınır.
-- `customerActionRequests` kaydına `requestedDate`, `requestedTime`, `decisionMessage`, `handledBy` alanları yazılır.
-- `appointmentStatusLogs` koleksiyonuna erteleme geçmişi kaydı eklenir.
-- Müşteriye gönderilecek yeni randevu bilgilendirme metni hazırlanır ve panelde kopyalanabilir.
-- `package.json` sürümü `1.8.0` oldu.
+- Müşteri panelinden gelen **iptal talebi** artık gerçek randevu durumuna bağlandı.
+- İşletme panelinde iptal talebi için **İptali Onayla** butonu eklendi.
+- İptal onaylanınca ilgili `appointments` kaydının `status` alanı **İptal** olur.
+- `customerActionRequests` kaydı **Tamamlandı** durumuna alınır.
+- `decisionMessage` alanına müşteriye gönderilecek iptal onay metni yazılır.
+- `appointmentStatusLogs` koleksiyonuna **İptal Talebi Onayı** geçmiş kaydı eklenir.
+- Hazırlanan mesaj panelde görüntülenip kopyalanabilir.
+- `package.json` sürümü `1.9.0` oldu.
 
 ## Önceki ana özellikler
 
@@ -22,7 +22,7 @@ Bu sürümde öncelik sırasındaki ilk büyük iş tamamlandı:
 - Firestore müşteri ve randevu kayıtları
 - Public randevu talep sayfası
 - Müşteri paneli
-- Erteleme / iptal talebi oluşturma
+- Erteleme talebini gerçek randevu güncellemesine bağlama
 - Süper Admin paneli
 - SaaS paket yönetimi
 
@@ -44,7 +44,7 @@ http://localhost:3000
 ```bash
 git status
 git add .
-git commit -m "Erteleme talebi randevu guncellemesine baglandi"
+git commit -m "Iptal talebi randevu durumuna baglandi"
 git push
 ```
 
