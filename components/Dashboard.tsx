@@ -4,15 +4,17 @@ import { AiSuggestions } from "@/components/AiSuggestions";
 import { AppointmentTable } from "@/components/AppointmentTable";
 import { CalendarCard } from "@/components/CalendarCard";
 import { CustomerCard } from "@/components/CustomerCard";
+import { AppointmentFormModal } from "@/components/AppointmentFormModal";
 import { CustomerFormModal } from "@/components/CustomerFormModal";
 import { FollowUpsCard } from "@/components/FollowUpsCard";
 import { Header } from "@/components/Header";
 import { RemindersCard } from "@/components/RemindersCard";
 import { Sidebar } from "@/components/Sidebar";
 import { StatCard } from "@/components/StatCard";
+import { listenAppointments } from "@/lib/services/appointment-service";
 import { listenCustomers } from "@/lib/services/customer-service";
 import { getSectorPreset } from "@/lib/sector-presets";
-import type { Customer, UserProfile } from "@/types/domain";
+import type { Appointment, Customer, UserProfile } from "@/types/domain";
 import type { User } from "firebase/auth";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
@@ -31,9 +33,13 @@ export function Dashboard({ user, profile }: DashboardProps) {
   const firstName = displayName.split(" ")[0] || "Murat";
   const preset = getSectorPreset(profile?.sector);
   const [customers, setCustomers] = useState<Customer[]>([]);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [customersLoading, setCustomersLoading] = useState(false);
+  const [appointmentsLoading, setAppointmentsLoading] = useState(false);
   const [customerError, setCustomerError] = useState("");
+  const [appointmentError, setAppointmentError] = useState("");
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
+  const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
 
   useEffect(() => {
     if (!profile?.tenantId) return;
@@ -56,12 +62,42 @@ export function Dashboard({ user, profile }: DashboardProps) {
     return unsubscribe;
   }, [profile?.tenantId]);
 
+  useEffect(() => {
+    if (!profile?.tenantId) return;
+
+    setAppointmentsLoading(true);
+    setAppointmentError("");
+
+    const unsubscribe = listenAppointments(
+      profile.tenantId,
+      (records) => {
+        setAppointments(records);
+        setAppointmentsLoading(false);
+      },
+      () => {
+        setAppointmentError("Randevu kayıtları okunamadı. Firestore bağlantısını kontrol edin.");
+        setAppointmentsLoading(false);
+      }
+    );
+
+    return unsubscribe;
+  }, [profile?.tenantId]);
+
   const historyLabel = preset.sector === "auto" ? "Servis Geçmişi" : preset.sector === "clinic" ? "Tedavi Geçmişi" : preset.sector === "education" ? "Görüşme Geçmişi" : "Hizmet Geçmişi";
   const featuredCustomer = customers[0] ?? preset.featuredCustomer;
   const realCustomerCount = customers.length;
+  const realAppointmentCount = appointments.length;
+  const visibleAppointments = realAppointmentCount > 0 ? appointments : preset.appointments;
 
   const stats = useMemo(() => {
     return preset.stats.map((stat, index) => {
+      if (index === 0 && realAppointmentCount > 0) {
+        return {
+          ...stat,
+          value: String(realAppointmentCount),
+          detail: `Firestore’da ${realAppointmentCount} randevu`,
+        };
+      }
       if (index === 3 && realCustomerCount > 0) {
         return {
           ...stat,
@@ -71,7 +107,7 @@ export function Dashboard({ user, profile }: DashboardProps) {
       }
       return stat;
     });
-  }, [preset.stats, realCustomerCount]);
+  }, [preset.stats, realCustomerCount, realAppointmentCount]);
 
   return (
     <div className={`appShell theme-${preset.sector}`}>
@@ -85,7 +121,7 @@ export function Dashboard({ user, profile }: DashboardProps) {
               <p>{profile?.tenantName ? `${profile.tenantName} için bugünkü plan ve özet aşağıda.` : "Bugünkü planınız ve işletmenizin özeti aşağıda."}</p>
             </div>
             <div className="actionRow">
-              <button className="primaryButton"><Plus size={20} /> Yeni Randevu</button>
+              <button className="primaryButton" onClick={() => setIsAppointmentModalOpen(true)}><Plus size={20} /> Yeni Randevu</button>
               <button className="secondaryButton" onClick={() => setIsCustomerModalOpen(true)}><UserPlus size={20} /> {preset.customerLabel} Ekle</button>
               <button className="secondaryButton"><Sparkles size={20} /> AI ile Mesaj Yaz</button>
               {user && <button className="logoutButton" onClick={() => signOut(auth)} title="Çıkış Yap"><LogOut size={20} /></button>}
@@ -93,7 +129,9 @@ export function Dashboard({ user, profile }: DashboardProps) {
           </div>
 
           {customerError && <p className="formMessage errorMessage dashboardMessage">{customerError}</p>}
+          {appointmentError && <p className="formMessage errorMessage dashboardMessage">{appointmentError}</p>}
           {customersLoading && <p className="formMessage successMessage dashboardMessage">Firestore müşteri kayıtları okunuyor...</p>}
+          {appointmentsLoading && <p className="formMessage successMessage dashboardMessage">Firestore randevu kayıtları okunuyor...</p>}
 
           <div className="statsGrid">
             {stats.map((stat, index) => {
@@ -107,7 +145,7 @@ export function Dashboard({ user, profile }: DashboardProps) {
               title={preset.appointmentTitle}
               customerLabel={preset.customerLabel}
               serviceColumnLabel={preset.serviceColumnLabel}
-              appointments={preset.appointments}
+              appointments={visibleAppointments}
               showResourceColumn={preset.sector === "auto"}
             />
             <AiSuggestions suggestions={preset.aiSuggestions} sector={preset.sector} />
@@ -124,6 +162,15 @@ export function Dashboard({ user, profile }: DashboardProps) {
           tenantId={profile.tenantId}
           sector={preset.sector}
           onClose={() => setIsCustomerModalOpen(false)}
+        />
+      )}
+
+      {isAppointmentModalOpen && profile?.tenantId && (
+        <AppointmentFormModal
+          tenantId={profile.tenantId}
+          sector={preset.sector}
+          customers={customers}
+          onClose={() => setIsAppointmentModalOpen(false)}
         />
       )}
     </div>

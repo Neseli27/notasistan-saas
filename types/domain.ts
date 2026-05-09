@@ -41,6 +41,8 @@ export interface NewCustomerInput {
 export interface Appointment {
   id: string;
   tenantId: string;
+  customerId?: string;
+  date?: string;
   time: string;
   customerName: string;
   customerPhone: string;
@@ -52,6 +54,22 @@ export interface Appointment {
   /** Otomotiv gibi sektörlerde plaka; diğer sektörlerde ek açıklama. */
   resourceDetail?: string;
   status: AppointmentStatus;
+  notes?: string;
+  sector?: Sector;
+  createdAt?: unknown;
+  updatedAt?: unknown;
+}
+
+export interface NewAppointmentInput {
+  tenantId: string;
+  sector: Sector;
+  customer: Customer;
+  date: string;
+  time: string;
+  service: string;
+  subService: string;
+  status: AppointmentStatus;
+  notes: string;
 }
 
 export interface AiSuggestion {

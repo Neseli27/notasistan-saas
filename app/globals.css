@@ -365,7 +365,8 @@ h1 { font-size: 36px; line-height: 1.1; margin: 0 0 8px; letter-spacing: -1px; }
   color: #1a2a50;
 }
 .customerForm input,
-.customerForm textarea {
+.customerForm textarea,
+.customerForm select {
   width: 100%;
   border: 1px solid #d7e1f0;
   outline: none;
@@ -377,7 +378,8 @@ h1 { font-size: 36px; line-height: 1.1; margin: 0 0 8px; letter-spacing: -1px; }
   resize: vertical;
 }
 .customerForm input:focus,
-.customerForm textarea:focus {
+.customerForm textarea:focus,
+.customerForm select:focus {
   border-color: #8fb3ff;
   box-shadow: 0 0 0 4px rgba(13, 72, 197, .08);
 }
@@ -413,4 +415,36 @@ h1 { font-size: 36px; line-height: 1.1; margin: 0 0 8px; letter-spacing: -1px; }
   .formGridTwo, .sectorFieldGrid { grid-template-columns: 1fr; }
   .modalActions { flex-direction: column-reverse; }
   .compactButton { width: 100%; justify-content: center; }
+}
+
+
+/* v0.5 - Gerçek randevu ekleme */
+.customerForm select {
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, #65718d 50%), linear-gradient(135deg, #65718d 50%, transparent 50%);
+  background-position: calc(100% - 20px) 50%, calc(100% - 14px) 50%;
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+}
+.selectedCustomerBox,
+.emptyStateBox {
+  border: 1px solid var(--line);
+  background: #f8fbff;
+  border-radius: 18px;
+  padding: 16px;
+}
+.selectedCustomerBox {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.selectedCustomerBox p,
+.emptyStateBox p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+.emptyStateBox {
+  display: grid;
+  gap: 14px;
 }

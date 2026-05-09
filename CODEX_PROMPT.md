@@ -1,33 +1,31 @@
-# Not Asistan v0.4 - Codex Görev Notu
+# Not Asistan v0.5 Geliştirme Özeti
 
-Bu proje Next.js + TypeScript + Firebase + Vercel tabanlı çok sektörlü SaaS başlangıç uygulamasıdır.
+Bu proje Firebase + GitHub + Vercel üzerinde çalışan Next.js tabanlı çok sektörlü SaaS uygulamasıdır.
 
-## Mevcut durum
+## Mevcut Durum
 
-- Firebase Auth çalışıyor.
-- Kullanıcı kayıt/giriş akışı var.
-- İlk girişte işletme oluşturuluyor.
-- İşletmenin sektörü Firestore `users` profilinde tutuluyor.
-- Dashboard sektöre göre otomotiv, güzellik, klinik, eğitim veya danışmanlık verileriyle uyarlanıyor.
-- v0.4 ile müşteri ekleme modali eklendi.
-- Müşteri kayıtları Firestore `customers` koleksiyonuna yazılıyor.
-- Dashboard müşteri kartı ve müşteri sayısı Firestore’dan okunuyor.
-- Tema renkleri `theme-${sector}` class yapısıyla sektöre göre otomatik değişmeye hazırlandı.
+- Next.js App Router
+- TypeScript
+- Tailwind kullanılmadan özel CSS tasarım sistemi
+- Firebase Authentication
+- Cloud Firestore
+- Vercel deploy uyumu
+- Tenant mantığı
+- Sektöre göre dashboard presetleri
+- Gerçek müşteri ekleme
+- Gerçek randevu ekleme
 
-## Dikkat edilecekler
+## v0.5 ile Eklenenler
 
-- `.env.local` GitHub’a gönderilmemeli.
-- Çok kiracılı yapı için tüm iş verilerinde `tenantId` korunmalı.
-- Firestore sorgularında mevcut kullanıcının `tenantId` değeri temel alınmalı.
-- Sağlık/klinik tarafında AI çıktıları ileride insan onayından geçmeli.
+- `components/AppointmentFormModal.tsx`
+- `lib/services/appointment-service.ts`
+- `appointments` koleksiyonuna Firestore kaydı
+- Dashboard üzerinden “Yeni Randevu” modalı
+- Randevu formunda müşteri seçimi
+- Sektöre göre hizmet/işlem önerileri
+- Otomotivde araç/plaka bilgisinin seçilen müşteriden otomatik randevuya taşınması
+- Randevu listesinin gerçek Firestore verisinden okunması
 
-## Sonraki hedef
+## Sonraki Hedef
 
-v0.5 geliştirmesi:
-
-1. Yeni Randevu butonunu çalıştır.
-2. Sektöre göre randevu formu oluştur.
-3. Firestore `appointments` koleksiyonuna kayıt yaz.
-4. Dashboard randevu listesini Firestore’dan okusun.
-5. Randevu durumu değiştirilebilsin.
-6. Otomotivde müşteri + araç/plaka alanları desteklensin.
+v0.6 için önerilen geliştirme: işlem notu / randevu sonrası özet ekleme ve takip tarihi oluşturma.

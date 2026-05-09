@@ -1,19 +1,17 @@
 # Not Asistan SaaS
 
-Randevulu çalışan işletmeler için yapay zekâ destekli müşteri notu, işlem hafızası ve takip platformu.
+Randevulu çalışan işletmeler için yapay zekâ destekli müşteri notu, işlem hafızası, randevu ve takip platformu.
 
-## v0.4 içeriği
+## v0.5 İçerik
 
-Bu sürümde aşağıdaki temel özellikler eklendi:
-
-- Firebase Authentication ile giriş/kayıt akışı
-- İlk girişte işletme oluşturma
-- Sektör seçimine göre dashboard uyarlaması
-- Sektöre göre otomatik tema renkleri altyapısı
-- `Müşteri Ekle / Hasta Ekle / Öğrenci Ekle` butonunun çalışması
-- Sektöre göre değişen müşteri kayıt formu
-- Firestore `customers` koleksiyonuna gerçek müşteri kaydı
-- Dashboard müşteri kartı ve müşteri sayısının Firestore kayıtlarından okunması
+- Firebase Authentication ile giriş/kayıt
+- İlk işletme oluşturma
+- Sektöre göre dashboard
+- Sektöre göre tema altyapısı
+- Gerçek müşteri ekleme ve Firestore kaydı
+- Müşteri kartının gerçek Firestore verisiyle beslenmesi
+- Gerçek randevu ekleme ve Firestore kaydı
+- Dashboard randevu listesinin gerçek Firestore verisinden beslenmesi
 
 ## Kurulum
 
@@ -30,64 +28,30 @@ http://localhost:3000
 
 ## Ortam değişkenleri
 
-`.env.example` dosyasını `.env.local` olarak kopyalayın ve Firebase Web App config bilgilerinizi girin:
+`.env.example` dosyasını `.env.local` olarak kopyalayın ve Firebase Web App config bilgilerini girin.
 
-```env
-NEXT_PUBLIC_FIREBASE_API_KEY=
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
-NEXT_PUBLIC_FIREBASE_APP_ID=
-NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=
+```bash
+copy .env.example .env.local
 ```
 
-`.env.local` dosyası GitHub’a gönderilmemelidir.
+## Firestore koleksiyonları
 
-## Firebase servisleri
+Uygulama çalıştıkça şu koleksiyonlar oluşur:
 
-Firebase Console içinde şunlar açık olmalı:
+- `tenants`
+- `users`
+- `customers`
+- `appointments`
 
-1. Authentication > Sign-in method > Email/Password
-2. Firestore Database
-3. Firestore Rules: geliştirme aşamasında sadece giriş yapan kullanıcıların erişmesine izin veren kural
+## GitHub / Vercel
 
-Önerilen geçici geliştirme kuralı:
-
-```js
-rules_version = '2';
-
-service cloud.firestore {
-  match /databases/{database}/documents {
-    function isSignedIn() {
-      return request.auth != null;
-    }
-
-    match /{document=**} {
-      allow read, write: if isSignedIn();
-    }
-  }
-}
-```
-
-## GitHub ve Vercel akışı
-
-Yerelde test ettikten sonra:
+Değişiklikleri göndermek için:
 
 ```bash
 git status
 git add .
-git commit -m "Gercek musteri ekleme sistemi eklendi"
+git commit -m "Gercek randevu ekleme sistemi eklendi"
 git push
 ```
 
-Vercel GitHub push sonrası otomatik deploy başlatır.
-
-## Sonraki sürüm önerisi
-
-v0.5 için önerilen modül:
-
-- Gerçek randevu ekleme
-- Randevuları Firestore’a kaydetme
-- Randevu listesini gerçek veriden okuma
-- Randevu durumları: Bekliyor / Onaylandı / Tamamlandı / Gelmedi
+Vercel GitHub push sonrası otomatik deploy alır.
