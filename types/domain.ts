@@ -22,6 +22,20 @@ export interface Customer {
   notes: string;
   nextAction: string;
   segment: "Yeni" | "Düzenli" | "VIP" | "Riskli" | "Geri Çağır";
+  sector?: Sector;
+  sectorData?: Record<string, string>;
+  createdAt?: unknown;
+  updatedAt?: unknown;
+}
+
+export interface NewCustomerInput {
+  tenantId: string;
+  sector: Sector;
+  name: string;
+  phone: string;
+  email: string;
+  notes: string;
+  sectorData: Record<string, string>;
 }
 
 export interface Appointment {

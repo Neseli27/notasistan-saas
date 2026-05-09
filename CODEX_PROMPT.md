@@ -1,25 +1,33 @@
-# Not Asistan v0.3 - Codex Görev Notu
+# Not Asistan v0.4 - Codex Görev Notu
 
-Bu sürümde onboarding sırasında seçilen sektörün dashboard'a doğru yansıması sağlandı.
+Bu proje Next.js + TypeScript + Firebase + Vercel tabanlı çok sektörlü SaaS başlangıç uygulamasıdır.
 
-## Sorun
-Kullanıcı işletme kurulumunda otomotiv sektörünü seçse bile dashboard güzellik salonu demo verileriyle açılıyordu.
+## Mevcut durum
 
-## Çözüm
-- `lib/sector-presets.ts` eklendi.
-- Dashboard artık `profile.sector` değerine göre sektör preset'i seçiyor.
-- Sidebar, Header, istatistik kartları, randevu tablosu, AI önerileri, müşteri kartı, hatırlatmalar ve takipler sektöre göre değişiyor.
-- Otomotiv sektöründe randevu tablosuna araç/plaka sütunu eklendi.
+- Firebase Auth çalışıyor.
+- Kullanıcı kayıt/giriş akışı var.
+- İlk girişte işletme oluşturuluyor.
+- İşletmenin sektörü Firestore `users` profilinde tutuluyor.
+- Dashboard sektöre göre otomotiv, güzellik, klinik, eğitim veya danışmanlık verileriyle uyarlanıyor.
+- v0.4 ile müşteri ekleme modali eklendi.
+- Müşteri kayıtları Firestore `customers` koleksiyonuna yazılıyor.
+- Dashboard müşteri kartı ve müşteri sayısı Firestore’dan okunuyor.
+- Tema renkleri `theme-${sector}` class yapısıyla sektöre göre otomatik değişmeye hazırlandı.
 
-## Kontrol listesi
-1. Yeni kullanıcı kaydı yap.
-2. İşletme oluşturma ekranında sektör olarak `Otomotiv / Oto Servis` seç.
-3. Dashboard açıldığında şu içeriklerin geldiğini doğrula:
-   - `Bugünkü Servis Randevuları`
-   - `Araçlar` menüsü
-   - `Müşteri & Araç Kartı`
-   - VW Passat, Renault Clio, plaka ve bakım içerikleri
-4. Klinik, güzellik, eğitim ve danışmanlık sektörlerinde de başlıkların değiştiğini kontrol et.
+## Dikkat edilecekler
 
-## Sonraki geliştirme
-Dashboard şu anda sektör bazlı demo preset kullanıyor. Bir sonraki aşamada Firestore'daki gerçek `customers`, `appointments`, `services`, `followUps` kayıtları okunacak.
+- `.env.local` GitHub’a gönderilmemeli.
+- Çok kiracılı yapı için tüm iş verilerinde `tenantId` korunmalı.
+- Firestore sorgularında mevcut kullanıcının `tenantId` değeri temel alınmalı.
+- Sağlık/klinik tarafında AI çıktıları ileride insan onayından geçmeli.
+
+## Sonraki hedef
+
+v0.5 geliştirmesi:
+
+1. Yeni Randevu butonunu çalıştır.
+2. Sektöre göre randevu formu oluştur.
+3. Firestore `appointments` koleksiyonuna kayıt yaz.
+4. Dashboard randevu listesini Firestore’dan okusun.
+5. Randevu durumu değiştirilebilsin.
+6. Otomotivde müşteri + araç/plaka alanları desteklensin.

@@ -1,16 +1,19 @@
-# Not Asistan SaaS Starter
+# Not Asistan SaaS
 
-Not Asistan; randevulu çalışan işletmeler için randevu, müşteri notu, işlem hafızası, hatırlatma ve takip yönetimi sunan SaaS başlangıç projesidir.
+Randevulu çalışan işletmeler için yapay zekâ destekli müşteri notu, işlem hafızası ve takip platformu.
 
-## v0.2 ile gelenler
+## v0.4 içeriği
 
-- Firebase Authentication bağlantısı
-- Giriş / kayıt ekranı
-- İlk işletme oluşturma ekranı
-- Firestore `users`, `tenants`, `services`, `customers` başlangıç kayıtları
-- Dashboard giriş koruması
-- Kullanıcı adı ve işletme adına göre kişiselleştirilmiş panel başlığı
-- Çıkış yapma butonu
+Bu sürümde aşağıdaki temel özellikler eklendi:
+
+- Firebase Authentication ile giriş/kayıt akışı
+- İlk girişte işletme oluşturma
+- Sektör seçimine göre dashboard uyarlaması
+- Sektöre göre otomatik tema renkleri altyapısı
+- `Müşteri Ekle / Hasta Ekle / Öğrenci Ekle` butonunun çalışması
+- Sektöre göre değişen müşteri kayıt formu
+- Firestore `customers` koleksiyonuna gerçek müşteri kaydı
+- Dashboard müşteri kartı ve müşteri sayısının Firestore kayıtlarından okunması
 
 ## Kurulum
 
@@ -25,15 +28,9 @@ Tarayıcı:
 http://localhost:3000
 ```
 
-## Environment Variables
+## Ortam değişkenleri
 
-`.env.example` dosyasını `.env.local` olarak kopyalayın ve Firebase Web App config bilgilerinizi girin.
-
-```bash
-copy .env.example .env.local
-```
-
-Gerekli değişkenler:
+`.env.example` dosyasını `.env.local` olarak kopyalayın ve Firebase Web App config bilgilerinizi girin:
 
 ```env
 NEXT_PUBLIC_FIREBASE_API_KEY=
@@ -45,11 +42,17 @@ NEXT_PUBLIC_FIREBASE_APP_ID=
 NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=
 ```
 
-## Firebase ayarları
+`.env.local` dosyası GitHub’a gönderilmemelidir.
 
-1. Authentication > Sign-in method > Email/Password aktif olmalı.
-2. Firestore Database oluşturulmuş olmalı.
-3. Geliştirme aşaması için geçici Firestore rule:
+## Firebase servisleri
+
+Firebase Console içinde şunlar açık olmalı:
+
+1. Authentication > Sign-in method > Email/Password
+2. Firestore Database
+3. Firestore Rules: geliştirme aşamasında sadece giriş yapan kullanıcıların erişmesine izin veren kural
+
+Önerilen geçici geliştirme kuralı:
 
 ```js
 rules_version = '2';
@@ -67,22 +70,24 @@ service cloud.firestore {
 }
 ```
 
-## GitHub / Vercel
+## GitHub ve Vercel akışı
 
-Projeyi GitHub'a gönderin. Vercel'de aynı Firebase env değerlerini Project Settings > Environment Variables bölümüne ekleyin ve Redeploy yapın.
+Yerelde test ettikten sonra:
 
-## Notlar
+```bash
+git status
+git add .
+git commit -m "Gercek musteri ekleme sistemi eklendi"
+git push
+```
 
-Bu sürüm hâlâ MVP başlangıç sürümüdür. Dashboard kartları büyük ölçüde demo verilerle görünür; ancak kullanıcı kaydı, işletme oluşturma ve başlangıç koleksiyon kayıtları Firestore'a yazılır. Sonraki sürümde müşteri ekleme, randevu ekleme ve gerçek dashboard verileri bağlanacaktır.
+Vercel GitHub push sonrası otomatik deploy başlatır.
 
-## v0.3 - Sektöre göre dashboard düzeltmesi
+## Sonraki sürüm önerisi
 
-Bu sürümde onboarding sırasında seçilen sektör dashboard'a yansıtılır.
+v0.5 için önerilen modül:
 
-- Güzellik seçilirse güzellik salonu verileri görünür.
-- Klinik seçilirse hasta/klinik dili görünür.
-- Otomotiv seçilirse araç, plaka, bakım ve servis dili görünür.
-- Eğitim seçilirse öğrenci/veli/görüşme dili görünür.
-- Danışmanlık seçilirse danışan/görüşme/takip dili görünür.
-
-Ana dosya: `lib/sector-presets.ts`
+- Gerçek randevu ekleme
+- Randevuları Firestore’a kaydetme
+- Randevu listesini gerçek veriden okuma
+- Randevu durumları: Bekliyor / Onaylandı / Tamamlandı / Gelmedi

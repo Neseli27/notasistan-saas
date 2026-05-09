@@ -240,3 +240,177 @@ h1 { font-size: 36px; line-height: 1.1; margin: 0 0 8px; letter-spacing: -1px; }
   .authHero, .authCard, .tenantCard { border-radius: 24px; padding: 24px; }
   .authHeroGrid, .sectorGrid { grid-template-columns: 1fr; }
 }
+
+/* v0.4 - Sektöre göre tema renkleri ve müşteri ekleme modali */
+.theme-beauty {
+  --theme-primary: #8b2f72;
+  --theme-primary-dark: #581b4f;
+  --theme-accent: #f06ca7;
+  --theme-soft: #fff0f7;
+}
+.theme-clinic {
+  --theme-primary: #0b4f8a;
+  --theme-primary-dark: #063866;
+  --theme-accent: #18b89b;
+  --theme-soft: #e8fbf7;
+}
+.theme-auto {
+  --theme-primary: #0b2e79;
+  --theme-primary-dark: #061e55;
+  --theme-accent: #f28a25;
+  --theme-soft: #fff2e4;
+}
+.theme-education {
+  --theme-primary: #3154b8;
+  --theme-primary-dark: #1f3478;
+  --theme-accent: #7c5cff;
+  --theme-soft: #f0edff;
+}
+.theme-consulting {
+  --theme-primary: #12334d;
+  --theme-primary-dark: #071d2d;
+  --theme-accent: #19a7a8;
+  --theme-soft: #e9fbfb;
+}
+
+.appShell[class*="theme-"] .primaryButton,
+.appShell[class*="theme-"] .authSubmit {
+  background: linear-gradient(180deg, var(--theme-primary), var(--theme-primary-dark));
+}
+.appShell[class*="theme-"] .secondaryButton {
+  color: var(--theme-primary);
+  border-color: color-mix(in srgb, var(--theme-primary) 45%, #d8e0ee);
+}
+.appShell[class*="theme-"] .brandMark,
+.appShell[class*="theme-"] .authLogo {
+  color: var(--theme-accent);
+  border-color: color-mix(in srgb, var(--theme-accent) 70%, #fff);
+  box-shadow: 0 0 28px color-mix(in srgb, var(--theme-accent) 28%, transparent);
+}
+.appShell[class*="theme-"] .navItem.active svg,
+.appShell[class*="theme-"] .sidebarCta a {
+  color: var(--theme-accent);
+}
+.appShell[class*="theme-"] .navItem.active,
+.appShell[class*="theme-"] .navItem:hover {
+  background: color-mix(in srgb, var(--theme-accent) 16%, transparent);
+}
+.appShell[class*="theme-"] .nextAction {
+  background: var(--theme-soft);
+  color: var(--theme-primary-dark);
+}
+
+.dashboardMessage { margin: -8px 0 18px; }
+
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(3, 12, 36, .46);
+  backdrop-filter: blur(8px);
+}
+.modalCard {
+  width: min(880px, 100%);
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+  border-radius: 28px;
+  background: #fff;
+  border: 1px solid #e2e8f4;
+  box-shadow: 0 32px 90px rgba(3, 18, 55, .28);
+  padding: 28px;
+}
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: flex-start;
+  padding-bottom: 18px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--line);
+}
+.modalHeader h2 {
+  margin: 8px 0 6px;
+  font-size: 30px;
+  letter-spacing: -.6px;
+}
+.modalHeader p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+.modalClose {
+  width: 42px;
+  height: 42px;
+  border: 1px solid #dce5f2;
+  border-radius: 14px;
+  background: #fff;
+  color: #26375d;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+}
+.customerForm {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.customerForm label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-weight: 850;
+  color: #1a2a50;
+}
+.customerForm input,
+.customerForm textarea {
+  width: 100%;
+  border: 1px solid #d7e1f0;
+  outline: none;
+  background: #fff;
+  color: var(--text);
+  border-radius: 15px;
+  padding: 15px 16px;
+  font: inherit;
+  resize: vertical;
+}
+.customerForm input:focus,
+.customerForm textarea:focus {
+  border-color: #8fb3ff;
+  box-shadow: 0 0 0 4px rgba(13, 72, 197, .08);
+}
+.formGridTwo,
+.sectorFieldGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.sectorFieldGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border: 1px solid var(--line);
+  background: #f8fbff;
+  border-radius: 20px;
+  padding: 16px;
+}
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 4px;
+}
+.compactButton {
+  height: 50px;
+  min-height: 50px;
+  padding: 0 20px;
+}
+
+@media (max-width: 760px) {
+  .modalBackdrop { padding: 12px; }
+  .modalCard { padding: 20px; border-radius: 22px; }
+  .modalHeader { align-items: flex-start; }
+  .formGridTwo, .sectorFieldGrid { grid-template-columns: 1fr; }
+  .modalActions { flex-direction: column-reverse; }
+  .compactButton { width: 100%; justify-content: center; }
+}
