@@ -2701,3 +2701,338 @@ h1 { font-size: 36px; line-height: 1.1; margin: 0 0 8px; letter-spacing: -1px; }
     grid-template-columns: 1fr;
   }
 }
+
+/* v2.0 - Müşteri PWA ve mobil deneyim güçlendirme */
+.customerAppHeader {
+  position: relative;
+  z-index: 2;
+}
+
+.customerAppMessage {
+  max-width: 1480px;
+  margin: 0 auto 16px;
+}
+
+.customerAppHero,
+.customerLatestNoteCard {
+  max-width: 1480px;
+  margin: 0 auto 18px;
+  border: 1px solid rgba(226, 232, 240, .92);
+  border-radius: 30px;
+  background: rgba(255, 255, 255, .88);
+  box-shadow: 0 24px 70px rgba(24, 45, 90, .10);
+}
+
+.customerAppHero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(320px, .75fr);
+  gap: 18px;
+  padding: 18px;
+}
+
+.customerAppHeroMain,
+.customerNextAppointmentCard,
+.customerLatestNoteCard > div {
+  border-radius: 24px;
+  padding: 24px;
+}
+
+.customerAppHeroMain {
+  color: #fff;
+  background:
+    radial-gradient(circle at top right, rgba(255, 255, 255, .16), transparent 38%),
+    linear-gradient(135deg, var(--theme-primary-dark, #061b4f), var(--theme-primary, #0c48c7));
+  min-height: 234px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.customerAppHeroMain h2 {
+  margin: 10px 0 8px;
+  font-size: clamp(30px, 4vw, 48px);
+  line-height: 1.02;
+  letter-spacing: -1.4px;
+}
+
+.customerAppHeroMain p {
+  max-width: 680px;
+  margin: 0 0 18px;
+  color: rgba(255, 255, 255, .82);
+  line-height: 1.58;
+  font-size: 16px;
+}
+
+.customerAppEyebrow {
+  display: inline-flex;
+  width: max-content;
+  align-items: center;
+  gap: 7px;
+  color: inherit;
+  font-size: 13px;
+  font-weight: 900;
+  opacity: .86;
+}
+
+.customerAppHeroBadges span {
+  gap: 7px;
+  background: rgba(255, 255, 255, .14);
+}
+
+.customerNextAppointmentCard {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: linear-gradient(180deg, #ffffff, #f8fbff);
+  border: 1px solid rgba(226, 232, 240, .92);
+}
+
+.customerNextAppointmentCard strong {
+  display: block;
+  margin: 10px 0 6px;
+  color: #0f172a;
+  font-size: 24px;
+  line-height: 1.12;
+}
+
+.customerNextAppointmentCard p,
+.customerNextAppointmentCard small {
+  color: var(--muted);
+  line-height: 1.48;
+  margin: 0 0 8px;
+}
+
+.customerNextAppointmentCard .statusBadge {
+  margin-top: 10px;
+}
+
+.customerInlineAction {
+  margin-top: 8px;
+  width: max-content;
+  color: var(--theme-primary, #0c48c7);
+  font-weight: 900;
+}
+
+.customerAppQuickGrid {
+  max-width: 1480px;
+  margin: 0 auto 18px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.customerAppQuickGrid a {
+  min-height: 72px;
+  border: 1px solid rgba(226, 232, 240, .92);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, .9);
+  box-shadow: 0 14px 34px rgba(24, 45, 90, .07);
+  color: #0f2f7a;
+  font-weight: 900;
+}
+
+.customerAppQuickGrid svg {
+  color: var(--theme-accent, #23d3ee);
+}
+
+.customerLatestNoteCard {
+  padding: 0;
+  overflow: hidden;
+}
+
+.customerLatestNoteCard > div {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, .94), rgba(255, 255, 255, .84)),
+    radial-gradient(circle at top right, var(--theme-soft, #e9f1ff), transparent 42%);
+}
+
+.customerLatestNoteCard h2 {
+  margin: 10px 0 8px;
+  font-size: 24px;
+}
+
+.customerLatestNoteCard p {
+  margin: 0;
+  max-width: 920px;
+  color: #465670;
+  line-height: 1.62;
+}
+
+.customerLatestNoteCard b {
+  display: inline-flex;
+  margin-top: 12px;
+  border-radius: 999px;
+  padding: 9px 12px;
+  color: var(--theme-primary, #0c48c7);
+  background: var(--theme-soft, #e9f1ff);
+}
+
+.customerDecisionMessage {
+  display: block;
+  margin-top: 7px;
+  color: #0f766e;
+  line-height: 1.45;
+}
+
+.customerBottomNav {
+  position: fixed;
+  left: 14px;
+  right: 14px;
+  bottom: 12px;
+  z-index: 70;
+  display: none;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+  padding: 8px;
+  border: 1px solid rgba(226, 232, 240, .86);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, .93);
+  box-shadow: 0 20px 60px rgba(15, 23, 42, .18);
+  backdrop-filter: blur(18px);
+}
+
+.customerBottomNav a {
+  min-height: 54px;
+  border-radius: 17px;
+  display: grid;
+  place-items: center;
+  gap: 2px;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.customerBottomNav a:nth-child(3) {
+  color: #fff;
+  background: linear-gradient(180deg, var(--theme-primary, #0c48c7), var(--theme-primary-dark, #061b4f));
+  box-shadow: 0 12px 26px rgba(6, 27, 79, .22);
+}
+
+.customerBottomNav svg {
+  color: currentColor;
+}
+
+@media (max-width: 1100px) {
+  .customerAppHero {
+    grid-template-columns: 1fr;
+  }
+
+  .customerAppQuickGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  .customerPanelPage {
+    padding: 15px 15px 94px;
+  }
+
+  .customerAppHeader {
+    margin-bottom: 14px;
+  }
+
+  .customerPanelHeader h1 {
+    font-size: 30px;
+  }
+
+  .customerPanelHeader p {
+    font-size: 15px;
+  }
+
+  .customerAppHero {
+    border-radius: 24px;
+    padding: 10px;
+  }
+
+  .customerAppHeroMain,
+  .customerNextAppointmentCard,
+  .customerLatestNoteCard > div {
+    border-radius: 20px;
+    padding: 18px;
+  }
+
+  .customerAppHeroMain {
+    min-height: 220px;
+  }
+
+  .customerAppHeroMain h2 {
+    font-size: 31px;
+  }
+
+  .customerAppHeroBadges span {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+
+  .customerAppSummaryGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .customerSummaryCard {
+    min-height: 94px;
+    padding: 15px;
+  }
+
+  .customerSummaryCard strong {
+    font-size: 27px;
+  }
+
+  .customerAppQuickGrid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .customerAppQuickGrid a {
+    min-height: 62px;
+    border-radius: 18px;
+    padding: 12px;
+    font-size: 13px;
+  }
+
+  .customerAppGrid {
+    gap: 12px;
+  }
+
+  .customerPortalSection,
+  .customerLatestNoteCard {
+    border-radius: 22px;
+  }
+
+  .customerSectionHeader {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .customerAppointmentActions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .customerAppointmentActions .statusBadge {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .customerAppointmentActions button {
+    justify-content: center;
+    min-height: 40px;
+  }
+
+  .customerBottomNav {
+    display: grid;
+  }
+
+  .pwaInstallBanner {
+    bottom: 86px;
+  }
+}

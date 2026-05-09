@@ -1,24 +1,24 @@
-# Not Asistan v1.9 Codex Notu
+# Not Asistan v2.0 Codex Notu
 
-Bu sürümde müşteri panelinden gelen iptal talepleri gerçek randevu durumuna bağlandı.
+Bu sürümde müşteri panelinin mobil/PWA deneyimi güçlendirildi.
 
 ## Beklenen davranış
 
-1. Müşteri panelinden randevu için iptal talebi gönderilir.
-2. İşletme panelinde Erteleme / İptal Talepleri kartında talep görünür.
-3. İşletme **İptali Onayla** butonuna basar.
-4. İlgili `appointments` belgesinde `status` değeri `İptal` olur.
-5. `customerActionRequests` belgesi `Tamamlandı` olur.
-6. `appointmentStatusLogs` koleksiyonuna iptal geçmişi yazılır.
-7. Müşteriye gönderilecek bilgilendirme metni panelde gösterilir ve kopyalanabilir.
+1. Müşteri paneli mobil ekranda uygulama hissi vermelidir.
+2. Üstte işletme adı, güvenli giriş bilgisi ve müşteri uygulaması vurgusu görünmelidir.
+3. Sıradaki randevu ayrı bir büyük kartta gösterilmelidir.
+4. Yeni randevu talebi, randevularım, işlem özetlerim ve taleplerim için hızlı işlem kartları olmalıdır.
+5. Mobilde altta sabit hızlı gezinme menüsü görünmelidir.
+6. PWA bannerı alttaki menüyle çakışmamalıdır.
+7. Mevcut randevu, erteleme, iptal ve işlem özeti akışları bozulmamalıdır.
 
 ## Kontrol edilecek dosyalar
 
-- `components/Dashboard.tsx`
-- `components/CustomerActionRequestsCard.tsx`
-- `lib/services/customer-portal-service.ts`
-- `types/domain.ts`
+- `components/customer/CustomerPanel.tsx`
+- `app/globals.css`
+- `components/PwaInstallBanner.tsx`
+- `public/manifest.webmanifest`
 
 ## Sonraki önerilen adım
 
-v2.0 kapsamında müşteri paneli mobil/PWA deneyimini güçlendirmek, ardından müşteri listesi ve müşteri detay sayfalarını geliştirmek.
+v2.1 kapsamında işletme tarafında müşteri listesi ve müşteri detay sayfası geliştirilmelidir. Bu sayede müşteri kartı, işlem geçmişi, randevu geçmişi ve sektör özel alanları tek yerde yönetilebilir.

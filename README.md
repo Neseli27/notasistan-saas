@@ -2,18 +2,19 @@
 
 Randevu, müşteri notu, işlem hafızası, takip, müşteri paneli ve SaaS yönetimi için Firebase + Vercel + GitHub tabanlı başlangıç uygulaması.
 
-## v1.9 Yenilikleri
+## v2.0 Yenilikleri
 
-Bu sürümde yol haritasındaki ikinci kritik iş tamamlandı:
+Bu sürümde müşteri tarafı mobil/PWA deneyimi güçlendirildi:
 
-- Müşteri panelinden gelen **iptal talebi** artık gerçek randevu durumuna bağlandı.
-- İşletme panelinde iptal talebi için **İptali Onayla** butonu eklendi.
-- İptal onaylanınca ilgili `appointments` kaydının `status` alanı **İptal** olur.
-- `customerActionRequests` kaydı **Tamamlandı** durumuna alınır.
-- `decisionMessage` alanına müşteriye gönderilecek iptal onay metni yazılır.
-- `appointmentStatusLogs` koleksiyonuna **İptal Talebi Onayı** geçmiş kaydı eklenir.
-- Hazırlanan mesaj panelde görüntülenip kopyalanabilir.
-- `package.json` sürümü `1.9.0` oldu.
+- Müşteri paneline mobil odaklı üst özet alanı eklendi.
+- Sıradaki randevu için büyük ve okunabilir kart oluşturuldu.
+- Yeni randevu talebi, randevularım, işlem özetlerim ve taleplerim için hızlı işlem kartları eklendi.
+- Mobil altta sabit hızlı gezinme menüsü eklendi.
+- Müşteri paneli küçük ekranlarda daha uygulama hissi verecek şekilde düzenlendi.
+- Müşteri tarafındaki PWA bannerı alttaki gezinme menüsüyle çakışmayacak şekilde ayarlandı.
+- Son paylaşılan işlem özeti ayrı bir kart olarak gösterildi.
+- Açık erteleme/iptal talepleri üst istatistikte ayrıca gösterilmeye başladı.
+- `package.json` sürümü `2.0.0` oldu.
 
 ## Önceki ana özellikler
 
@@ -22,7 +23,7 @@ Bu sürümde yol haritasındaki ikinci kritik iş tamamlandı:
 - Firestore müşteri ve randevu kayıtları
 - Public randevu talep sayfası
 - Müşteri paneli
-- Erteleme talebini gerçek randevu güncellemesine bağlama
+- Erteleme ve iptal taleplerini gerçek randevu yönetimine bağlama
 - Süper Admin paneli
 - SaaS paket yönetimi
 
@@ -39,12 +40,20 @@ Tarayıcı:
 http://localhost:3000
 ```
 
+## Test önerisi
+
+1. Müşteri paneli linkini mobil tarayıcıda veya Chrome geliştirici araçlarında mobil görünümde açın.
+2. Sıradaki randevu kartını kontrol edin.
+3. Alttaki hızlı gezinme menüsünün göründüğünü kontrol edin.
+4. PWA bannerının menünün üstünde kaldığını test edin.
+5. Yeni randevu talebi, erteleme ve iptal akışlarının bozulmadığını kontrol edin.
+
 ## Yayına gönderme
 
 ```bash
 git status
 git add .
-git commit -m "Iptal talebi randevu durumuna baglandi"
+git commit -m "Musteri PWA mobil deneyimi guclendirildi"
 git push
 ```
 
