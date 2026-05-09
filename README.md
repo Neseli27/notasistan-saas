@@ -75,3 +75,12 @@ Environment Variables Vercel panelinde de eklenmelidir. Değişikliklerden sonra
 ## Sonraki önerilen sürüm
 
 v1.0 için mantıklı adım: müşteri tarafında işletmeye özel daha profesyonel mobil randevu deneyimi, hizmet seçimine göre süre/fiyat bilgisi, işletme logosu ve tema ayarları.
+
+
+## v1.0 Notları
+
+- Randevu tablosunda sütun genişlikleri ve aksiyon alanı düzeltildi.
+- Durum rozeti ve Not butonu aynı hizaya alındı.
+- Uzun araç, plaka, servis ve açıklama metinleri tablo düzenini bozmayacak şekilde sınırlandırıldı.
+- Randevu talebi kartları daha düzenli ve okunabilir hâle getirildi.
+- Dar ekranlarda randevu listesi taşma yapmadan kullanılacak şekilde iyileştirildi.

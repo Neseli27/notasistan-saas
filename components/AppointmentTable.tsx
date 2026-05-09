@@ -32,7 +32,7 @@ export function AppointmentTable({ title, customerLabel, serviceColumnLabel, app
         <span>{customerLabel}</span>
         {showResourceColumn && <span>Araç</span>}
         <span>{serviceColumnLabel}</span>
-        <span>Durum</span>
+        <span className="alignRight">Durum / İşlem</span>
       </div>
 
       {appointments.map((item) => (
@@ -46,24 +46,28 @@ export function AppointmentTable({ title, customerLabel, serviceColumnLabel, app
             </div>
           </div>
           {showResourceColumn && (
-            <div>
-              <b>{item.resourceName}</b>
-              <p>{item.resourceDetail}</p>
+            <div className="tableTextCell resourceCell">
+              <b title={item.resourceName}>{item.resourceName}</b>
+              <p title={item.resourceDetail}>{item.resourceDetail}</p>
             </div>
           )}
-          <div>
-            <b>{item.service}</b>
-            <p>{item.subService}</p>
+          <div className="tableTextCell serviceCell">
+            <b title={item.service}>{item.service}</b>
+            <p title={item.subService}>{item.subService}</p>
           </div>
           <div className="statusCell">
-            <span className={statusClass(item.status)}>{item.status}</span>
-            {onAddNote && item.customerId ? (
-              <button className="noteActionButton" onClick={() => onAddNote(item)} title="İşlem notu ekle">
-                <FileText size={16} /> Not
-              </button>
-            ) : (
-              <MoreVertical size={18} />
-            )}
+            <div className="statusActionGroup">
+              <span className={statusClass(item.status)} title={item.status}>{item.status}</span>
+              {onAddNote && item.customerId ? (
+                <button className="noteActionButton" onClick={() => onAddNote(item)} title="İşlem notu ekle">
+                  <FileText size={16} /> Not
+                </button>
+              ) : (
+                <button className="rowIconButton" type="button" title="Diğer işlemler">
+                  <MoreVertical size={18} />
+                </button>
+              )}
+            </div>
           </div>
         </div>
       ))}

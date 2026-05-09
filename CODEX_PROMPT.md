@@ -37,3 +37,12 @@ Not Asistan; randevulu çalışan işletmeler için müşteri notu, randevu, iş
 - Randevu talebi onaylandıktan sonra WhatsApp/SMS gönderim entegrasyonu
 - Randevu durumlarının ayrı panelden yönetilmesi
 - Yetki/rol sisteminin tenantId bazlı sıkılaştırılması
+
+
+## v1.0 Notları
+
+- Randevu tablosunda sütun genişlikleri ve aksiyon alanı düzeltildi.
+- Durum rozeti ve Not butonu aynı hizaya alındı.
+- Uzun araç, plaka, servis ve açıklama metinleri tablo düzenini bozmayacak şekilde sınırlandırıldı.
+- Randevu talebi kartları daha düzenli ve okunabilir hâle getirildi.
+- Dar ekranlarda randevu listesi taşma yapmadan kullanılacak şekilde iyileştirildi.
