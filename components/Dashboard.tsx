@@ -4,6 +4,7 @@ import { AiSuggestions } from "@/components/AiSuggestions";
 import { AppointmentFormModal } from "@/components/AppointmentFormModal";
 import { AppointmentNoteModal } from "@/components/AppointmentNoteModal";
 import { AppointmentTable } from "@/components/AppointmentTable";
+import { BookingRequestsCard } from "@/components/BookingRequestsCard";
 import { CalendarCard } from "@/components/CalendarCard";
 import { CustomerCard } from "@/components/CustomerCard";
 import { CustomerFormModal } from "@/components/CustomerFormModal";
@@ -15,8 +16,9 @@ import { StatCard } from "@/components/StatCard";
 import { listenAppointments } from "@/lib/services/appointment-service";
 import { listenAppointmentNotes, listenFollowUps, listenReminders } from "@/lib/services/appointment-note-service";
 import { listenCustomers } from "@/lib/services/customer-service";
+import { ensurePublicTenant, listenBookingRequests } from "@/lib/services/public-booking-service";
 import { getSectorPreset } from "@/lib/sector-presets";
-import type { Appointment, AppointmentNote, Customer, FollowUp, Reminder, UserProfile } from "@/types/domain";
+import type { Appointment, AppointmentNote, BookingRequest, Customer, FollowUp, Reminder, UserProfile } from "@/types/domain";
 import type { User } from "firebase/auth";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
@@ -48,15 +50,61 @@ export function Dashboard({ user, profile }: DashboardProps) {
   const [appointmentNotes, setAppointmentNotes] = useState<AppointmentNote[]>([]);
   const [realFollowUps, setRealFollowUps] = useState<FollowUp[]>([]);
   const [realReminders, setRealReminders] = useState<Reminder[]>([]);
+  const [bookingRequests, setBookingRequests] = useState<BookingRequest[]>([]);
+  const [publicSlug, setPublicSlug] = useState("");
+  const [appOrigin, setAppOrigin] = useState("");
   const [customersLoading, setCustomersLoading] = useState(false);
   const [appointmentsLoading, setAppointmentsLoading] = useState(false);
   const [notesLoading, setNotesLoading] = useState(false);
   const [customerError, setCustomerError] = useState("");
   const [appointmentError, setAppointmentError] = useState("");
   const [noteError, setNoteError] = useState("");
+  const [bookingError, setBookingError] = useState("");
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
   const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
   const [selectedAppointmentForNote, setSelectedAppointmentForNote] = useState<Appointment | null>(null);
+
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setAppOrigin(window.location.origin);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!profile?.tenantId || !profile?.tenantName || !profile?.sector) return;
+
+    let mounted = true;
+
+    ensurePublicTenant({
+      tenantId: profile.tenantId,
+      tenantName: profile.tenantName,
+      sector: profile.sector,
+    })
+      .then((slug) => {
+        if (mounted && slug) setPublicSlug(slug);
+      })
+      .catch((error) => {
+        console.error("Genel randevu linki hazırlanamadı:", error);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, [profile?.tenantId, profile?.tenantName, profile?.sector]);
+
+  useEffect(() => {
+    if (!profile?.tenantId) return;
+
+    setBookingError("");
+    const unsubscribe = listenBookingRequests(
+      profile.tenantId,
+      setBookingRequests,
+      () => setBookingError("Müşteri randevu talepleri okunamadı. Firestore kurallarını kontrol edin.")
+    );
+
+    return unsubscribe;
+  }, [profile?.tenantId]);
 
   useEffect(() => {
     if (!profile?.tenantId) return;
@@ -142,6 +190,7 @@ export function Dashboard({ user, profile }: DashboardProps) {
   const visibleFollowUps = realFollowUps.length > 0 ? realFollowUps : preset.followUps;
   const visibleReminders = realReminders.length > 0 ? realReminders : preset.reminders;
   const visibleSuggestions = realNoteCount > 0 ? buildNoteSuggestions(appointmentNotes) : preset.aiSuggestions;
+  const publicBookingUrl = publicSlug && appOrigin ? `${appOrigin}/randevu/${publicSlug}` : "";
 
   const stats = useMemo(() => {
     return preset.stats.map((stat, index) => {
@@ -192,6 +241,7 @@ export function Dashboard({ user, profile }: DashboardProps) {
           {customerError && <p className="formMessage errorMessage dashboardMessage">{customerError}</p>}
           {appointmentError && <p className="formMessage errorMessage dashboardMessage">{appointmentError}</p>}
           {noteError && <p className="formMessage errorMessage dashboardMessage">{noteError}</p>}
+          {bookingError && <p className="formMessage errorMessage dashboardMessage">{bookingError}</p>}
           {customersLoading && <p className="formMessage successMessage dashboardMessage">Firestore müşteri kayıtları okunuyor...</p>}
           {appointmentsLoading && <p className="formMessage successMessage dashboardMessage">Firestore randevu kayıtları okunuyor...</p>}
           {notesLoading && <p className="formMessage successMessage dashboardMessage">İşlem notları ve takipler okunuyor...</p>}
@@ -200,6 +250,17 @@ export function Dashboard({ user, profile }: DashboardProps) {
             <div className="noteInsightBanner">
               <StickyNote size={20} />
               <span><b>{realNoteCount} işlem notu</b> kaydedildi. Takip ve hatırlatma kartları gerçek kayıtlarla güncelleniyor.</span>
+            </div>
+          )}
+
+          {publicBookingUrl && (
+            <div className="publicLinkBanner">
+              <Sparkles size={20} />
+              <div>
+                <b>Müşteri randevu sayfanız hazır.</b>
+                <span>{publicBookingUrl}</span>
+              </div>
+              <a href={publicBookingUrl} target="_blank" rel="noreferrer">Sayfayı Aç</a>
             </div>
           )}
 
@@ -221,6 +282,7 @@ export function Dashboard({ user, profile }: DashboardProps) {
             />
             <AiSuggestions suggestions={visibleSuggestions} sector={preset.sector} />
             <CustomerCard customer={featuredCustomer} customerLabel={preset.sector === "auto" ? "Müşteri & Araç" : preset.customerLabel} historyLabel={historyLabel} />
+            <BookingRequestsCard requests={bookingRequests} publicUrl={publicBookingUrl} />
             <CalendarCard />
             <RemindersCard reminders={visibleReminders} />
             <FollowUpsCard followUps={visibleFollowUps} />

@@ -44,11 +44,23 @@ function slugify(value: string) {
 }
 
 export async function createTenantForUser(params: CreateTenantParams): Promise<UserProfile> {
+  const tenantSlug = slugify(params.tenantName);
+
   const tenantRef = await addDoc(collection(db, "tenants"), {
     name: params.tenantName,
     sector: params.sector,
-    slug: slugify(params.tenantName),
+    slug: tenantSlug,
     ownerUid: params.uid,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
+
+  await setDoc(doc(db, "publicTenants", tenantSlug), {
+    tenantId: tenantRef.id,
+    name: params.tenantName,
+    sector: params.sector,
+    slug: tenantSlug,
+    isActive: true,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });

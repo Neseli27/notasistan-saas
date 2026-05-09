@@ -101,6 +101,46 @@ export interface NewAppointmentNoteInput {
   createReminder: boolean;
 }
 
+
+export interface PublicTenant {
+  tenantId: string;
+  name: string;
+  sector: Sector;
+  slug: string;
+  isActive?: boolean;
+}
+
+export interface BookingRequest {
+  id: string;
+  tenantId: string;
+  tenantSlug: string;
+  sector: Sector;
+  customerName: string;
+  customerPhone: string;
+  customerEmail: string;
+  service: string;
+  preferredDate: string;
+  preferredTime: string;
+  notes: string;
+  status: "Yeni Talep" | "Görüldü" | "Randevuya Çevrildi" | "İptal";
+  source?: string;
+  createdAt?: unknown;
+  updatedAt?: unknown;
+}
+
+export interface NewBookingRequestInput {
+  tenantId: string;
+  tenantSlug: string;
+  sector: Sector;
+  customerName: string;
+  customerPhone: string;
+  customerEmail: string;
+  service: string;
+  preferredDate: string;
+  preferredTime: string;
+  notes: string;
+}
+
 export interface AiSuggestion {
   id: string;
   title: string;

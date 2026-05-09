@@ -1,42 +1,30 @@
-# Codex Görev Özeti — Not Asistan v0.7
+# Not Asistan v0.8 Codex Görev Özeti
 
-Bu proje Next.js + Firebase + Vercel üzerinde çalışan çok sektörlü SaaS başlangıcıdır.
+Bu proje Next.js + Firebase + Vercel tabanlı bir SaaS MVP'dir.
 
-## Mevcut Modüller
+## Mevcut durum
 
-- Firebase Authentication
-- Firestore kullanıcı/işletme kayıtları
-- Sektöre göre dashboard
-- Gerçek müşteri ekleme
-- Gerçek randevu ekleme
-- İşlem notu, takip ve hatırlatma kaydı
-- Firestore listener yapısı
-- Sektör bazlı tema altyapısı
-- PWA manifest, ikonlar ve service worker
-- Mobil telefona ekleme bannerı
-
-## v0.7 ile Eklenenler
-
-1. `public/manifest.webmanifest` eklendi.
-2. `public/sw.js` eklendi.
-3. `public/icons/` altında PWA ikonları eklendi.
-4. `components/PwaInstallBanner.tsx` eklendi.
-5. `app/layout.tsx` içine manifest, ikon, viewport ve banner entegrasyonu eklendi.
-6. `app/globals.css` içine PWA banner stilleri eklendi.
-
-## Sonraki Mantıklı Geliştirme
-
-Müşteri tarafı ayrı bir PWA deneyimi olarak tasarlanmalı:
-
-- `/randevu/[tenantSlug]` müşteri randevu alma sayfası
-- İşletmeye özel tema ve logo
-- Müşterinin randevu alması / erteleme talebi
-- Telefona ekleme bannerı sadece müşteri portalında daha belirgin gösterilmeli
-- Müşteri tarafında login zorunlu olmadan doğrulama kodu veya geçici randevu akışı düşünülmeli
+- Firebase Auth ile giriş/kayıt var.
+- İşletme oluşturma ve sektör seçimi var.
+- Dashboard sektöre göre tema ve içerik değiştiriyor.
+- Müşteri, randevu, işlem notu, takip ve hatırlatma kayıtları Firestore'a yazılıyor.
+- PWA desteği ve telefona ekleme bannerı var.
+- `/randevu/[slug]` müşteri tarafı public randevu talep sayfası eklendi.
+- Public form `bookingRequests` koleksiyonuna kayıt oluşturuyor.
+- Admin dashboard `bookingRequests` kayıtlarını gösteriyor.
 
 ## Dikkat
 
-- `.env.local` GitHub’a yüklenmemeli.
-- PWA install prompt Android/Chrome’da native çalışır.
-- iOS Safari `beforeinstallprompt` desteklemediği için banner kullanıcıya “Paylaş > Ana Ekrana Ekle” yönergesi gösterir.
-- Service worker geliştirme sırasında eski cache tutabilir; gerekirse tarayıcı Application > Service Workers bölümünden unregister yapılabilir.
+- `.env.local` GitHub'a gönderilmemelidir.
+- Firestore rules dosyası Firebase Console'da publish edilmelidir.
+- `bookingRequests` public create iznine sahiptir; sonraki sürümde rate limit / captcha / telefon doğrulama eklenebilir.
+
+## Sonraki görev
+
+Gelen randevu talebini onaylama akışı geliştir:
+
+1. BookingRequestsCard içindeki her talebe `Onayla`, `Görüldü`, `İptal` butonları ekle.
+2. `Onayla` tıklanınca talebi `appointments` koleksiyonuna gerçek randevu olarak yaz.
+3. Talep durumunu `Randevuya Çevrildi` yap.
+4. Talep içindeki müşteri daha önce yoksa `customers` koleksiyonuna müşteri kaydı aç.
+5. Müşteriye gönderilecek WhatsApp/SMS teyit metnini oluştur ve kopyalama butonu ekle.

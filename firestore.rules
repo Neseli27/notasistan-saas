@@ -6,8 +6,49 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    // Geçici geliştirme kuralı:
-    // Sadece Firebase Authentication ile giriş yapan kullanıcılar okuyabilir/yazabilir.
+    // Müşteri tarafındaki randevu sayfası için genel işletme profili okunabilir.
+    // Bu dokümanlarda yalnızca işletme adı, sektör, slug ve tenantId tutulmalıdır.
+    match /publicTenants/{slug} {
+      allow read: if true;
+      allow write: if isSignedIn();
+    }
+
+    // Müşteri tarafındaki PWA randevu talebi formu giriş yapmadan talep oluşturabilir.
+    // Yönetim paneli talepleri giriş yapan işletme kullanıcısı üzerinden okur.
+    match /bookingRequests/{requestId} {
+      allow create: if request.resource.data.keys().hasOnly([
+          "tenantId",
+          "tenantSlug",
+          "sector",
+          "customerName",
+          "customerPhone",
+          "customerEmail",
+          "customerAvatar",
+          "service",
+          "preferredDate",
+          "preferredTime",
+          "notes",
+          "status",
+          "source",
+          "createdAt",
+          "updatedAt"
+        ])
+        && request.resource.data.tenantId is string
+        && request.resource.data.tenantSlug is string
+        && request.resource.data.customerName is string
+        && request.resource.data.customerPhone is string
+        && request.resource.data.service is string
+        && request.resource.data.preferredDate is string
+        && request.resource.data.preferredTime is string
+        && request.resource.data.status == "Yeni Talep"
+        && request.resource.data.source == "public-pwa";
+
+      allow read, update, delete: if isSignedIn();
+    }
+
+    // Geliştirme aşaması kuralı:
+    // Sadece Firebase Authentication ile giriş yapan kullanıcılar yönetim verisini okuyabilir/yazabilir.
+    // Tenant bazlı nihai kural sonraki sürümde sıkılaştırılacaktır.
     match /{document=**} {
       allow read, write: if isSignedIn();
     }
