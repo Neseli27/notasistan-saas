@@ -33,3 +33,8 @@ v1.2 için talep kabul/red akışı müşteri mesaj geçmişine bağlanabilir:
 - Randevuya çevrilen taleplerden otomatik reminder oluştur.
 - Public randevu talebinde otomotiv için plaka/araç bilgisi opsiyonel alınsın.
 - İşletme ayarlarından public form alanları özelleştirilsin.
+
+
+## v1.2 geliştirme notu
+
+Randevu tablosundaki durum alanı artık doğrudan değiştirilebilir. `updateAppointmentStatus` servisi Firestore'daki `appointments` dokümanını günceller ve `updatedAt` alanını yeniler. Bundan sonraki aşamada durum değişim geçmişi ve müşteri bilgilendirme mesajları ayrı bir log koleksiyonuna taşınabilir.

@@ -1443,3 +1443,48 @@ h1 { font-size: 36px; line-height: 1.1; margin: 0 0 8px; letter-spacing: -1px; }
     width: max-content;
   }
 }
+
+/* v1.2 - Randevu durum yönetimi */
+.statusSelect {
+  appearance: none;
+  min-width: 88px;
+  max-width: 94px;
+  height: 34px;
+  border: 0;
+  border-radius: 999px;
+  padding: 0 18px 0 10px;
+  font-size: 11.5px;
+  font-weight: 900;
+  text-align: center;
+  text-align-last: center;
+  outline: none;
+  cursor: pointer;
+  background-image:
+    linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position:
+    calc(100% - 10px) 14px,
+    calc(100% - 6px) 14px;
+  background-size: 4px 4px, 4px 4px;
+  background-repeat: no-repeat;
+}
+
+.statusSelect:disabled {
+  cursor: progress;
+  opacity: .72;
+}
+
+.statusSelect.waiting { color: #d97706; background-color: #fff1d7; }
+.statusSelect.done { color: #1254db; background-color: #e9f1ff; }
+.statusSelect.approved { color: #0f9f73; background-color: #e8f8ef; }
+.statusSelect.danger { color: #b91c1c; background-color: #fee2e2; }
+
+@media (max-width: 1450px) {
+  .statusSelect {
+    min-width: 78px;
+    max-width: 82px;
+    font-size: 11px;
+    padding-left: 7px;
+    padding-right: 14px;
+  }
+}

@@ -13,12 +13,12 @@ import { Header } from "@/components/Header";
 import { RemindersCard } from "@/components/RemindersCard";
 import { Sidebar } from "@/components/Sidebar";
 import { StatCard } from "@/components/StatCard";
-import { listenAppointments } from "@/lib/services/appointment-service";
+import { listenAppointments, updateAppointmentStatus } from "@/lib/services/appointment-service";
 import { listenAppointmentNotes, listenFollowUps, listenReminders } from "@/lib/services/appointment-note-service";
 import { listenCustomers } from "@/lib/services/customer-service";
 import { convertBookingRequestToAppointment, ensurePublicTenant, listenBookingRequests, rejectBookingRequest } from "@/lib/services/public-booking-service";
 import { getSectorPreset } from "@/lib/sector-presets";
-import type { Appointment, AppointmentNote, BookingRequest, Customer, FollowUp, Reminder, UserProfile } from "@/types/domain";
+import type { Appointment, AppointmentNote, AppointmentStatus, BookingRequest, Customer, FollowUp, Reminder, UserProfile } from "@/types/domain";
 import type { User } from "firebase/auth";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
@@ -61,6 +61,8 @@ export function Dashboard({ user, profile }: DashboardProps) {
   const [noteError, setNoteError] = useState("");
   const [bookingError, setBookingError] = useState("");
   const [bookingSuccess, setBookingSuccess] = useState("");
+  const [appointmentStatusMessage, setAppointmentStatusMessage] = useState("");
+  const [updatingAppointmentId, setUpdatingAppointmentId] = useState<string | null>(null);
   const [convertingRequestId, setConvertingRequestId] = useState<string | null>(null);
   const [rejectingRequestId, setRejectingRequestId] = useState<string | null>(null);
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
@@ -222,6 +224,26 @@ export function Dashboard({ user, profile }: DashboardProps) {
     });
   }, [preset.stats, realCustomerCount, realAppointmentCount, realFollowUps.length, visibleFollowUps.length]);
 
+
+  async function handleAppointmentStatusChange(appointment: Appointment, status: AppointmentStatus) {
+    if (!appointment.id || appointment.status === status) return;
+
+    setAppointmentError("");
+    setAppointmentStatusMessage("");
+    setUpdatingAppointmentId(appointment.id);
+
+    try {
+      await updateAppointmentStatus(appointment.id, status);
+      setAppointmentStatusMessage(`${appointment.customerName} randevusu "${status}" olarak güncellendi.`);
+      window.setTimeout(() => setAppointmentStatusMessage(""), 2800);
+    } catch (error) {
+      console.error("Randevu durumu güncellenemedi:", error);
+      setAppointmentError("Randevu durumu güncellenemedi. Firestore bağlantısını kontrol edin.");
+    } finally {
+      setUpdatingAppointmentId(null);
+    }
+  }
+
   async function handleConvertBookingRequest(request: BookingRequest) {
     if (!profile?.tenantId || !profile?.sector) return;
 
@@ -290,6 +312,7 @@ export function Dashboard({ user, profile }: DashboardProps) {
           {noteError && <p className="formMessage errorMessage dashboardMessage">{noteError}</p>}
           {bookingError && <p className="formMessage errorMessage dashboardMessage">{bookingError}</p>}
           {bookingSuccess && <p className="formMessage successMessage dashboardMessage">{bookingSuccess}</p>}
+          {appointmentStatusMessage && <p className="formMessage successMessage dashboardMessage">{appointmentStatusMessage}</p>}
           {customersLoading && <p className="formMessage successMessage dashboardMessage">Firestore müşteri kayıtları okunuyor...</p>}
           {appointmentsLoading && <p className="formMessage successMessage dashboardMessage">Firestore randevu kayıtları okunuyor...</p>}
           {notesLoading && <p className="formMessage successMessage dashboardMessage">İşlem notları ve takipler okunuyor...</p>}
@@ -327,6 +350,8 @@ export function Dashboard({ user, profile }: DashboardProps) {
               appointments={visibleAppointments}
               showResourceColumn={preset.sector === "auto"}
               onAddNote={setSelectedAppointmentForNote}
+              onStatusChange={handleAppointmentStatusChange}
+              updatingAppointmentId={updatingAppointmentId}
             />
             <AiSuggestions suggestions={visibleSuggestions} sector={preset.sector} />
             <CustomerCard customer={featuredCustomer} customerLabel={preset.sector === "auto" ? "Müşteri & Araç" : preset.customerLabel} historyLabel={historyLabel} />

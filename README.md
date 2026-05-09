@@ -71,3 +71,14 @@ git push
 ```
 
 Vercel, GitHub push işleminden sonra yeni sürümü otomatik deploy eder.
+
+
+## v1.2 - Randevu Durum Yönetimi
+
+Bu sürümde randevu tablosuna hızlı durum değiştirme özelliği eklendi.
+
+- Randevu durumları Firestore üzerinde güncellenir.
+- Desteklenen durumlar: Bekliyor, Onaylandı, Tamamlandı, Gelmedi, İptal.
+- Durum değişimi sonrası dashboard bilgilendirme mesajı gösterir.
+- Tablo aksiyon alanı önceki UI hizalama düzenini koruyacak şekilde iyileştirildi.
+

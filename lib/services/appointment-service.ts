@@ -1,6 +1,6 @@
 import { db } from "@/lib/firebase";
 import type { Appointment, NewAppointmentInput, Sector } from "@/types/domain";
-import { addDoc, collection, onSnapshot, query, serverTimestamp, where } from "firebase/firestore";
+import { addDoc, collection, doc, onSnapshot, query, serverTimestamp, updateDoc, where } from "firebase/firestore";
 
 function getCustomerResource(sector: Sector, sectorData?: Record<string, string>) {
   if (!sectorData) return { resourceName: "", resourceDetail: "" };
@@ -87,6 +87,14 @@ export async function createAppointment(input: NewAppointmentInput) {
     status: input.status,
     notes: input.notes.trim(),
     createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
+}
+
+
+export async function updateAppointmentStatus(appointmentId: string, status: Appointment["status"]) {
+  await updateDoc(doc(db, "appointments", appointmentId), {
+    status,
     updatedAt: serverTimestamp(),
   });
 }
