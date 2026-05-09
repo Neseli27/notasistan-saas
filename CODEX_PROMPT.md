@@ -38,3 +38,20 @@ v1.2 için talep kabul/red akışı müşteri mesaj geçmişine bağlanabilir:
 ## v1.2 geliştirme notu
 
 Randevu tablosundaki durum alanı artık doğrudan değiştirilebilir. `updateAppointmentStatus` servisi Firestore'daki `appointments` dokümanını günceller ve `updatedAt` alanını yeniler. Bundan sonraki aşamada durum değişim geçmişi ve müşteri bilgilendirme mesajları ayrı bir log koleksiyonuna taşınabilir.
+
+
+## v1.3 Geliştirme Notu
+
+Randevu durumu değiştiğinde aşağıdaki akış korunmalıdır:
+
+1. `appointments/{id}` dokümanındaki `status` alanı güncellenir.
+2. `appointmentStatusLogs` koleksiyonuna durum geçmişi kaydı eklenir.
+3. Sektöre ve duruma uygun müşteri bilgilendirme metni oluşturulur.
+4. Bu metin dashboard üzerinde kopyalanabilir şekilde gösterilir.
+
+Bu sürümde eklenen önemli dosyalar:
+
+- `components/StatusMessageBanner.tsx`
+- `components/StatusHistoryCard.tsx`
+- `lib/services/appointment-service.ts`
+- `types/domain.ts`

@@ -82,3 +82,16 @@ Bu sürümde randevu tablosuna hızlı durum değiştirme özelliği eklendi.
 - Durum değişimi sonrası dashboard bilgilendirme mesajı gösterir.
 - Tablo aksiyon alanı önceki UI hizalama düzenini koruyacak şekilde iyileştirildi.
 
+
+
+## v1.3 - Randevu Durum Geçmişi ve Bilgilendirme Metni
+
+Bu sürümde randevu durum yönetimi daha profesyonel hale getirildi.
+
+- Randevu durumu değiştirildiğinde `appointmentStatusLogs` koleksiyonuna geçmiş kaydı eklenir.
+- Durum değişimine göre müşteriye gönderilecek hazır bilgilendirme metni üretilir.
+- Oluşan metin panelde gösterilir ve tek tıkla panoya kopyalanabilir.
+- Dashboard'a **Durum Geçmişi** kartı eklendi.
+- Geçmiş kayıtlardaki mesajlar tekrar kopyalanabilir.
+
+Not: Firestore kurallarında genel geliştirme kuralı giriş yapan kullanıcıya izin verdiği için bu sürümde ek rules değişikliği zorunlu değildir.

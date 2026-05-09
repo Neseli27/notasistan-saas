@@ -72,6 +72,21 @@ export interface NewAppointmentInput {
   notes: string;
 }
 
+export interface AppointmentStatusLog {
+  id: string;
+  tenantId: string;
+  appointmentId: string;
+  customerId?: string;
+  customerName: string;
+  customerPhone: string;
+  service: string;
+  previousStatus: AppointmentStatus;
+  newStatus: AppointmentStatus;
+  message: string;
+  createdAt?: unknown;
+  updatedBy?: string;
+}
+
 export interface AppointmentNote {
   id: string;
   tenantId: string;

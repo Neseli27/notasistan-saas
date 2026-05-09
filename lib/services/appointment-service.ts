@@ -1,5 +1,5 @@
 import { db } from "@/lib/firebase";
-import type { Appointment, NewAppointmentInput, Sector } from "@/types/domain";
+import type { Appointment, AppointmentStatusLog, NewAppointmentInput, Sector } from "@/types/domain";
 import { addDoc, collection, doc, onSnapshot, query, serverTimestamp, updateDoc, where } from "firebase/firestore";
 
 function getCustomerResource(sector: Sector, sectorData?: Record<string, string>) {
@@ -51,6 +51,47 @@ function normalizeAppointment(id: string, data: Record<string, unknown>): Appoin
   };
 }
 
+function normalizeStatusLog(id: string, data: Record<string, unknown>): AppointmentStatusLog {
+  return {
+    id,
+    tenantId: String(data.tenantId ?? ""),
+    appointmentId: String(data.appointmentId ?? ""),
+    customerId: data.customerId ? String(data.customerId) : undefined,
+    customerName: String(data.customerName ?? "İsimsiz Kayıt"),
+    customerPhone: String(data.customerPhone ?? ""),
+    service: String(data.service ?? "Randevu"),
+    previousStatus: (data.previousStatus as Appointment["status"]) ?? "Bekliyor",
+    newStatus: (data.newStatus as Appointment["status"]) ?? "Bekliyor",
+    message: String(data.message ?? ""),
+    createdAt: data.createdAt,
+    updatedBy: data.updatedBy ? String(data.updatedBy) : undefined,
+  };
+}
+
+export function buildAppointmentStatusMessage(appointment: Appointment, status: Appointment["status"], tenantName?: string) {
+  const businessName = tenantName || "Not Asistan";
+  const dateText = [appointment.date, appointment.time].filter(Boolean).join(" ");
+  const serviceText = appointment.service || "randevunuz";
+
+  if (status === "Onaylandı") {
+    return `Merhaba ${appointment.customerName}, ${businessName} için ${serviceText} randevunuz onaylandı. Randevu zamanı: ${dateText}. Sizi bekliyoruz.`;
+  }
+
+  if (status === "Tamamlandı") {
+    return `Merhaba ${appointment.customerName}, ${businessName} ziyaretiniz için teşekkür ederiz. ${serviceText} işleminiz tamamlandı. Bir sonraki takip veya hatırlatma için sizinle gerektiğinde iletişime geçeceğiz.`;
+  }
+
+  if (status === "Gelmedi") {
+    return `Merhaba ${appointment.customerName}, ${businessName} için planlanan ${serviceText} randevunuza katılamadığınızı gördük. Uygun olduğunuzda yeni bir randevu planlayabiliriz.`;
+  }
+
+  if (status === "İptal") {
+    return `Merhaba ${appointment.customerName}, ${businessName} için ${dateText} tarihli ${serviceText} randevunuz iptal edilmiştir. Yeni bir zaman belirlemek isterseniz bizimle iletişime geçebilirsiniz.`;
+  }
+
+  return `Merhaba ${appointment.customerName}, ${businessName} için ${serviceText} randevunuz bekleme durumundadır. Uygunluk netleştiğinde sizinle iletişime geçeceğiz.`;
+}
+
 export function listenAppointments(tenantId: string, onChange: (appointments: Appointment[]) => void, onError?: (error: Error) => void) {
   const appointmentsQuery = query(collection(db, "appointments"), where("tenantId", "==", tenantId));
 
@@ -63,6 +104,23 @@ export function listenAppointments(tenantId: string, onChange: (appointments: Ap
     },
     (error) => {
       console.error("Randevular okunamadı:", error);
+      onError?.(error as Error);
+    }
+  );
+}
+
+export function listenAppointmentStatusLogs(tenantId: string, onChange: (logs: AppointmentStatusLog[]) => void, onError?: (error: Error) => void) {
+  const logsQuery = query(collection(db, "appointmentStatusLogs"), where("tenantId", "==", tenantId));
+
+  return onSnapshot(
+    logsQuery,
+    (snapshot) => {
+      const logs = snapshot.docs.map((docSnap) => normalizeStatusLog(docSnap.id, docSnap.data()));
+      logs.sort((a, b) => String(b.createdAt ?? "").localeCompare(String(a.createdAt ?? ""), "tr"));
+      onChange(logs);
+    },
+    (error) => {
+      console.error("Randevu durum geçmişi okunamadı:", error);
       onError?.(error as Error);
     }
   );
@@ -91,10 +149,29 @@ export async function createAppointment(input: NewAppointmentInput) {
   });
 }
 
+export async function updateAppointmentStatus(appointment: Appointment, status: Appointment["status"], tenantName?: string, updatedBy?: string) {
+  if (!appointment.id) throw new Error("Randevu kimliği bulunamadı.");
 
-export async function updateAppointmentStatus(appointmentId: string, status: Appointment["status"]) {
-  await updateDoc(doc(db, "appointments", appointmentId), {
+  const message = buildAppointmentStatusMessage(appointment, status, tenantName);
+
+  await updateDoc(doc(db, "appointments", appointment.id), {
     status,
     updatedAt: serverTimestamp(),
   });
+
+  await addDoc(collection(db, "appointmentStatusLogs"), {
+    tenantId: appointment.tenantId,
+    appointmentId: appointment.id,
+    customerId: appointment.customerId || "",
+    customerName: appointment.customerName,
+    customerPhone: appointment.customerPhone,
+    service: appointment.service,
+    previousStatus: appointment.status,
+    newStatus: status,
+    message,
+    updatedBy: updatedBy || "",
+    createdAt: serverTimestamp(),
+  });
+
+  return message;
 }

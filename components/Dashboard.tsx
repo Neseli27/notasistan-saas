@@ -13,12 +13,14 @@ import { Header } from "@/components/Header";
 import { RemindersCard } from "@/components/RemindersCard";
 import { Sidebar } from "@/components/Sidebar";
 import { StatCard } from "@/components/StatCard";
-import { listenAppointments, updateAppointmentStatus } from "@/lib/services/appointment-service";
+import { StatusHistoryCard } from "@/components/StatusHistoryCard";
+import { StatusMessageBanner } from "@/components/StatusMessageBanner";
+import { listenAppointments, listenAppointmentStatusLogs, updateAppointmentStatus } from "@/lib/services/appointment-service";
 import { listenAppointmentNotes, listenFollowUps, listenReminders } from "@/lib/services/appointment-note-service";
 import { listenCustomers } from "@/lib/services/customer-service";
 import { convertBookingRequestToAppointment, ensurePublicTenant, listenBookingRequests, rejectBookingRequest } from "@/lib/services/public-booking-service";
 import { getSectorPreset } from "@/lib/sector-presets";
-import type { Appointment, AppointmentNote, AppointmentStatus, BookingRequest, Customer, FollowUp, Reminder, UserProfile } from "@/types/domain";
+import type { Appointment, AppointmentNote, AppointmentStatus, AppointmentStatusLog, BookingRequest, Customer, FollowUp, Reminder, UserProfile } from "@/types/domain";
 import type { User } from "firebase/auth";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
@@ -51,6 +53,7 @@ export function Dashboard({ user, profile }: DashboardProps) {
   const [realFollowUps, setRealFollowUps] = useState<FollowUp[]>([]);
   const [realReminders, setRealReminders] = useState<Reminder[]>([]);
   const [bookingRequests, setBookingRequests] = useState<BookingRequest[]>([]);
+  const [statusLogs, setStatusLogs] = useState<AppointmentStatusLog[]>([]);
   const [publicSlug, setPublicSlug] = useState("");
   const [appOrigin, setAppOrigin] = useState("");
   const [customersLoading, setCustomersLoading] = useState(false);
@@ -62,6 +65,7 @@ export function Dashboard({ user, profile }: DashboardProps) {
   const [bookingError, setBookingError] = useState("");
   const [bookingSuccess, setBookingSuccess] = useState("");
   const [appointmentStatusMessage, setAppointmentStatusMessage] = useState("");
+  const [statusDraftMessage, setStatusDraftMessage] = useState<{ customerName: string; message: string } | null>(null);
   const [updatingAppointmentId, setUpdatingAppointmentId] = useState<string | null>(null);
   const [convertingRequestId, setConvertingRequestId] = useState<string | null>(null);
   const [rejectingRequestId, setRejectingRequestId] = useState<string | null>(null);
@@ -156,6 +160,18 @@ export function Dashboard({ user, profile }: DashboardProps) {
   useEffect(() => {
     if (!profile?.tenantId) return;
 
+    const unsubscribe = listenAppointmentStatusLogs(
+      profile.tenantId,
+      setStatusLogs,
+      () => setAppointmentError("Randevu durum geçmişi okunamadı. Firestore bağlantısını kontrol edin.")
+    );
+
+    return unsubscribe;
+  }, [profile?.tenantId]);
+
+  useEffect(() => {
+    if (!profile?.tenantId) return;
+
     setNotesLoading(true);
     setNoteError("");
 
@@ -233,8 +249,9 @@ export function Dashboard({ user, profile }: DashboardProps) {
     setUpdatingAppointmentId(appointment.id);
 
     try {
-      await updateAppointmentStatus(appointment.id, status);
+      const message = await updateAppointmentStatus(appointment, status, profile?.tenantName, profile?.displayName || user?.email || "");
       setAppointmentStatusMessage(`${appointment.customerName} randevusu "${status}" olarak güncellendi.`);
+      setStatusDraftMessage({ customerName: appointment.customerName, message });
       window.setTimeout(() => setAppointmentStatusMessage(""), 2800);
     } catch (error) {
       console.error("Randevu durumu güncellenemedi:", error);
@@ -313,6 +330,13 @@ export function Dashboard({ user, profile }: DashboardProps) {
           {bookingError && <p className="formMessage errorMessage dashboardMessage">{bookingError}</p>}
           {bookingSuccess && <p className="formMessage successMessage dashboardMessage">{bookingSuccess}</p>}
           {appointmentStatusMessage && <p className="formMessage successMessage dashboardMessage">{appointmentStatusMessage}</p>}
+          {statusDraftMessage && (
+            <StatusMessageBanner
+              customerName={statusDraftMessage.customerName}
+              message={statusDraftMessage.message}
+              onClose={() => setStatusDraftMessage(null)}
+            />
+          )}
           {customersLoading && <p className="formMessage successMessage dashboardMessage">Firestore müşteri kayıtları okunuyor...</p>}
           {appointmentsLoading && <p className="formMessage successMessage dashboardMessage">Firestore randevu kayıtları okunuyor...</p>}
           {notesLoading && <p className="formMessage successMessage dashboardMessage">İşlem notları ve takipler okunuyor...</p>}
@@ -364,6 +388,7 @@ export function Dashboard({ user, profile }: DashboardProps) {
               onReject={handleRejectBookingRequest}
               rejectingRequestId={rejectingRequestId}
             />
+            <StatusHistoryCard logs={statusLogs} />
             <CalendarCard />
             <RemindersCard reminders={visibleReminders} />
             <FollowUpsCard followUps={visibleFollowUps} />
