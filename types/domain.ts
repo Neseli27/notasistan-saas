@@ -207,6 +207,10 @@ export interface CustomerActionRequest {
   appointmentService?: string;
   appointmentDate?: string;
   appointmentTime?: string;
+  requestedDate?: string;
+  requestedTime?: string;
+  decisionMessage?: string;
+  handledBy?: string;
   type: "Erteleme" | "İptal";
   message: string;
   status: "Yeni Talep" | "Görüldü" | "Tamamlandı" | "Reddedildi";

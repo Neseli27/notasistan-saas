@@ -2652,3 +2652,52 @@ h1 { font-size: 36px; line-height: 1.1; margin: 0 0 8px; letter-spacing: -1px; }
   .superAdminTableRow { min-width: 920px; }
   .superAdminRequestGrid { grid-template-columns: 1fr; }
 }
+
+/* v1.8 - Erteleme talebini gerçek randevu güncellemesine bağlama */
+.rescheduleDecisionBox {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.75fr);
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid rgba(14, 165, 233, 0.18);
+  border-radius: 14px;
+  background: rgba(239, 246, 255, 0.72);
+}
+
+.rescheduleDecisionBox label {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.rescheduleDecisionBox label span {
+  color: #1e3a8a;
+  font-size: 11px;
+  font-weight: 850;
+  margin: 0;
+}
+
+.rescheduleDecisionBox input {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid #d8e5f7;
+  border-radius: 11px;
+  padding: 8px 9px;
+  color: #0f172a;
+  background: #fff;
+  font-size: 12px;
+  font-weight: 750;
+  outline: none;
+}
+
+.rescheduleDecisionBox input:focus {
+  border-color: var(--theme-primary, #0c48c7);
+  box-shadow: 0 0 0 3px rgba(12, 72, 199, 0.10);
+}
+
+@media (max-width: 760px) {
+  .rescheduleDecisionBox {
+    grid-template-columns: 1fr;
+  }
+}

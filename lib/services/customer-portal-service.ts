@@ -14,6 +14,7 @@ import {
   addDoc,
   collection,
   doc,
+  getDoc,
   getDocs,
   limit,
   onSnapshot,
@@ -118,6 +119,10 @@ function normalizeActionRequest(id: string, data: Record<string, unknown>): Cust
     appointmentService: data.appointmentService ? String(data.appointmentService) : undefined,
     appointmentDate: data.appointmentDate ? String(data.appointmentDate) : undefined,
     appointmentTime: data.appointmentTime ? String(data.appointmentTime) : undefined,
+    requestedDate: data.requestedDate ? String(data.requestedDate) : undefined,
+    requestedTime: data.requestedTime ? String(data.requestedTime) : undefined,
+    decisionMessage: data.decisionMessage ? String(data.decisionMessage) : undefined,
+    handledBy: data.handledBy ? String(data.handledBy) : undefined,
     type: (data.type as CustomerActionRequest["type"]) ?? "Erteleme",
     message: String(data.message ?? ""),
     status: (data.status as CustomerActionRequest["status"]) ?? "Yeni Talep",
@@ -398,8 +403,14 @@ export function buildCustomerActionResponseMessage(input: {
   const brand = tenantName || "İşletmemiz";
 
   if (approved) {
+    if (request.decisionMessage) return request.decisionMessage;
+
     if (request.type === "İptal") {
       return `Merhaba ${request.customerName}, ${request.appointmentDate || ""} ${request.appointmentTime || ""} tarihli ${request.appointmentService || "randevu"} için ilettiğiniz iptal talebi alınmış ve işleme alınmıştır. ${brand} olarak sizi yeniden ağırlamaktan memnuniyet duyarız.`;
+    }
+
+    if (request.requestedDate && request.requestedTime) {
+      return `Merhaba ${request.customerName}, ${brand} için ${request.appointmentService || "randevu"} erteleme talebiniz onaylandı. Yeni randevu zamanınız: ${request.requestedDate} saat ${request.requestedTime}. Görüşmek üzere.`;
     }
 
     return `Merhaba ${request.customerName}, ${request.appointmentDate || ""} ${request.appointmentTime || ""} tarihli ${request.appointmentService || "randevu"} için ilettiğiniz erteleme talebi alınmıştır. Size uygun yeni saat için işletmemiz en kısa sürede dönüş yapacaktır. ${brand}`;
@@ -410,4 +421,67 @@ export function buildCustomerActionResponseMessage(input: {
   }
 
   return `Merhaba ${request.customerName}, ${request.appointmentService || "randevu"} için ilettiğiniz erteleme talebini aldık. Şu an uygunluk kontrolü yapılmaktadır; net bilgi için sizinle iletişime geçeceğiz. ${brand}`;
+}
+
+export async function completeCustomerRescheduleRequest(input: {
+  request: CustomerActionRequest;
+  newDate: string;
+  newTime: string;
+  tenantName?: string;
+  handledBy?: string;
+}) {
+  if (!input.request.appointmentId) {
+    throw new Error("Erteleme talebine bağlı randevu bulunamadı.");
+  }
+
+  if (!input.newDate || !input.newTime) {
+    throw new Error("Yeni tarih ve saat gereklidir.");
+  }
+
+  const appointmentRef = doc(db, "appointments", input.request.appointmentId);
+  const appointmentSnap = await getDoc(appointmentRef);
+  const appointmentData = appointmentSnap.exists() ? appointmentSnap.data() : {};
+  const previousStatus = String(appointmentData.status ?? "Bekliyor");
+  const service = String(appointmentData.service ?? input.request.appointmentService ?? "Randevu");
+  const previousDate = String(appointmentData.date ?? input.request.appointmentDate ?? "");
+  const previousTime = String(appointmentData.time ?? input.request.appointmentTime ?? "");
+  const brand = input.tenantName || "İşletmemiz";
+  const message = `Merhaba ${input.request.customerName}, ${brand} için ${service} erteleme talebiniz onaylandı. Önceki randevunuz ${previousDate} ${previousTime} idi. Yeni randevu zamanınız: ${input.newDate} saat ${input.newTime}. Görüşmek üzere.`;
+
+  await updateDoc(appointmentRef, {
+    date: input.newDate,
+    time: input.newTime,
+    status: "Onaylandı",
+    updatedAt: serverTimestamp(),
+  });
+
+  await updateDoc(doc(db, "customerActionRequests", input.request.id), {
+    status: "Tamamlandı",
+    requestedDate: input.newDate,
+    requestedTime: input.newTime,
+    handledBy: input.handledBy || "",
+    decisionMessage: message,
+    updatedAt: serverTimestamp(),
+  });
+
+  await addDoc(collection(db, "appointmentStatusLogs"), {
+    tenantId: input.request.tenantId,
+    appointmentId: input.request.appointmentId,
+    customerId: input.request.customerId || "",
+    customerName: input.request.customerName,
+    customerPhone: input.request.customerPhone,
+    service,
+    previousStatus,
+    newStatus: "Onaylandı",
+    previousDate,
+    previousTime,
+    newDate: input.newDate,
+    newTime: input.newTime,
+    message,
+    updatedBy: input.handledBy || "",
+    actionType: "Erteleme Talebi Onayı",
+    createdAt: serverTimestamp(),
+  });
+
+  return message;
 }

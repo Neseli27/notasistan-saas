@@ -20,7 +20,7 @@ import { listenAppointments, listenAppointmentStatusLogs, updateAppointmentStatu
 import { listenAppointmentNotes, listenFollowUps, listenReminders } from "@/lib/services/appointment-note-service";
 import { listenCustomers } from "@/lib/services/customer-service";
 import { convertBookingRequestToAppointment, ensurePublicTenant, listenBookingRequests, rejectBookingRequest } from "@/lib/services/public-booking-service";
-import { buildCustomerActionResponseMessage, listenTenantCustomerActionRequests, updateCustomerActionRequestStatus } from "@/lib/services/customer-portal-service";
+import { buildCustomerActionResponseMessage, completeCustomerRescheduleRequest, listenTenantCustomerActionRequests, updateCustomerActionRequestStatus } from "@/lib/services/customer-portal-service";
 import { getSectorPreset } from "@/lib/sector-presets";
 import type { Appointment, AppointmentNote, AppointmentStatus, AppointmentStatusLog, BookingRequest, Customer, CustomerActionRequest, FollowUp, Reminder, UserProfile } from "@/types/domain";
 import type { User } from "firebase/auth";
@@ -347,6 +347,37 @@ export function Dashboard({ user, profile }: DashboardProps) {
     }
   }
 
+  async function handleApproveRescheduleRequest(request: CustomerActionRequest, newDate: string, newTime: string) {
+    if (!request.appointmentId) {
+      setBookingError("Bu erteleme talebine bağlı randevu bulunamadı.");
+      return;
+    }
+
+    const approved = window.confirm(`${request.customerName} randevusunu ${newDate} saat ${newTime} olarak güncellemek istiyor musunuz?`);
+    if (!approved) return;
+
+    setBookingError("");
+    setBookingSuccess("");
+    setProcessingActionRequestId(request.id);
+
+    try {
+      const message = await completeCustomerRescheduleRequest({
+        request,
+        newDate,
+        newTime,
+        tenantName: profile?.tenantName,
+        handledBy: profile?.displayName || user?.email || "",
+      });
+      setBookingSuccess(`${request.customerName} erteleme talebi onaylandı ve randevu güncellendi.`);
+      setStatusDraftMessage({ customerName: request.customerName, message });
+    } catch (error) {
+      console.error("Erteleme talebi randevuya uygulanamadı:", error);
+      setBookingError("Erteleme talebi randevuya uygulanamadı. Firestore bağlantısını ve randevu kaydını kontrol edin.");
+    } finally {
+      setProcessingActionRequestId(null);
+    }
+  }
+
   async function handleCopyCustomerActionMessage(request: CustomerActionRequest, approved: boolean) {
     const message = buildCustomerActionResponseMessage({
       request,
@@ -453,6 +484,7 @@ export function Dashboard({ user, profile }: DashboardProps) {
               requests={customerActionRequests}
               processingRequestId={processingActionRequestId}
               onApprove={(request) => handleCustomerActionDecision(request, "Tamamlandı")}
+              onApproveReschedule={handleApproveRescheduleRequest}
               onReject={(request) => handleCustomerActionDecision(request, "Reddedildi")}
               onCopyMessage={handleCopyCustomerActionMessage}
             />

@@ -1,11 +1,13 @@
 import type { CustomerActionRequest } from "@/types/domain";
 import { CheckCircle2, Copy, RefreshCw, XCircle } from "lucide-react";
+import { useState } from "react";
 
 interface CustomerActionRequestsCardProps {
   requests: CustomerActionRequest[];
   onApprove?: (request: CustomerActionRequest) => void;
   onReject?: (request: CustomerActionRequest) => void;
   onCopyMessage?: (request: CustomerActionRequest, approved: boolean) => void;
+  onApproveReschedule?: (request: CustomerActionRequest, newDate: string, newTime: string) => void;
   processingRequestId?: string | null;
 }
 
@@ -16,14 +18,38 @@ function statusTone(status: CustomerActionRequest["status"]) {
   return "orange";
 }
 
+function todayIso() {
+  return new Date().toISOString().slice(0, 10);
+}
+
 export function CustomerActionRequestsCard({
   requests,
   onApprove,
   onReject,
   onCopyMessage,
+  onApproveReschedule,
   processingRequestId,
 }: CustomerActionRequestsCardProps) {
   const visibleRequests = requests.slice(0, 5);
+  const [rescheduleDrafts, setRescheduleDrafts] = useState<Record<string, { date: string; time: string }>>({});
+
+  function getDraft(request: CustomerActionRequest) {
+    return rescheduleDrafts[request.id] ?? {
+      date: request.requestedDate || request.appointmentDate || todayIso(),
+      time: request.requestedTime || request.appointmentTime || "09:00",
+    };
+  }
+
+  function updateDraft(requestId: string, patch: Partial<{ date: string; time: string }>) {
+    setRescheduleDrafts((current) => ({
+      ...current,
+      [requestId]: {
+        date: current[requestId]?.date || todayIso(),
+        time: current[requestId]?.time || "09:00",
+        ...patch,
+      },
+    }));
+  }
 
   return (
     <section className="panel customerActionRequestsCard">
@@ -42,6 +68,8 @@ export function CustomerActionRequestsCard({
           {visibleRequests.map((request) => {
             const isClosed = request.status === "Tamamlandı" || request.status === "Reddedildi";
             const isProcessing = processingRequestId === request.id;
+            const isRescheduleRequest = request.type === "Erteleme";
+            const draft = getDraft(request);
 
             return (
               <article key={request.id} className="customerActionRequestItem">
@@ -50,7 +78,31 @@ export function CustomerActionRequestsCard({
                   <span>{request.type} talebi • {request.appointmentService || "Randevu"}</span>
                   <p>{request.message}</p>
                   {request.appointmentDate && (
-                    <small>{request.appointmentDate} {request.appointmentTime ? `• ${request.appointmentTime}` : ""}</small>
+                    <small>Mevcut randevu: {request.appointmentDate} {request.appointmentTime ? `• ${request.appointmentTime}` : ""}</small>
+                  )}
+                  {request.requestedDate && (
+                    <small>Talep edilen yeni zaman: {request.requestedDate} {request.requestedTime ? `• ${request.requestedTime}` : ""}</small>
+                  )}
+
+                  {!isClosed && isRescheduleRequest && (
+                    <div className="rescheduleDecisionBox">
+                      <label>
+                        <span>Yeni tarih</span>
+                        <input
+                          type="date"
+                          value={draft.date}
+                          onChange={(event) => updateDraft(request.id, { date: event.target.value })}
+                        />
+                      </label>
+                      <label>
+                        <span>Yeni saat</span>
+                        <input
+                          type="time"
+                          value={draft.time}
+                          onChange={(event) => updateDraft(request.id, { time: event.target.value })}
+                        />
+                      </label>
+                    </div>
                   )}
                 </div>
 
@@ -66,15 +118,27 @@ export function CustomerActionRequestsCard({
                     </button>
                     {!isClosed && (
                       <>
-                        <button
-                          type="button"
-                          disabled={isProcessing}
-                          onClick={() => onApprove?.(request)}
-                          className="approveActionButton"
-                          title="Talebi tamamlandı olarak işaretle"
-                        >
-                          <CheckCircle2 size={14} /> Onayla
-                        </button>
+                        {isRescheduleRequest ? (
+                          <button
+                            type="button"
+                            disabled={isProcessing || !draft.date || !draft.time}
+                            onClick={() => onApproveReschedule?.(request, draft.date, draft.time)}
+                            className="approveActionButton"
+                            title="Randevuyu yeni tarih/saat ile güncelle ve talebi tamamla"
+                          >
+                            <CheckCircle2 size={14} /> Ertele ve Onayla
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            disabled={isProcessing}
+                            onClick={() => onApprove?.(request)}
+                            className="approveActionButton"
+                            title="Talebi tamamlandı olarak işaretle"
+                          >
+                            <CheckCircle2 size={14} /> Onayla
+                          </button>
+                        )}
                         <button
                           type="button"
                           disabled={isProcessing}
