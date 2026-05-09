@@ -70,3 +70,8 @@ Sonraki geliştirme hedefi: müşteri erteleme/iptal taleplerini işletme paneli
 - Her talep için müşteriye gönderilecek olumlu/red dönüş metni hazırlanır ve panoya kopyalanabilir.
 - Talep kartları mobilde ve dar ekranda daha düzenli görünür.
 - Firestore `customerActionRequests` kayıtlarında `status`, `handledBy`, `updatedAt` alanları güncellenir.
+
+
+## v1.6 Süper Admin Paneli Görevi
+
+Süper admin paneli eklendi. `role === "super_admin"` olan kullanıcılar normal işletme paneli yerine `SuperAdminPanel` bileşenine yönlendirilir. Panel tüm tenant, user, customer, appointment ve request koleksiyonlarını okur; SaaS sahibine merkezi izleme sunar. Sonraki adımda tenant bazlı Firestore Rules sıkılaştırılmalı ve işletme paket/abonelik yönetimi eklenmelidir.

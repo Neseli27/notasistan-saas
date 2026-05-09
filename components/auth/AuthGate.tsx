@@ -1,6 +1,7 @@
 "use client";
 
 import { Dashboard } from "@/components/Dashboard";
+import { SuperAdminPanel } from "@/components/super-admin/SuperAdminPanel";
 import { AuthForm } from "@/components/auth/AuthForm";
 import { TenantSetup } from "@/components/auth/TenantSetup";
 import { auth } from "@/lib/firebase";
@@ -54,6 +55,10 @@ export function AuthGate() {
 
   if (!firebaseUser) {
     return <AuthForm />;
+  }
+
+  if (profile?.role === "super_admin") {
+    return <SuperAdminPanel user={firebaseUser} profile={profile} />;
   }
 
   if (profile?.role === "customer") {

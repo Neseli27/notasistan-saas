@@ -138,3 +138,33 @@ Bu sürümde Firestore kuralları hâlâ geliştirme aşaması kolaylığı içi
 - Her talep için müşteriye gönderilecek olumlu/red dönüş metni hazırlanır ve panoya kopyalanabilir.
 - Talep kartları mobilde ve dar ekranda daha düzenli görünür.
 - Firestore `customerActionRequests` kayıtlarında `status`, `handledBy`, `updatedAt` alanları güncellenir.
+
+
+## v1.6 - Süper Admin Paneli
+
+Bu sürümde Not Asistan SaaS yönetimi için süper admin paneli eklendi.
+
+Özellikler:
+
+- Tüm işletmeleri tek panelden görme
+- Kullanıcı, müşteri, randevu ve açık talep sayılarını izleme
+- İşletme bazlı özet metrikler
+- Randevu ve müşteri paneli linklerini kopyalama
+- İşletmeyi aktif/pasif olarak işaretleme
+- Kullanıcıları rol ve işletme bilgisiyle listeleme
+- Randevu talepleri ve müşteri erteleme/iptal taleplerini merkezi izleme
+
+### İlk süper admin hesabını tanımlama
+
+Firebase Console > Firestore Database > `users` koleksiyonunda kendi kullanıcı dokümanınızı açın. `role` alanını şu şekilde değiştirin:
+
+```txt
+role = super_admin
+tenantId = __super_admin__
+tenantName = Not Asistan
+sector = consulting
+```
+
+Sonra uygulamadan çıkış yapıp tekrar giriş yapın. Root panel otomatik olarak Süper Admin Paneli açacaktır.
+
+> Not: Canlı/ücretli kullanıma geçmeden önce Firestore Rules tenant bazlı olarak sıkılaştırılmalıdır.
