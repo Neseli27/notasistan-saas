@@ -1,0 +1,52 @@
+{
+  "name": "Not Asistan",
+  "short_name": "NotAsistan",
+  "description": "Randevu, işlem notu, hatırlatma ve müşteri takibi için akıllı işletme asistanı.",
+  "id": "/",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "browser"],
+  "background_color": "#f7f9fc",
+  "theme_color": "#061b4f",
+  "orientation": "portrait-primary",
+  "lang": "tr",
+  "dir": "ltr",
+  "categories": ["business", "productivity", "medical"],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Yeni Randevu",
+      "short_name": "Randevu",
+      "description": "Not Asistan panelini açarak yeni randevu oluşturun.",
+      "url": "/?action=new-appointment",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Müşteri Ekle",
+      "short_name": "Müşteri",
+      "description": "Not Asistan panelini açarak yeni müşteri kaydı oluşturun.",
+      "url": "/?action=new-customer",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

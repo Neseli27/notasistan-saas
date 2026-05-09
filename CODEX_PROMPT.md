@@ -1,41 +1,42 @@
-# Not Asistan v0.6 Geliştirme Özeti
+# Codex Görev Özeti — Not Asistan v0.7
 
-Bu proje Firebase + GitHub + Vercel üzerinde çalışan Next.js tabanlı çok sektörlü SaaS uygulamasıdır.
+Bu proje Next.js + Firebase + Vercel üzerinde çalışan çok sektörlü SaaS başlangıcıdır.
 
-## Mevcut Durum
+## Mevcut Modüller
 
-- Next.js App Router
-- TypeScript
-- Özel CSS tasarım sistemi
 - Firebase Authentication
-- Cloud Firestore
-- Vercel deploy uyumu
-- Tenant mantığı
-- Sektöre göre dashboard presetleri
+- Firestore kullanıcı/işletme kayıtları
+- Sektöre göre dashboard
 - Gerçek müşteri ekleme
 - Gerçek randevu ekleme
-- Gerçek işlem notu / takip / hatırlatma oluşturma
+- İşlem notu, takip ve hatırlatma kaydı
+- Firestore listener yapısı
+- Sektör bazlı tema altyapısı
+- PWA manifest, ikonlar ve service worker
+- Mobil telefona ekleme bannerı
 
-## v0.6 ile Eklenenler
+## v0.7 ile Eklenenler
 
-- `components/AppointmentNoteModal.tsx`
-- `lib/services/appointment-note-service.ts`
-- `appointmentNotes` koleksiyonuna Firestore kaydı
-- `followUps` koleksiyonuna Firestore kaydı
-- `reminders` koleksiyonuna Firestore kaydı
-- Randevu tablosunda gerçek randevular için `Not` butonu
-- İşlem notu yazma, müşteri özeti oluşturma, iç not, sonraki aksiyon ve takip tarihi alanları
-- İşlem notu kaydedilince randevu durumu `Tamamlandı` olarak güncellenir
-- Müşteri kartında son ziyaret, işlem sayısı, not ve sonraki aksiyon güncellenir
-- Dashboard’daki takip, hatırlatma ve AI önerileri kartları gerçek kayıtlardan beslenebilir
+1. `public/manifest.webmanifest` eklendi.
+2. `public/sw.js` eklendi.
+3. `public/icons/` altında PWA ikonları eklendi.
+4. `components/PwaInstallBanner.tsx` eklendi.
+5. `app/layout.tsx` içine manifest, ikon, viewport ve banner entegrasyonu eklendi.
+6. `app/globals.css` içine PWA banner stilleri eklendi.
 
-## Sonraki Hedef
+## Sonraki Mantıklı Geliştirme
 
-v0.7 için önerilen geliştirme:
+Müşteri tarafı ayrı bir PWA deneyimi olarak tasarlanmalı:
 
-- Randevu durumu değiştirme menüsü
-- Müşteri listesi sayfası
-- Randevular sayfası
-- İşlem notları sayfası
-- AI ile mesaj taslağı oluşturma modalı
-- WhatsApp/SMS için kopyalanabilir mesaj akışı
+- `/randevu/[tenantSlug]` müşteri randevu alma sayfası
+- İşletmeye özel tema ve logo
+- Müşterinin randevu alması / erteleme talebi
+- Telefona ekleme bannerı sadece müşteri portalında daha belirgin gösterilmeli
+- Müşteri tarafında login zorunlu olmadan doğrulama kodu veya geçici randevu akışı düşünülmeli
+
+## Dikkat
+
+- `.env.local` GitHub’a yüklenmemeli.
+- PWA install prompt Android/Chrome’da native çalışır.
+- iOS Safari `beforeinstallprompt` desteklemediği için banner kullanıcıya “Paylaş > Ana Ekrana Ekle” yönergesi gösterir.
+- Service worker geliştirme sırasında eski cache tutabilir; gerekirse tarayıcı Application > Service Workers bölümünden unregister yapılabilir.

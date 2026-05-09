@@ -2,7 +2,7 @@
 
 Randevulu çalışan işletmeler için yapay zekâ destekli müşteri notu, işlem hafızası, randevu ve takip platformu.
 
-## v0.6 İçerik
+## v0.7 İçerik
 
 - Firebase Authentication ile giriş/kayıt
 - İlk işletme oluşturma
@@ -16,6 +16,26 @@ Randevulu çalışan işletmeler için yapay zekâ destekli müşteri notu, işl
 - Sonraki yapılacak iş ve takip tarihi oluşturma
 - Takip ve hatırlatma kayıtlarını Firestore’a yazma
 - Dashboard’daki Takipler / Hatırlatmalar / AI Önerileri kartlarını gerçek işlem notlarıyla güncelleme
+- PWA manifest dosyası
+- Service worker kaydı
+- Android/Chrome için telefona yükleme tetikleyicisi
+- iPhone/iPad için Ana Ekrana Ekle yönlendirmesi
+- Uygulama ikonları ve tema rengi
+- Mobilde görünen “Not Asistan’ı telefona ekleyin” bannerı
+
+## PWA Notları
+
+Bu sürümde PWA desteği uygulama geneline eklendi. Müşteri tarafı ayrı portal hâline getirildiğinde aynı PWA altyapısı `/randevu/[isletme]` veya benzeri müşteri linkleri için de kullanılabilir.
+
+PWA dosyaları:
+
+- `public/manifest.webmanifest`
+- `public/sw.js`
+- `public/icons/icon-192.png`
+- `public/icons/icon-512.png`
+- `public/icons/maskable-512.png`
+- `public/icons/apple-touch-icon.png`
+- `components/PwaInstallBanner.tsx`
 
 ## Kurulum
 
@@ -62,6 +82,7 @@ Uygulama çalıştıkça şu koleksiyonlar oluşur:
 7. **Notu Düzenle ve Müşteri Özeti Hazırla** butonunu deneyin.
 8. Takip tarihi seçip kaydedin.
 9. Firestore’da `appointmentNotes`, `followUps`, `reminders` koleksiyonlarının oluştuğunu kontrol edin.
+10. Mobil Chrome veya Safari ile canlı Vercel adresini açıp PWA bannerını test edin.
 
 ## GitHub / Vercel
 
@@ -70,7 +91,7 @@ Değişiklikleri göndermek için:
 ```bash
 git status
 git add .
-git commit -m "Islem notu ve takip sistemi eklendi"
+git commit -m "PWA destegi ve telefona ekleme banneri eklendi"
 git push
 ```
 
