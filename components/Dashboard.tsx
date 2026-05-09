@@ -16,7 +16,7 @@ import { StatCard } from "@/components/StatCard";
 import { listenAppointments } from "@/lib/services/appointment-service";
 import { listenAppointmentNotes, listenFollowUps, listenReminders } from "@/lib/services/appointment-note-service";
 import { listenCustomers } from "@/lib/services/customer-service";
-import { ensurePublicTenant, listenBookingRequests } from "@/lib/services/public-booking-service";
+import { convertBookingRequestToAppointment, ensurePublicTenant, listenBookingRequests } from "@/lib/services/public-booking-service";
 import { getSectorPreset } from "@/lib/sector-presets";
 import type { Appointment, AppointmentNote, BookingRequest, Customer, FollowUp, Reminder, UserProfile } from "@/types/domain";
 import type { User } from "firebase/auth";
@@ -60,6 +60,8 @@ export function Dashboard({ user, profile }: DashboardProps) {
   const [appointmentError, setAppointmentError] = useState("");
   const [noteError, setNoteError] = useState("");
   const [bookingError, setBookingError] = useState("");
+  const [bookingSuccess, setBookingSuccess] = useState("");
+  const [convertingRequestId, setConvertingRequestId] = useState<string | null>(null);
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
   const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
   const [selectedAppointmentForNote, setSelectedAppointmentForNote] = useState<Appointment | null>(null);
@@ -219,6 +221,28 @@ export function Dashboard({ user, profile }: DashboardProps) {
     });
   }, [preset.stats, realCustomerCount, realAppointmentCount, realFollowUps.length, visibleFollowUps.length]);
 
+  async function handleConvertBookingRequest(request: BookingRequest) {
+    if (!profile?.tenantId || !profile?.sector) return;
+
+    setBookingError("");
+    setBookingSuccess("");
+    setConvertingRequestId(request.id);
+
+    try {
+      await convertBookingRequestToAppointment({
+        tenantId: profile.tenantId,
+        sector: profile.sector,
+        request,
+      });
+      setBookingSuccess(`${request.customerName} talebi randevuya çevrildi.`);
+    } catch (error) {
+      console.error("Randevu talebi dönüştürülemedi:", error);
+      setBookingError("Randevu talebi randevuya çevrilemedi. Firestore kurallarını ve bağlantıyı kontrol edin.");
+    } finally {
+      setConvertingRequestId(null);
+    }
+  }
+
   return (
     <div className={`appShell theme-${preset.sector}`}>
       <Sidebar preset={preset} />
@@ -242,6 +266,7 @@ export function Dashboard({ user, profile }: DashboardProps) {
           {appointmentError && <p className="formMessage errorMessage dashboardMessage">{appointmentError}</p>}
           {noteError && <p className="formMessage errorMessage dashboardMessage">{noteError}</p>}
           {bookingError && <p className="formMessage errorMessage dashboardMessage">{bookingError}</p>}
+          {bookingSuccess && <p className="formMessage successMessage dashboardMessage">{bookingSuccess}</p>}
           {customersLoading && <p className="formMessage successMessage dashboardMessage">Firestore müşteri kayıtları okunuyor...</p>}
           {appointmentsLoading && <p className="formMessage successMessage dashboardMessage">Firestore randevu kayıtları okunuyor...</p>}
           {notesLoading && <p className="formMessage successMessage dashboardMessage">İşlem notları ve takipler okunuyor...</p>}
@@ -282,7 +307,13 @@ export function Dashboard({ user, profile }: DashboardProps) {
             />
             <AiSuggestions suggestions={visibleSuggestions} sector={preset.sector} />
             <CustomerCard customer={featuredCustomer} customerLabel={preset.sector === "auto" ? "Müşteri & Araç" : preset.customerLabel} historyLabel={historyLabel} />
-            <BookingRequestsCard requests={bookingRequests} publicUrl={publicBookingUrl} />
+            <BookingRequestsCard
+              requests={bookingRequests}
+              publicUrl={publicBookingUrl}
+              tenantName={profile?.tenantName}
+              onConvert={handleConvertBookingRequest}
+              convertingRequestId={convertingRequestId}
+            />
             <CalendarCard />
             <RemindersCard reminders={visibleReminders} />
             <FollowUpsCard followUps={visibleFollowUps} />

@@ -1,6 +1,6 @@
-# Not Asistan SaaS v0.8
+# Not Asistan SaaS v0.9
 
-Randevulu çalışan işletmeler için yapay zekâ destekli müşteri notu, işlem hafızası, takip ve randevu talep platformu.
+Randevulu çalışan işletmeler için yapay zekâ destekli müşteri notu, işlem hafızası, takip ve müşteri tarafı randevu talep platformu.
 
 ## Bu sürümde neler var?
 
@@ -11,9 +11,12 @@ Randevulu çalışan işletmeler için yapay zekâ destekli müşteri notu, işl
 - Gerçek randevu ekleme
 - İşlem notu, takip ve hatırlatma kayıtları
 - PWA manifest, service worker ve telefona ekleme bannerı
-- **Müşteri tarafı randevu talep sayfası**
-- **Genel randevu linki:** `/randevu/[isletme-slug]`
-- **Admin panelinde gelen randevu talepleri kartı**
+- Müşteri tarafı randevu talep sayfası
+- Genel randevu linki: `/randevu/[isletme-slug]`
+- Admin panelinde gelen randevu talepleri kartı
+- **Gelen randevu talebini tek tıkla gerçek randevuya çevirme**
+- **Public talepten otomatik müşteri kaydı oluşturma veya aynı telefondaki mevcut müşteriyi kullanma**
+- **WhatsApp/SMS için teyit mesajı kopyalama**
 
 ## Kurulum
 
@@ -52,6 +55,13 @@ NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=...
 
 Müşteri bu sayfadan ad soyad, telefon, hizmet, tarih, saat ve ön not bilgilerini girerek randevu talebi oluşturur. Talep `bookingRequests` koleksiyonuna kaydedilir ve admin panelindeki **Randevu Talepleri** kartında görünür.
 
+## Talebi randevuya çevirme
+
+Admin panelindeki **Randevu Talepleri** kartında iki yeni işlem vardır:
+
+1. **Teyit Mesajı**: Müşteri için WhatsApp/SMS'te kullanılabilecek kısa teyit metnini panoya kopyalar.
+2. **Randevuya Çevir**: Talebi `appointments` koleksiyonuna gerçek randevu olarak kaydeder. Aynı telefon numarasına sahip müşteri varsa onu kullanır; yoksa otomatik yeni müşteri kaydı oluşturur. Talebin durumu `Randevuya Çevrildi` olur.
+
 ## Firestore Rules
 
 Bu sürümde `publicTenants` herkese okunabilir, `bookingRequests` ise giriş yapmadan yalnızca yeni talep oluşturabilir. Yönetim verileri için giriş yapmış kullanıcı şartı korunur.
@@ -64,4 +74,4 @@ Environment Variables Vercel panelinde de eklenmelidir. Değişikliklerden sonra
 
 ## Sonraki önerilen sürüm
 
-v0.9 için mantıklı adım: gelen randevu talebini tek tıkla gerçek randevuya dönüştürme, talep durumunu güncelleme ve müşteriye WhatsApp/SMS metni üretme.
+v1.0 için mantıklı adım: müşteri tarafında işletmeye özel daha profesyonel mobil randevu deneyimi, hizmet seçimine göre süre/fiyat bilgisi, işletme logosu ve tema ayarları.

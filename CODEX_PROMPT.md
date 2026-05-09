@@ -1,30 +1,39 @@
-# Not Asistan v0.8 Codex Görev Özeti
+# Codex Görevi - Not Asistan v0.9
 
-Bu proje Next.js + Firebase + Vercel tabanlı bir SaaS MVP'dir.
+Bu proje Next.js, TypeScript, Firebase Authentication, Firestore ve Vercel üzerinde çalışan çok sektörlü bir SaaS uygulamasıdır.
 
-## Mevcut durum
+## Ürün amacı
 
-- Firebase Auth ile giriş/kayıt var.
-- İşletme oluşturma ve sektör seçimi var.
-- Dashboard sektöre göre tema ve içerik değiştiriyor.
-- Müşteri, randevu, işlem notu, takip ve hatırlatma kayıtları Firestore'a yazılıyor.
-- PWA desteği ve telefona ekleme bannerı var.
-- `/randevu/[slug]` müşteri tarafı public randevu talep sayfası eklendi.
-- Public form `bookingRequests` koleksiyonuna kayıt oluşturuyor.
-- Admin dashboard `bookingRequests` kayıtlarını gösteriyor.
+Not Asistan; randevulu çalışan işletmeler için müşteri notu, randevu, işlem özeti, takip, hatırlatma ve müşteri tarafı randevu talep yönetimi sağlar.
 
-## Dikkat
+## Mevcut özellikler
 
-- `.env.local` GitHub'a gönderilmemelidir.
-- Firestore rules dosyası Firebase Console'da publish edilmelidir.
-- `bookingRequests` public create iznine sahiptir; sonraki sürümde rate limit / captcha / telefon doğrulama eklenebilir.
+- Firebase Authentication ile giriş/kayıt
+- Tenant/işletme kurulumu
+- Sektöre göre dashboard ve demo veri dili
+- Gerçek müşteri ekleme
+- Gerçek randevu ekleme
+- İşlem notu, takip ve hatırlatma kayıtları
+- PWA manifest ve telefona ekleme bannerı
+- Public randevu talep sayfası: `/randevu/[slug]`
+- Public randevu taleplerinin admin panelde listelenmesi
+- Gelen talebi tek tıkla gerçek randevuya dönüştürme
+- Teyit mesajı kopyalama
 
-## Sonraki görev
+## Dikkat edilecek mimari ilkeler
 
-Gelen randevu talebini onaylama akışı geliştir:
+- Her iş verisinde `tenantId` bulunmalıdır.
+- Public sayfada yalnızca güvenli işletme profili (`publicTenants`) okunmalıdır.
+- Public kullanıcı sadece `bookingRequests` içine yeni talep oluşturabilmelidir.
+- Yönetim panelindeki okuma/yazma işlemleri giriş yapan kullanıcıyla sınırlandırılmalıdır.
+- Sektöre göre alanlar `lib/sector-presets.ts` ve ilgili form bileşenleriyle yönetilmelidir.
+- Firestore erişimleri `lib/services/*` dosyaları üzerinden yapılmalıdır.
 
-1. BookingRequestsCard içindeki her talebe `Onayla`, `Görüldü`, `İptal` butonları ekle.
-2. `Onayla` tıklanınca talebi `appointments` koleksiyonuna gerçek randevu olarak yaz.
-3. Talep durumunu `Randevuya Çevrildi` yap.
-4. Talep içindeki müşteri daha önce yoksa `customers` koleksiyonuna müşteri kaydı aç.
-5. Müşteriye gönderilecek WhatsApp/SMS teyit metnini oluştur ve kopyalama butonu ekle.
+## Sonraki geliştirilecek özellikler
+
+- İşletme ayarlarından renk/tema seçimi
+- İşletme logosu ve kapak görseli
+- Public randevu sayfasında hizmet listesi/fiyat/süre gösterimi
+- Randevu talebi onaylandıktan sonra WhatsApp/SMS gönderim entegrasyonu
+- Randevu durumlarının ayrı panelden yönetilmesi
+- Yetki/rol sisteminin tenantId bazlı sıkılaştırılması

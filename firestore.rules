@@ -37,7 +37,7 @@ service cloud.firestore {
         && request.resource.data.tenantSlug is string
         && request.resource.data.customerName is string
         && request.resource.data.customerPhone is string
-        && request.resource.data.service is string
+        && request.resource.data["service"] is string
         && request.resource.data.preferredDate is string
         && request.resource.data.preferredTime is string
         && request.resource.data.status == "Yeni Talep"

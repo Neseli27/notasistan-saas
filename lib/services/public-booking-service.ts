@@ -5,10 +5,13 @@ import {
   collection,
   doc,
   getDoc,
+  getDocs,
+  limit,
   onSnapshot,
   query,
   serverTimestamp,
   setDoc,
+  updateDoc,
   where,
 } from "firebase/firestore";
 
@@ -19,6 +22,54 @@ function getInitials(name: string) {
     .slice(0, 2)
     .map((part) => part[0]?.toLocaleUpperCase("tr-TR") ?? "")
     .join("");
+}
+
+function buildSectorDataFromRequest(sector: Sector, request: BookingRequest): Record<string, string> {
+  if (sector === "auto") {
+    return {
+      "Araç": "Talep sonrası tamamlanacak",
+      "Plaka": "Talep sonrası tamamlanacak",
+      "Kilometre / yakıt": "Talep sonrası tamamlanacak",
+    };
+  }
+
+  if (sector === "clinic") {
+    return {
+      "Kontrol / işlem konusu": request.service,
+      "Tercih notu": request.notes || "Public randevu talebi",
+    };
+  }
+
+  if (sector === "education") {
+    return {
+      "Görüşme konusu": request.service,
+      "Veli": request.customerName,
+    };
+  }
+
+  if (sector === "consulting") {
+    return {
+      "Görüşme konusu": request.service,
+      "Kurum / şirket": "Talep sonrası tamamlanacak",
+    };
+  }
+
+  return {
+    "İlk talep": request.service,
+    "Tercih / not": request.notes || "Public randevu talebi",
+  };
+}
+
+function getPublicRequestNextAction(sector: Sector) {
+  const actions: Record<Sector, string> = {
+    beauty: "Randevu teyidi gönder ve işlem öncesi hazırlık notlarını paylaş.",
+    clinic: "Randevu teyidi gönder; gerekli ön bilgilendirmeyi yetkili personel kontrolünden sonra paylaş.",
+    auto: "Araç bilgilerini tamamla, randevu saatini teyit et ve servis kabul notunu hazırla.",
+    education: "Veli/öğrenci ile görüşme saatini teyit et ve ön değerlendirme notu hazırla.",
+    consulting: "Görüşme saatini teyit et ve toplantı gündemini oluştur.",
+  };
+
+  return actions[sector];
 }
 
 function normalizeBookingRequest(id: string, data: Record<string, unknown>): BookingRequest {
@@ -126,4 +177,88 @@ export function listenBookingRequests(
       onError?.(error as Error);
     }
   );
+}
+
+
+export async function convertBookingRequestToAppointment(input: {
+  tenantId: string;
+  sector: Sector;
+  request: BookingRequest;
+}) {
+  const request = input.request;
+  const normalizedPhone = request.customerPhone.trim();
+  let customerId = "";
+  let customerAvatar = getInitials(request.customerName);
+  let customerNotes = request.notes.trim() || "Public randevu talebi üzerinden oluşturuldu.";
+
+  if (normalizedPhone) {
+    const existingCustomerQuery = query(
+      collection(db, "customers"),
+      where("tenantId", "==", input.tenantId),
+      where("phone", "==", normalizedPhone),
+      limit(1)
+    );
+    const existingCustomerSnapshot = await getDocs(existingCustomerQuery);
+    const existingCustomer = existingCustomerSnapshot.docs[0];
+
+    if (existingCustomer) {
+      customerId = existingCustomer.id;
+      const existingData = existingCustomer.data();
+      customerAvatar = String(existingData.avatar ?? customerAvatar);
+      customerNotes = [String(existingData.notes ?? "").trim(), request.notes.trim()].filter(Boolean).join(". ");
+    }
+  }
+
+  if (!customerId) {
+    const customerDoc = await addDoc(collection(db, "customers"), {
+      tenantId: input.tenantId,
+      sector: input.sector,
+      name: request.customerName.trim(),
+      phone: normalizedPhone,
+      email: request.customerEmail.trim(),
+      avatar: customerAvatar,
+      notes: customerNotes,
+      nextAction: getPublicRequestNextAction(input.sector),
+      historyCount: 0,
+      lastVisit: "Public talep alındı",
+      segment: "Yeni",
+      sectorData: buildSectorDataFromRequest(input.sector, request),
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+    customerId = customerDoc.id;
+  }
+
+  await addDoc(collection(db, "appointments"), {
+    tenantId: input.tenantId,
+    sector: input.sector,
+    customerId,
+    customerName: request.customerName.trim(),
+    customerPhone: normalizedPhone,
+    avatar: customerAvatar,
+    date: request.preferredDate,
+    time: request.preferredTime,
+    service: request.service.trim(),
+    subService: request.notes.trim() || "Public randevu talebi",
+    resourceName: input.sector === "auto" ? "Araç bilgisi talep sonrası tamamlanacak" : "",
+    resourceDetail: input.sector === "auto" ? "Plaka bilgisi talep sonrası tamamlanacak" : "",
+    status: "Bekliyor",
+    notes: request.notes.trim(),
+    bookingRequestId: request.id,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
+
+  await updateDoc(doc(db, "bookingRequests", request.id), {
+    status: "Randevuya Çevrildi",
+    convertedAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
+}
+
+export async function markBookingRequestSeen(requestId: string) {
+  await updateDoc(doc(db, "bookingRequests", requestId), {
+    status: "Görüldü",
+    updatedAt: serverTimestamp(),
+  });
 }
