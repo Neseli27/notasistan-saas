@@ -240,3 +240,21 @@ export async function createAppointmentNote(input: NewAppointmentNoteInput) {
     updatedAt: serverTimestamp(),
   });
 }
+
+export async function updateReminderStatus(reminderId: string, status: Reminder["status"]) {
+  if (!reminderId) throw new Error("Hatırlatma kimliği bulunamadı.");
+
+  await updateDoc(doc(db, "reminders", reminderId), {
+    status,
+    updatedAt: serverTimestamp(),
+  });
+}
+
+export async function updateFollowUpStatus(followUpId: string, status: FollowUp["status"]) {
+  if (!followUpId) throw new Error("Takip kimliği bulunamadı.");
+
+  await updateDoc(doc(db, "followUps", followUpId), {
+    status,
+    updatedAt: serverTimestamp(),
+  });
+}

@@ -13,6 +13,14 @@ service cloud.firestore {
       allow write: if isSignedIn();
     }
 
+
+    // Public randevu sayfasında aktif ve görünür hizmetlerin listelenebilmesi için okunabilir.
+    // Yönetim paneli hizmetleri giriş yapan kullanıcı üzerinden yönetir.
+    match /services/{serviceId} {
+      allow read: if true;
+      allow write: if isSignedIn();
+    }
+
     // Müşteri tarafındaki PWA randevu talebi formu giriş yapmadan talep oluşturabilir.
     // Yönetim paneli talepleri giriş yapan işletme kullanıcısı üzerinden okur.
     match /bookingRequests/{requestId} {

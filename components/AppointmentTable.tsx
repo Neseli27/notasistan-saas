@@ -59,6 +59,7 @@ export function AppointmentTable({
       {appointments.map((item) => {
         const isUpdating = updatingAppointmentId === item.id;
         const isDeleting = deletingAppointmentId === item.id;
+        const isDemoAppointment = item.tenantId === "demo";
 
         return (
           <div className={`${gridClass} tableRow`} key={item.id}>
@@ -82,7 +83,7 @@ export function AppointmentTable({
             </div>
             <div className="statusCell">
               <div className="statusActionGroup">
-                {onStatusChange ? (
+                {onStatusChange && !isDemoAppointment ? (
                   <select
                     className={`statusSelect ${statusClass(item.status)}`}
                     value={item.status}
@@ -99,7 +100,7 @@ export function AppointmentTable({
                 )}
 
                 <div className="appointmentActionButtons">
-                  {onAddNote && item.customerId ? (
+                  {onAddNote && item.customerId && !isDemoAppointment ? (
                     <button className="noteActionButton" onClick={() => onAddNote(item)} title="İşlem notu ekle" type="button">
                       <FileText size={15} /> Not
                     </button>
@@ -109,7 +110,7 @@ export function AppointmentTable({
                     </button>
                   )}
 
-                  {onEdit && (
+                  {onEdit && !isDemoAppointment && (
                     <button className="rowIconButton editRowButton" type="button" title="Randevuyu düzenle" onClick={() => onEdit(item)}>
                       <Edit3 size={15} />
                     </button>
@@ -119,7 +120,7 @@ export function AppointmentTable({
                     <button
                       className="rowIconButton dangerRowButton"
                       type="button"
-                      title="Randevuyu sil"
+                      title={isDemoAppointment ? "Demo randevuyu ekrandan kaldır" : "Randevuyu sil"}
                       disabled={isDeleting}
                       onClick={() => onDelete(item)}
                     >

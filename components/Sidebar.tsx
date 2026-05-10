@@ -11,7 +11,9 @@ import {
   Settings,
   Sparkles,
   Target,
-  UsersRound
+  UsersRound,
+  UserRoundCog,
+  Wrench
 } from "lucide-react";
 import type { SectorPreset } from "@/lib/sector-presets";
 
@@ -25,6 +27,8 @@ export function Sidebar({ preset }: SidebarProps) {
     { label: "Ana Panel", icon: Home, active: true },
     { label: "Randevular", icon: CalendarDays },
     { label: preset.customerPluralLabel, icon: UsersRound },
+    { label: "Personel", icon: UserRoundCog },
+    { label: "Hizmetler", icon: Wrench },
     ...(preset.sidebarExtra ? [{ label: preset.sidebarExtra.label, icon: extraIcon }] : []),
     { label: "İşlem Notları", icon: FileText },
     { label: "Hatırlatmalar", icon: Bell },

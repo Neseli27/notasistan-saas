@@ -1,8 +1,9 @@
 "use client";
 
 import { createPublicBookingRequest, getPublicTenantBySlug } from "@/lib/services/public-booking-service";
+import { listenPublicServiceItems } from "@/lib/services/catalog-service";
 import { getSectorPreset } from "@/lib/sector-presets";
-import type { PublicTenant } from "@/types/domain";
+import type { PublicTenant, ServiceItem } from "@/types/domain";
 import { CalendarDays, CheckCircle2, Clock3, Loader2, LogIn, Mail, Phone, Send, Sparkles, UserRound } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
@@ -43,6 +44,7 @@ export function PublicBookingPage({ slug }: PublicBookingPageProps) {
   const [preferredDate, setPreferredDate] = useState(getToday());
   const [preferredTime, setPreferredTime] = useState("10:00");
   const [notes, setNotes] = useState("");
+  const [publicServices, setPublicServices] = useState<ServiceItem[]>([]);
 
   useEffect(() => {
     let mounted = true;
@@ -79,11 +81,35 @@ export function PublicBookingPage({ slug }: PublicBookingPageProps) {
     };
   }, [slug]);
 
+  useEffect(() => {
+    if (!tenant?.tenantId) return;
+
+    const unsubscribe = listenPublicServiceItems(
+      tenant.tenantId,
+      (items) => {
+        setPublicServices(items);
+        if (items.length > 0) {
+          setService((current) => current && items.some((item) => item.name === current) ? current : items[0].name);
+        }
+      },
+      () => {
+        // Public hizmet okuma kuralı henüz yayınlanmadıysa varsayılan sektör hizmetleri kullanılmaya devam eder.
+        setPublicServices([]);
+      }
+    );
+
+    return unsubscribe;
+  }, [tenant?.tenantId]);
+
   const preset = useMemo(() => getSectorPreset(tenant?.sector), [tenant?.sector]);
   const serviceOptions = useMemo(() => {
+    if (publicServices.length > 0) {
+      return publicServices.map((item) => item.name);
+    }
+
     const unique = Array.from(new Set(preset.appointments.map((appointment) => appointment.service)));
     return unique.length > 0 ? unique : ["Randevu"];
-  }, [preset.appointments]);
+  }, [preset.appointments, publicServices]);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();

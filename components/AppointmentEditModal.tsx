@@ -1,10 +1,11 @@
 "use client";
 
 import { updateAppointment } from "@/lib/services/appointment-service";
+import { listenServiceItems, listenStaffMembers } from "@/lib/services/catalog-service";
 import { getSectorPreset } from "@/lib/sector-presets";
-import type { Appointment, AppointmentStatus, Sector } from "@/types/domain";
+import type { Appointment, AppointmentStatus, Sector, ServiceItem, StaffMember } from "@/types/domain";
 import { CalendarClock, X } from "lucide-react";
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 
 interface AppointmentEditModalProps {
   sector: Sector;
@@ -13,7 +14,7 @@ interface AppointmentEditModalProps {
   onUpdated?: () => void;
 }
 
-const serviceSuggestions: Record<Sector, string[]> = {
+const fallbackServiceSuggestions: Record<Sector, string[]> = {
   beauty: ["Cilt Bakımı", "Saç Boyama", "Kaş Laminasyonu", "Protez Tırnak", "Lazer Epilasyon"],
   clinic: ["Diş Kontrolü", "Kontrol Muayenesi", "Diyetisyen Görüşmesi", "Fizik Tedavi Seansı", "Sonuç Bilgilendirme"],
   auto: ["Periyodik Bakım", "Yağ Değişimi", "Fren Balata Kontrolü", "Klima Bakımı", "Lastik Rot-Balans"],
@@ -31,19 +32,39 @@ function fallbackDate(date?: string) {
 
 export function AppointmentEditModal({ sector, appointment, onClose, onUpdated }: AppointmentEditModalProps) {
   const preset = getSectorPreset(sector);
+  const [serviceItems, setServiceItems] = useState<ServiceItem[]>([]);
+  const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
+
+  useEffect(() => {
+    if (!appointment.tenantId || appointment.tenantId === "demo") return;
+    const unsubscribeServices = listenServiceItems(appointment.tenantId, setServiceItems);
+    const unsubscribeStaff = listenStaffMembers(appointment.tenantId, setStaffMembers);
+    return () => {
+      unsubscribeServices();
+      unsubscribeStaff();
+    };
+  }, [appointment.tenantId]);
+
+  const activeServices = useMemo(() => serviceItems.filter((item) => item.isActive), [serviceItems]);
   const services = useMemo(() => {
-    const defaults = serviceSuggestions[sector];
+    const dynamic = activeServices.map((item) => item.name);
+    const defaults = dynamic.length > 0 ? dynamic : fallbackServiceSuggestions[sector];
     return defaults.includes(appointment.service) ? defaults : [appointment.service, ...defaults];
-  }, [sector, appointment.service]);
+  }, [sector, appointment.service, activeServices]);
+  const activeStaff = useMemo(() => staffMembers.filter((item) => item.isActive), [staffMembers]);
 
   const [date, setDate] = useState(fallbackDate(appointment.date));
   const [time, setTime] = useState(appointment.time || "09:00");
   const [service, setService] = useState(appointment.service || services[0]);
+  const [staffId, setStaffId] = useState(appointment.staffId || "");
   const [subService, setSubService] = useState(appointment.subService || "");
   const [status, setStatus] = useState<AppointmentStatus>(appointment.status || "Bekliyor");
   const [notes, setNotes] = useState(appointment.notes || "");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+
+  const selectedService = activeServices.find((item) => item.name === service);
+  const selectedStaff = activeStaff.find((item) => item.id === staffId);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -62,6 +83,9 @@ export function AppointmentEditModal({ sector, appointment, onClose, onUpdated }
         time,
         service,
         subService,
+        staffId: selectedStaff?.id || "",
+        staffName: selectedStaff?.name || "",
+        durationMinutes: selectedService?.durationMinutes || appointment.durationMinutes || 0,
         status,
         notes,
       });
@@ -82,7 +106,7 @@ export function AppointmentEditModal({ sector, appointment, onClose, onUpdated }
           <div>
             <span className="eyebrow">{preset.label}</span>
             <h2>Randevu Düzenle</h2>
-            <p>{appointment.customerName} için tarih, saat, işlem ve durum bilgilerini güncelleyin.</p>
+            <p>{appointment.customerName} için tarih, saat, işlem, personel ve durum bilgilerini güncelleyin.</p>
           </div>
           <button className="modalClose" onClick={onClose} aria-label="Kapat"><X size={20} /></button>
         </div>
@@ -117,17 +141,35 @@ export function AppointmentEditModal({ sector, appointment, onClose, onUpdated }
               </select>
             </label>
             <label>
+              Sorumlu personel
+              <select value={staffId} onChange={(event) => setStaffId(event.target.value)}>
+                <option value="">Personel seçmeden devam et</option>
+                {activeStaff.map((item) => <option key={item.id} value={item.id}>{item.name} — {item.title}</option>)}
+              </select>
+            </label>
+          </div>
+
+          <div className="formGridTwo">
+            <label>
               Durum
               <select value={status} onChange={(event) => setStatus(event.target.value as AppointmentStatus)}>
                 {statusOptions.map((item) => <option key={item} value={item}>{item}</option>)}
               </select>
             </label>
+            <label>
+              Kısa açıklama / alt işlem
+              <input value={subService} onChange={(event) => setSubService(event.target.value)} placeholder="Örn. 10.000 km, HydraFacial, veli görüşmesi..." />
+            </label>
           </div>
 
-          <label>
-            Kısa açıklama / alt işlem
-            <input value={subService} onChange={(event) => setSubService(event.target.value)} placeholder="Örn. 10.000 km, HydraFacial, veli görüşmesi..." />
-          </label>
+          {selectedService && (
+            <div className="selectedCustomerBox serviceSelectionBox">
+              <div>
+                <b>{selectedService.name}</b>
+                <p>{selectedService.category} • {selectedService.durationMinutes} dakika {selectedService.price ? `• ${selectedService.price} TL` : ""}</p>
+              </div>
+            </div>
+          )}
 
           <label>
             Ön not

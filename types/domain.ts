@@ -53,6 +53,9 @@ export interface Appointment {
   avatar: string;
   service: string;
   subService: string;
+  staffId?: string;
+  staffName?: string;
+  durationMinutes?: number;
   /** Otomotiv gibi sektörlerde araç adı; eğitimde sınıf/konu gibi ek kaynak bilgisi. */
   resourceName?: string;
   /** Otomotiv gibi sektörlerde plaka; diğer sektörlerde ek açıklama. */
@@ -72,6 +75,9 @@ export interface NewAppointmentInput {
   time: string;
   service: string;
   subService: string;
+  staffId?: string;
+  staffName?: string;
+  durationMinutes?: number;
   status: AppointmentStatus;
   notes: string;
 }
@@ -82,6 +88,9 @@ export interface UpdateAppointmentInput {
   time: string;
   service: string;
   subService: string;
+  staffId?: string;
+  staffName?: string;
+  durationMinutes?: number;
   status: AppointmentStatus;
   notes: string;
 }
@@ -226,6 +235,55 @@ export interface CustomerActionRequest {
   status: "Yeni Talep" | "Görüldü" | "Tamamlandı" | "Reddedildi";
   createdAt?: unknown;
   updatedAt?: unknown;
+}
+
+
+export interface StaffMember {
+  id: string;
+  tenantId: string;
+  sector: Sector;
+  name: string;
+  title: string;
+  phone: string;
+  email: string;
+  specialty: string;
+  isActive: boolean;
+  createdAt?: unknown;
+  updatedAt?: unknown;
+}
+
+export interface NewStaffMemberInput {
+  tenantId: string;
+  sector: Sector;
+  name: string;
+  title: string;
+  phone: string;
+  email: string;
+  specialty: string;
+}
+
+export interface ServiceItem {
+  id: string;
+  tenantId: string;
+  sector: Sector;
+  name: string;
+  category: string;
+  durationMinutes: number;
+  price: number;
+  isActive: boolean;
+  isPublic: boolean;
+  createdAt?: unknown;
+  updatedAt?: unknown;
+}
+
+export interface NewServiceItemInput {
+  tenantId: string;
+  sector: Sector;
+  name: string;
+  category: string;
+  durationMinutes: number;
+  price: number;
+  isPublic: boolean;
 }
 
 export interface UserProfile {

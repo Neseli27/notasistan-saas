@@ -1,26 +1,26 @@
-# Not Asistan v2.2 Codex Notu
+# Not Asistan v2.5 Codex Görevi
 
-Bu sürümde randevu yönetimi güçlendirildi.
+Bu proje Next.js + TypeScript + Firebase tabanlı çok işletmeli SaaS uygulamasıdır.
 
-## Beklenen davranış
+## Bu sürümün amacı
 
-1. `AppointmentTable` içinde her randevu satırında durum seçimi, Not, Düzenle ve Sil aksiyonları görünmelidir.
-2. Düzenle aksiyonu `AppointmentEditModal` bileşenini açmalıdır.
-3. Düzenleme modalında tarih, saat, hizmet/işlem, alt açıklama, durum ve ön not alanları düzenlenebilmelidir.
-4. Kaydetme işlemi `updateAppointment` servisini çağırarak Firestore `appointments` belgesini güncellemelidir.
-5. Silme aksiyonu onay penceresi göstermeli ve onaydan sonra `deleteAppointment` servisiyle ilgili randevuyu silmelidir.
-6. Otomotiv panelinde tablo sağ aksiyon alanı taşmamalıdır.
-7. Mevcut müşteri, müşteri paneli, randevu talebi, erteleme/iptal talebi ve işlem notu akışları bozulmamalıdır.
+AI Asistan gerçek entegrasyon altyapısını eklemek:
 
-## Kontrol edilecek dosyalar
+1. Mesaj Merkezi içindeki hatırlatma/takip mesajlarını AI ile yeniden yazmak.
+2. İşlem notu penceresinde müşteri özeti üretimini AI destekli hâle getirmek.
+3. `OPENAI_API_KEY` yoksa uygulamanın bozulmaması ve fallback şablonla çalışması.
 
-- `components/AppointmentTable.tsx`
-- `components/AppointmentEditModal.tsx`
-- `components/Dashboard.tsx`
-- `lib/services/appointment-service.ts`
-- `types/domain.ts`
+## Kritik dosyalar
+
+- `app/api/ai/message/route.ts`
+- `lib/ai.ts`
+- `components/MessageCenter.tsx`
+- `components/AppointmentNoteModal.tsx`
 - `app/globals.css`
 
-## Sonraki önerilen adım
+## Güvenlik notları
 
-v2.3 kapsamında personel ve hizmet/işlem tanımlama sistemi eklenmelidir. Randevu oluşturma ve düzenleme formları daha sonra bu gerçek hizmet/personel kayıtlarından beslenmelidir.
+- `OPENAI_API_KEY` istemci tarafında kullanılmamalıdır.
+- API key sadece server route içinde `process.env.OPENAI_API_KEY` üzerinden okunmalıdır.
+- Sağlık sektöründe tanı, tedavi, ilaç önerisi üretme.
+- Müşteriye gönderilecek metinler kısa, sade ve profesyonel olmalıdır.

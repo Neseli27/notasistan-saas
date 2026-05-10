@@ -74,11 +74,45 @@ export function AppointmentNoteModal({ tenantId, sector, appointment, onClose, o
   const [reminderChannel, setReminderChannel] = useState<ReminderChannel>("WhatsApp");
   const [createReminder, setCreateReminder] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiSource, setAiSource] = useState<"openai" | "fallback" | null>(null);
   const [error, setError] = useState("");
 
-  function handleSmartSummary() {
-    const summary = buildSummary(rawNote, appointment, sector);
-    setCustomerSummary(summary || `${appointment.customerName} için işlem özeti hazırlanacak.`);
+  async function handleSmartSummary() {
+    const fallbackSummary = buildSummary(rawNote, appointment, sector);
+
+    if (!rawNote.trim()) {
+      setCustomerSummary(`${appointment.customerName} için işlem özeti hazırlanacak.`);
+      return;
+    }
+
+    setAiLoading(true);
+    setAiSource(null);
+    try {
+      const response = await fetch("/api/ai/message", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          mode: "summary",
+          context: {
+            sector,
+            appointment,
+            rawNote,
+          },
+        }),
+      });
+
+      if (!response.ok) throw new Error("AI özeti alınamadı");
+      const data = await response.json();
+      setCustomerSummary(data.text || fallbackSummary || `${appointment.customerName} için işlem özeti hazırlanacak.`);
+      setAiSource(data.source || "fallback");
+    } catch (err) {
+      console.error(err);
+      setCustomerSummary(fallbackSummary || `${appointment.customerName} için işlem özeti hazırlanacak.`);
+      setAiSource("fallback");
+    } finally {
+      setAiLoading(false);
+    }
 
     if (!internalNote.trim()) {
       setInternalNote(`Randevu: ${appointment.date || "Tarih yok"} ${appointment.time}. İşlem: ${appointment.service}. Durum tamamlandı olarak işaretlenecek.`);
@@ -149,9 +183,10 @@ export function AppointmentNoteModal({ tenantId, sector, appointment, onClose, o
             <textarea value={rawNote} onChange={(event) => setRawNote(event.target.value)} placeholder="Örn. Araç yağ değişimi yapıldı, filtreler kontrol edildi. Bir sonraki bakım 10.000 km sonra..." rows={5} />
           </label>
 
-          <button type="button" className="smartSummaryButton" onClick={handleSmartSummary}>
-            <Sparkles size={18} /> Notu Düzenle ve Müşteri Özeti Hazırla
+          <button type="button" className="smartSummaryButton" onClick={handleSmartSummary} disabled={aiLoading}>
+            <Sparkles size={18} /> {aiLoading ? "AI özeti hazırlanıyor..." : "AI ile Notu Düzenle ve Müşteri Özeti Hazırla"}
           </button>
+          {aiSource && <p className="aiSourceHint">{aiSource === "openai" ? "AI metni canlı modelle hazırlandı." : "AI anahtarı yoksa akıllı yerel şablon kullanıldı."}</p>}
 
           <label>
             Müşteriye gönderilecek kısa özet *

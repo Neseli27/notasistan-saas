@@ -1,10 +1,11 @@
 "use client";
 
 import { createAppointment } from "@/lib/services/appointment-service";
+import { listenServiceItems, listenStaffMembers } from "@/lib/services/catalog-service";
 import { getSectorPreset } from "@/lib/sector-presets";
-import type { AppointmentStatus, Customer, Sector } from "@/types/domain";
+import type { AppointmentStatus, Customer, Sector, ServiceItem, StaffMember } from "@/types/domain";
 import { X } from "lucide-react";
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 
 interface AppointmentFormModalProps {
   tenantId: string;
@@ -14,7 +15,7 @@ interface AppointmentFormModalProps {
   onCreated?: () => void;
 }
 
-const serviceSuggestions: Record<Sector, string[]> = {
+const fallbackServiceSuggestions: Record<Sector, string[]> = {
   beauty: ["Cilt Bakımı", "Saç Boyama", "Kaş Laminasyonu", "Protez Tırnak", "Lazer Epilasyon"],
   clinic: ["Diş Kontrolü", "Kontrol Muayenesi", "Diyetisyen Görüşmesi", "Fizik Tedavi Seansı", "Sonuç Bilgilendirme"],
   auto: ["Periyodik Bakım", "Yağ Değişimi", "Fren Balata Kontrolü", "Klima Bakımı", "Lastik Rot-Balans"],
@@ -34,18 +35,44 @@ function todayIso() {
 
 export function AppointmentFormModal({ tenantId, sector, customers, onClose, onCreated }: AppointmentFormModalProps) {
   const preset = getSectorPreset(sector);
-  const services = useMemo(() => serviceSuggestions[sector], [sector]);
+  const [serviceItems, setServiceItems] = useState<ServiceItem[]>([]);
+  const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
+  const [catalogError, setCatalogError] = useState("");
+
+  const activeServices = useMemo(() => serviceItems.filter((item) => item.isActive), [serviceItems]);
+  const services = useMemo(() => activeServices.length > 0 ? activeServices.map((item) => item.name) : fallbackServiceSuggestions[sector], [activeServices, sector]);
+  const activeStaff = useMemo(() => staffMembers.filter((item) => item.isActive), [staffMembers]);
+
   const [customerId, setCustomerId] = useState(customers[0]?.id ?? "");
   const [date, setDate] = useState(todayIso());
   const [time, setTime] = useState("09:00");
   const [service, setService] = useState(services[0] ?? "Randevu");
+  const [staffId, setStaffId] = useState("");
   const [subService, setSubService] = useState("");
   const [status, setStatus] = useState<AppointmentStatus>("Bekliyor");
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
+  useEffect(() => {
+    const unsubscribeServices = listenServiceItems(tenantId, setServiceItems, () => setCatalogError("Hizmet kayıtları okunamadı. Varsayılan liste kullanılacak."));
+    const unsubscribeStaff = listenStaffMembers(tenantId, setStaffMembers, () => setCatalogError("Personel kayıtları okunamadı. Randevu personelsiz oluşturulabilir."));
+
+    return () => {
+      unsubscribeServices();
+      unsubscribeStaff();
+    };
+  }, [tenantId]);
+
+  useEffect(() => {
+    if (!service || !services.includes(service)) {
+      setService(services[0] ?? "Randevu");
+    }
+  }, [services, service]);
+
   const selectedCustomer = customers.find((customer) => customer.id === customerId);
+  const selectedService = activeServices.find((item) => item.name === service);
+  const selectedStaff = activeStaff.find((item) => item.id === staffId);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -61,6 +88,10 @@ export function AppointmentFormModal({ tenantId, sector, customers, onClose, onC
       return;
     }
 
+    const staffText = selectedStaff ? selectedStaff.name : "";
+    const durationText = selectedService?.durationMinutes ? `${selectedService.durationMinutes} dk` : "";
+    const suggestedSubService = [staffText, durationText].filter(Boolean).join(" • ");
+
     setSaving(true);
     try {
       await createAppointment({
@@ -70,7 +101,10 @@ export function AppointmentFormModal({ tenantId, sector, customers, onClose, onC
         date,
         time,
         service,
-        subService,
+        subService: subService.trim() || suggestedSubService,
+        staffId: selectedStaff?.id,
+        staffName: selectedStaff?.name,
+        durationMinutes: selectedService?.durationMinutes,
         status,
         notes,
       });
@@ -91,7 +125,7 @@ export function AppointmentFormModal({ tenantId, sector, customers, onClose, onC
           <div>
             <span className="eyebrow">{preset.label}</span>
             <h2>Yeni Randevu Oluştur</h2>
-            <p>{preset.customerLabel} seçin, tarih/saat belirleyin ve randevuyu Firestore’a kaydedin.</p>
+            <p>{preset.customerLabel} seçin; işletmenizin kendi hizmet ve personel kayıtlarıyla randevu oluşturun.</p>
           </div>
           <button className="modalClose" onClick={onClose} aria-label="Kapat"><X size={20} /></button>
         </div>
@@ -104,6 +138,7 @@ export function AppointmentFormModal({ tenantId, sector, customers, onClose, onC
           </div>
         ) : (
           <form className="customerForm" onSubmit={handleSubmit}>
+            {catalogError && <p className="formMessage errorMessage">{catalogError}</p>}
             <label>
               {preset.customerLabel} seçimi *
               <select value={customerId} onChange={(event) => setCustomerId(event.target.value)}>
@@ -132,17 +167,35 @@ export function AppointmentFormModal({ tenantId, sector, customers, onClose, onC
                 </select>
               </label>
               <label>
+                Sorumlu personel
+                <select value={staffId} onChange={(event) => setStaffId(event.target.value)}>
+                  <option value="">Personel seçmeden devam et</option>
+                  {activeStaff.map((item) => <option key={item.id} value={item.id}>{item.name} — {item.title}</option>)}
+                </select>
+              </label>
+            </div>
+
+            <div className="formGridTwo">
+              <label>
                 Durum
                 <select value={status} onChange={(event) => setStatus(event.target.value as AppointmentStatus)}>
                   {statusOptions.map((item) => <option key={item} value={item}>{item}</option>)}
                 </select>
               </label>
+              <label>
+                Kısa açıklama / alt işlem
+                <input value={subService} onChange={(event) => setSubService(event.target.value)} placeholder="Örn. 10.000 km, HydraFacial, veli görüşmesi..." />
+              </label>
             </div>
 
-            <label>
-              Kısa açıklama / alt işlem
-              <input value={subService} onChange={(event) => setSubService(event.target.value)} placeholder="Örn. 10.000 km, HydraFacial, veli görüşmesi..." />
-            </label>
+            {selectedService && (
+              <div className="selectedCustomerBox serviceSelectionBox">
+                <div>
+                  <b>{selectedService.name}</b>
+                  <p>{selectedService.category} • {selectedService.durationMinutes} dakika {selectedService.price ? `• ${selectedService.price} TL` : ""}</p>
+                </div>
+              </div>
+            )}
 
             <label>
               Ön not

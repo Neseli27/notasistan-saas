@@ -10,6 +10,7 @@ import { CalendarCard } from "@/components/CalendarCard";
 import { CustomerCard } from "@/components/CustomerCard";
 import { CustomerDirectory } from "@/components/CustomerDirectory";
 import { CustomerActionRequestsCard } from "@/components/CustomerActionRequestsCard";
+import { MessageCenter } from "@/components/MessageCenter";
 import { CustomerFormModal } from "@/components/CustomerFormModal";
 import { FollowUpsCard } from "@/components/FollowUpsCard";
 import { Header } from "@/components/Header";
@@ -18,8 +19,9 @@ import { Sidebar } from "@/components/Sidebar";
 import { StatCard } from "@/components/StatCard";
 import { StatusHistoryCard } from "@/components/StatusHistoryCard";
 import { StatusMessageBanner } from "@/components/StatusMessageBanner";
+import { StaffServiceManager } from "@/components/StaffServiceManager";
 import { deleteAppointment, listenAppointments, listenAppointmentStatusLogs, updateAppointmentStatus } from "@/lib/services/appointment-service";
-import { listenAppointmentNotes, listenFollowUps, listenReminders } from "@/lib/services/appointment-note-service";
+import { listenAppointmentNotes, listenFollowUps, listenReminders, updateFollowUpStatus, updateReminderStatus } from "@/lib/services/appointment-note-service";
 import { listenCustomers } from "@/lib/services/customer-service";
 import { convertBookingRequestToAppointment, ensurePublicTenant, listenBookingRequests, rejectBookingRequest } from "@/lib/services/public-booking-service";
 import { buildCustomerActionResponseMessage, completeCustomerCancellationRequest, completeCustomerRescheduleRequest, listenTenantCustomerActionRequests, updateCustomerActionRequestStatus } from "@/lib/services/customer-portal-service";
@@ -80,6 +82,8 @@ export function Dashboard({ user, profile }: DashboardProps) {
   const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
   const [selectedAppointmentForNote, setSelectedAppointmentForNote] = useState<Appointment | null>(null);
   const [selectedAppointmentForEdit, setSelectedAppointmentForEdit] = useState<Appointment | null>(null);
+  const demoHiddenStorageKey = `notasistan:hidden-demo-appointments:${profile?.tenantId || "guest"}:${preset.sector}`;
+  const [hiddenDemoAppointmentIds, setHiddenDemoAppointmentIds] = useState<string[]>([]);
 
 
   useEffect(() => {
@@ -87,6 +91,17 @@ export function Dashboard({ user, profile }: DashboardProps) {
       setAppOrigin(window.location.origin);
     }
   }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    try {
+      const stored = window.localStorage.getItem(demoHiddenStorageKey);
+      setHiddenDemoAppointmentIds(stored ? JSON.parse(stored) : []);
+    } catch {
+      setHiddenDemoAppointmentIds([]);
+    }
+  }, [demoHiddenStorageKey]);
 
   useEffect(() => {
     if (!profile?.tenantId || !profile?.tenantName || !profile?.sector) return;
@@ -227,7 +242,8 @@ export function Dashboard({ user, profile }: DashboardProps) {
   const realCustomerCount = customers.length;
   const realAppointmentCount = appointments.length;
   const realNoteCount = appointmentNotes.length;
-  const visibleAppointments = realAppointmentCount > 0 ? appointments : preset.appointments;
+  const visibleDemoAppointments = preset.appointments.filter((appointment) => !hiddenDemoAppointmentIds.includes(appointment.id));
+  const visibleAppointments = realAppointmentCount > 0 ? appointments : visibleDemoAppointments;
   const visibleFollowUps = realFollowUps.length > 0 ? realFollowUps : preset.followUps;
   const visibleReminders = realReminders.length > 0 ? realReminders : preset.reminders;
   const visibleSuggestions = realNoteCount > 0 ? buildNoteSuggestions(appointmentNotes) : preset.aiSuggestions;
@@ -265,6 +281,12 @@ export function Dashboard({ user, profile }: DashboardProps) {
   async function handleAppointmentStatusChange(appointment: Appointment, status: AppointmentStatus) {
     if (!appointment.id || appointment.status === status) return;
 
+    if (appointment.tenantId === "demo") {
+      setAppointmentError("Demo randevular gerçek Firestore kaydı değildir. Durum değiştirmek için önce gerçek randevu oluşturun.");
+      window.setTimeout(() => setAppointmentError(""), 3500);
+      return;
+    }
+
     setAppointmentError("");
     setAppointmentStatusMessage("");
     setUpdatingAppointmentId(appointment.id);
@@ -286,7 +308,12 @@ export function Dashboard({ user, profile }: DashboardProps) {
   async function handleDeleteAppointment(appointment: Appointment) {
     if (!appointment.id) return;
 
-    const approved = window.confirm(`${appointment.customerName} için ${appointment.date || "tarihsiz"} ${appointment.time} randevusunu silmek istiyor musunuz? Bu işlem randevu kaydını kaldırır.`);
+    const isDemoAppointment = appointment.tenantId === "demo";
+    const approved = window.confirm(
+      isDemoAppointment
+        ? `${appointment.customerName} demo randevusunu ekrandan kaldırmak istiyor musunuz? Bu kayıt Firestore'da olmadığı için sadece bu tarayıcıda gizlenir.`
+        : `${appointment.customerName} için ${appointment.date || "tarihsiz"} ${appointment.time} randevusunu silmek istiyor musunuz? Bu işlem randevu kaydını kaldırır.`
+    );
     if (!approved) return;
 
     setAppointmentError("");
@@ -294,6 +321,19 @@ export function Dashboard({ user, profile }: DashboardProps) {
     setDeletingAppointmentId(appointment.id);
 
     try {
+      if (isDemoAppointment) {
+        setHiddenDemoAppointmentIds((current) => {
+          const next = Array.from(new Set([...current, appointment.id]));
+          if (typeof window !== "undefined") {
+            window.localStorage.setItem(demoHiddenStorageKey, JSON.stringify(next));
+          }
+          return next;
+        });
+        setAppointmentStatusMessage(`${appointment.customerName} demo randevusu ekrandan kaldırıldı.`);
+        window.setTimeout(() => setAppointmentStatusMessage(""), 2800);
+        return;
+      }
+
       await deleteAppointment(appointment.id);
       setAppointmentStatusMessage(`${appointment.customerName} randevusu silindi.`);
       window.setTimeout(() => setAppointmentStatusMessage(""), 2800);
@@ -434,6 +474,42 @@ export function Dashboard({ user, profile }: DashboardProps) {
     }
   }
 
+  async function handleReminderStatusChange(reminder: Reminder, status: Reminder["status"]) {
+    if (!reminder.id || reminder.tenantId === "demo") {
+      setNoteError("Demo hatırlatmalar gerçek Firestore kaydı değildir. Gerçek işlem notu oluşturunca mesaj merkezi güncellenir.");
+      window.setTimeout(() => setNoteError(""), 3200);
+      return;
+    }
+
+    setNoteError("");
+    try {
+      await updateReminderStatus(reminder.id, status);
+      setBookingSuccess(`${reminder.title} hatırlatması ${status?.toLocaleLowerCase("tr-TR")} olarak işaretlendi.`);
+      window.setTimeout(() => setBookingSuccess(""), 2600);
+    } catch (error) {
+      console.error("Hatırlatma durumu güncellenemedi:", error);
+      setNoteError("Hatırlatma durumu güncellenemedi. Firestore bağlantısını kontrol edin.");
+    }
+  }
+
+  async function handleFollowUpStatusChange(followUp: FollowUp, status: FollowUp["status"]) {
+    if (!followUp.id || followUp.tenantId === "demo") {
+      setNoteError("Demo takipler gerçek Firestore kaydı değildir. Gerçek işlem notu oluşturunca mesaj merkezi güncellenir.");
+      window.setTimeout(() => setNoteError(""), 3200);
+      return;
+    }
+
+    setNoteError("");
+    try {
+      await updateFollowUpStatus(followUp.id, status);
+      setBookingSuccess(`${followUp.customerName} takibi ${status?.toLocaleLowerCase("tr-TR")} olarak işaretlendi.`);
+      window.setTimeout(() => setBookingSuccess(""), 2600);
+    } catch (error) {
+      console.error("Takip durumu güncellenemedi:", error);
+      setNoteError("Takip durumu güncellenemedi. Firestore bağlantısını kontrol edin.");
+    }
+  }
+
   return (
     <div className={`appShell theme-${preset.sector}`}>
       <Sidebar preset={preset} />
@@ -523,6 +599,17 @@ export function Dashboard({ user, profile }: DashboardProps) {
               sector={preset.sector}
               historyLabel={historyLabel}
               onAddCustomer={() => setIsCustomerModalOpen(true)}
+            />
+            {profile?.tenantId && (
+              <StaffServiceManager tenantId={profile.tenantId} sector={preset.sector} />
+            )}
+            <MessageCenter
+              tenantName={profile?.tenantName}
+              sector={preset.sector}
+              reminders={visibleReminders}
+              followUps={visibleFollowUps}
+              onReminderStatusChange={handleReminderStatusChange}
+              onFollowUpStatusChange={handleFollowUpStatusChange}
             />
             <BookingRequestsCard
               requests={bookingRequests}
