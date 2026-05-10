@@ -170,7 +170,7 @@ export function CustomerPortal({ slug }: CustomerPortalProps) {
     return (
       <main className="customerPortalPage">
         <section className="customerPortalCard customerPortalLoading">
-          <div className="customerPortalMark">{tenant.appearance?.logoUrl ? <img src={tenant.appearance.logoUrl} alt="Logo" /> : "✦"}</div>
+          <div className="customerPortalMark">✦</div>
           <h1>Müşteri paneliniz hazırlanıyor...</h1>
           <p>İşletme ve oturum bilgileri kontrol ediliyor.</p>
         </section>
