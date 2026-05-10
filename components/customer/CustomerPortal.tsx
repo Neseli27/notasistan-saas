@@ -16,7 +16,8 @@ import {
   type User,
 } from "firebase/auth";
 import { ArrowRight, Building2, LockKeyhole, Mail, Phone, UserRound } from "lucide-react";
-import { FormEvent, useEffect, useState } from "react";
+import type { CSSProperties, FormEvent } from "react";
+import { useEffect, useState } from "react";
 import { CustomerPanel } from "@/components/customer/CustomerPanel";
 
 interface CustomerPortalProps {
@@ -169,7 +170,7 @@ export function CustomerPortal({ slug }: CustomerPortalProps) {
     return (
       <main className="customerPortalPage">
         <section className="customerPortalCard customerPortalLoading">
-          <div className="customerPortalMark">✦</div>
+          <div className="customerPortalMark">{tenant.appearance?.logoUrl ? <img src={tenant.appearance.logoUrl} alt="Logo" /> : "✦"}</div>
           <h1>Müşteri paneliniz hazırlanıyor...</h1>
           <p>İşletme ve oturum bilgileri kontrol ediliyor.</p>
         </section>
@@ -195,14 +196,24 @@ export function CustomerPortal({ slug }: CustomerPortalProps) {
 
   const isWrongAccount = firebaseUser && profile && (profile.role !== "customer" || profile.tenantId !== tenant.tenantId);
 
+  const publicThemeStyle = tenant.appearance?.themeMode === "custom"
+    ? ({
+        "--theme-primary": tenant.appearance.primaryColor,
+        "--theme-primary-dark": tenant.appearance.primaryColor,
+        "--theme-accent": tenant.appearance.accentColor,
+        "--theme-soft": `${tenant.appearance.accentColor}18`,
+      } as CSSProperties)
+    : undefined;
+  const publicBrandName = tenant.appearance?.brandName || tenant.name;
+
   return (
-    <main className={`customerPortalPage customer-theme-${tenant.sector}`}>
+    <main className={`customerPortalPage customer-theme-${tenant.sector} theme-${tenant.sector}`} style={publicThemeStyle}>
       <section className="customerPortalHero">
         <div className="customerPortalBrand">
-          <div className="customerPortalMark">✦</div>
+          <div className="customerPortalMark">{tenant.appearance?.logoUrl ? <img src={tenant.appearance.logoUrl} alt="Logo" /> : "✦"}</div>
           <span>Not Asistan</span>
         </div>
-        <h1>{tenant.name} müşteri paneli</h1>
+        <h1>{publicBrandName} müşteri paneli</h1>
         <p>Randevularınızı, taleplerinizi ve size özel işlem özetlerini telefondan kolayca takip edin.</p>
         <div className="customerPortalBadges">
           <span>Yaklaşan randevular</span>
@@ -212,7 +223,7 @@ export function CustomerPortal({ slug }: CustomerPortalProps) {
       </section>
 
       <section className="customerPortalCard">
-        <span className="eyebrow"><Building2 size={16} /> {tenant.name}</span>
+        <span className="eyebrow"><Building2 size={16} /> {publicBrandName}</span>
         <h2>{mode === "login" ? "Müşteri girişi" : "Müşteri hesabı oluştur"}</h2>
         <p>{mode === "login" ? "Daha önce hesap oluşturduysanız giriş yapın." : "Randevularınızı takip etmek için müşteri hesabınızı oluşturun."}</p>
 

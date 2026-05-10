@@ -51,3 +51,7 @@ Firestore rules artık role ve tenantId bazlıdır. Yeni geliştirmelerde her ye
 - public create/read gereksinimi
 
 ayrı ayrı düşünülmelidir. Geniş `match /{document=**}` kuralı kapalıdır.
+
+## v2.8 kapsamı
+
+Tema ve marka ayarları eklendi. `components/AppearanceSettings.tsx` ve `lib/services/appearance-service.ts` dosyaları görünüm ayarlarını yönetir. Ayarlar Firestore'da tenant belgesinin `appearance` alanına ve public profilin `appearance` alanına yazılır. Public sayfa ve müşteri paneli `--theme-primary`, `--theme-accent` CSS değişkenleriyle dinamik renklendirilir.

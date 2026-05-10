@@ -24,6 +24,7 @@ import {
   Smartphone,
   XCircle,
 } from "lucide-react";
+import type { CSSProperties } from "react";
 import { useEffect, useMemo, useState } from "react";
 
 interface CustomerPanelProps {
@@ -112,6 +113,15 @@ export function CustomerPanel({ tenant, profile, onSignOut }: CustomerPanelProps
 
   const latestNote = notes[0];
   const bookingUrl = `/randevu/${tenant.slug}`;
+  const customerThemeStyle = tenant.appearance?.themeMode === "custom"
+    ? ({
+        "--theme-primary": tenant.appearance.primaryColor,
+        "--theme-primary-dark": tenant.appearance.primaryColor,
+        "--theme-accent": tenant.appearance.accentColor,
+        "--theme-soft": `${tenant.appearance.accentColor}18`,
+      } as CSSProperties)
+    : undefined;
+  const publicBrandName = tenant.appearance?.brandName || tenant.name;
 
   function openActionModal(appointment: Appointment, type: "Erteleme" | "İptal") {
     setSelectedAppointment(appointment);
@@ -145,12 +155,12 @@ export function CustomerPanel({ tenant, profile, onSignOut }: CustomerPanelProps
   }
 
   return (
-    <main className={`customerPanelPage customer-theme-${tenant.sector}`}>
+    <main className={`customerPanelPage customer-theme-${tenant.sector} theme-${tenant.sector}`} style={customerThemeStyle}>
       <header className="customerPanelHeader customerAppHeader">
         <div>
-          <div className="customerPanelBrand">✦ Not Asistan</div>
+          <div className="customerPanelBrand">{tenant.appearance?.logoUrl ? <img src={tenant.appearance.logoUrl} alt="Logo" /> : "✦"} Not Asistan</div>
           <h1>Merhaba, {profile.displayName}</h1>
-          <p>{tenant.name} müşteri paneliniz. Randevularınızı, taleplerinizi ve size açık işlem özetlerini buradan takip edebilirsiniz.</p>
+          <p>{publicBrandName} müşteri paneliniz. Randevularınızı, taleplerinizi ve size açık işlem özetlerini buradan takip edebilirsiniz.</p>
         </div>
         <div className="customerPanelActions">
           <a className="primaryButton" href={bookingUrl}><Plus size={19} /> Yeni Randevu Talebi</a>
@@ -164,7 +174,7 @@ export function CustomerPanel({ tenant, profile, onSignOut }: CustomerPanelProps
       <section className="customerAppHero" id="ozet">
         <div className="customerAppHeroMain">
           <span className="customerAppEyebrow"><Smartphone size={16} /> Müşteri uygulamanız hazır</span>
-          <h2>{tenant.name}</h2>
+          <h2>{publicBrandName}</h2>
           <p>Bu panel, {sectorLabel(tenant.sector)} süreçleriniz için telefonda uygulama gibi kullanılacak şekilde düzenlendi.</p>
           <div className="customerHeroBadges customerAppHeroBadges">
             <span><ShieldCheck size={14} /> Güvenli giriş</span>

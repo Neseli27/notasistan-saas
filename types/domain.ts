@@ -5,6 +5,17 @@ export type TenantPlanStatus = "Deneme" | "Aktif" | "Askıda" | "İptal";
 export type AppointmentStatus = "Onaylandı" | "Bekliyor" | "Tamamlandı" | "İptal" | "Gelmedi";
 export type ReminderChannel = "WhatsApp" | "SMS" | "E-posta";
 
+export type TenantThemeMode = "auto" | "custom";
+
+export interface TenantAppearance {
+  themeMode: TenantThemeMode;
+  primaryColor: string;
+  accentColor: string;
+  logoUrl?: string;
+  brandName?: string;
+  updatedAt?: unknown;
+}
+
 export interface Tenant {
   id: string;
   name: string;
@@ -12,6 +23,7 @@ export interface Tenant {
   slug: string;
   plan?: TenantPlan;
   planStatus?: TenantPlanStatus;
+  appearance?: TenantAppearance;
 }
 
 export interface Customer {
@@ -146,6 +158,7 @@ export interface PublicTenant {
   sector: Sector;
   slug: string;
   isActive?: boolean;
+  appearance?: TenantAppearance;
 }
 
 export interface BookingRequest {

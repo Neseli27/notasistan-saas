@@ -36,9 +36,11 @@ interface SidebarProps {
   preset: SectorPreset;
   activeSection: SidebarSectionId;
   onSectionChange: (section: SidebarSectionId) => void;
+  brandName?: string;
+  logoUrl?: string;
 }
 
-export function Sidebar({ preset, activeSection, onSectionChange }: SidebarProps) {
+export function Sidebar({ preset, activeSection, onSectionChange, brandName, logoUrl }: SidebarProps) {
   const extraIcon = preset.sidebarExtra?.type === "vehicle" ? Car : preset.sidebarExtra?.type === "student" ? GraduationCap : BriefcaseBusiness;
   const baseItems = [
     { id: "home", label: "Ana Panel", icon: Home },
@@ -60,9 +62,9 @@ export function Sidebar({ preset, activeSection, onSectionChange }: SidebarProps
     <aside className="sidebar">
       <div className="brand">
         <div className="brandMark">
-          <Sparkles size={24} />
+          {logoUrl ? <img src={logoUrl} alt="İşletme logosu" /> : <Sparkles size={24} />}
         </div>
-        <span>Not Asistan</span>
+        <span>{brandName || "Not Asistan"}</span>
       </div>
 
       <nav className="navList" aria-label="Ana menü">

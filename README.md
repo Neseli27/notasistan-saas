@@ -79,3 +79,21 @@ GitHub'a push sonrası Vercel otomatik deploy eder.
 - Müşteri portal kayıt akışı güvenlik kurallarına uygun hâle getirildi.
 
 > Not: Sağlık sektöründe iç notların müşteriye görünmemesi için ileride müşteri özetleri ayrı bir public summary koleksiyonuna taşınacaktır.
+
+## v2.8 - Tema, Logo ve İşletme Görünüm Ayarları
+
+Bu sürümde işletme panelindeki Ayarlar bölümüne görünüm yönetimi eklendi.
+
+- Sektöre göre otomatik tema korunur.
+- İşletmeye özel ana renk ve vurgu rengi seçilebilir.
+- Hazır renk paletleri kullanılabilir.
+- Public görünen marka adı düzenlenebilir.
+- Logo URL alanı eklendi.
+- Seçilen tema işletme panelinde, public randevu sayfasında ve müşteri panelinde uygulanır.
+- Görünüm ayarları `tenants/{tenantId}.appearance` ve ilgili `publicTenants/{slug}.appearance` alanına kaydedilir.
+
+Test:
+1. İşletme panelinde Ayarlar bölümüne girin.
+2. Özel tema seçip renkleri değiştirin.
+3. Kaydet butonuna basın.
+4. Randevu sayfası ve müşteri paneli linklerini açıp renklerin yansıdığını kontrol edin.

@@ -1,6 +1,7 @@
 "use client";
 
 import { AiSuggestions } from "@/components/AiSuggestions";
+import { AppearanceSettings } from "@/components/AppearanceSettings";
 import { AppointmentFormModal } from "@/components/AppointmentFormModal";
 import { AppointmentEditModal } from "@/components/AppointmentEditModal";
 import { AppointmentNoteModal } from "@/components/AppointmentNoteModal";
@@ -27,11 +28,13 @@ import { listenCustomers } from "@/lib/services/customer-service";
 import { convertBookingRequestToAppointment, ensurePublicTenant, listenBookingRequests, rejectBookingRequest } from "@/lib/services/public-booking-service";
 import { buildCustomerActionResponseMessage, completeCustomerCancellationRequest, completeCustomerRescheduleRequest, listenTenantCustomerActionRequests, updateCustomerActionRequestStatus } from "@/lib/services/customer-portal-service";
 import { getSectorPreset } from "@/lib/sector-presets";
-import type { Appointment, AppointmentNote, AppointmentStatus, AppointmentStatusLog, BookingRequest, Customer, CustomerActionRequest, FollowUp, Reminder, UserProfile } from "@/types/domain";
+import { getDefaultAppearance, listenTenantAppearance } from "@/lib/services/appearance-service";
+import type { Appointment, AppointmentNote, AppointmentStatus, AppointmentStatusLog, BookingRequest, Customer, CustomerActionRequest, FollowUp, Reminder, TenantAppearance, UserProfile } from "@/types/domain";
 import type { User } from "firebase/auth";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { Bell, CalendarDays, Clock3, LogOut, Plus, Sparkles, StickyNote, UserPlus, UsersRound } from "lucide-react";
+import type { CSSProperties } from "react";
 import { useEffect, useMemo, useState } from "react";
 
 interface DashboardProps {
@@ -54,6 +57,7 @@ export function Dashboard({ user, profile }: DashboardProps) {
   const displayName = profile?.displayName || user?.displayName || "Murat Yılmaz";
   const firstName = displayName.split(" ")[0] || "Murat";
   const preset = getSectorPreset(profile?.sector);
+  const [appearance, setAppearance] = useState<TenantAppearance>(() => getDefaultAppearance(preset.sector, profile?.tenantName));
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [appointmentNotes, setAppointmentNotes] = useState<AppointmentNote[]>([]);
@@ -93,6 +97,23 @@ export function Dashboard({ user, profile }: DashboardProps) {
       setAppOrigin(window.location.origin);
     }
   }, []);
+
+  useEffect(() => {
+    if (!profile?.tenantId || !profile?.tenantName) {
+      setAppearance(getDefaultAppearance(preset.sector, profile?.tenantName));
+      return;
+    }
+
+    const unsubscribe = listenTenantAppearance(
+      profile.tenantId,
+      preset.sector,
+      profile.tenantName,
+      setAppearance,
+      () => setBookingError("Görünüm ayarları okunamadı. Firestore kurallarını kontrol edin.")
+    );
+
+    return unsubscribe;
+  }, [profile?.tenantId, profile?.tenantName, preset.sector]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -251,6 +272,16 @@ export function Dashboard({ user, profile }: DashboardProps) {
   const visibleSuggestions = realNoteCount > 0 ? buildNoteSuggestions(appointmentNotes) : preset.aiSuggestions;
   const publicBookingUrl = publicSlug && appOrigin ? `${appOrigin}/randevu/${publicSlug}` : "";
   const customerPortalUrl = publicSlug && appOrigin ? `${appOrigin}/musteri/${publicSlug}` : "";
+  const activeBrandName = appearance.brandName || profile?.tenantName || "Not Asistan";
+  const themeStyle = appearance.themeMode === "custom"
+    ? ({
+        "--theme-primary": appearance.primaryColor,
+        "--theme-primary-dark": appearance.primaryColor,
+        "--theme-accent": appearance.accentColor,
+        "--theme-soft": `${appearance.accentColor}18`,
+      } as CSSProperties)
+    : undefined;
+
 
   const stats = useMemo(() => {
     return preset.stats.map((stat, index) => {
@@ -534,11 +565,22 @@ export function Dashboard({ user, profile }: DashboardProps) {
             </div>
           </div>
           <div className="miniList">
-            <div><b>Tema</b><span>Sektöre göre otomatik tema aktif. İşletmeye özel renk seçimi sonraki sürümde eklenebilir.</span></div>
+            <div><b>Tema</b><span>Sektöre göre otomatik tema veya işletmeye özel renk seçimi kullanılabilir.</span></div>
             <div><b>PWA</b><span>Müşteri paneli telefona eklenebilir şekilde hazırlanmıştır.</span></div>
-            <div><b>Güvenlik</b><span>Tenant ve rol bazlı kurallar v2.6 sonrası sıkılaştırılacaktır.</span></div>
+            <div><b>Güvenlik</b><span>Tenant ve rol bazlı güvenlik kuralları aktiftir.</span></div>
           </div>
         </div>
+
+        {profile?.tenantId && (
+          <AppearanceSettings
+            tenantId={profile.tenantId}
+            tenantName={profile.tenantName || "İşletme"}
+            sector={preset.sector}
+            publicSlug={publicSlug}
+            appearance={appearance}
+            onAppearanceChange={setAppearance}
+          />
+        )}
       </div>
     );
   }
@@ -799,8 +841,8 @@ export function Dashboard({ user, profile }: DashboardProps) {
     );
   }
   return (
-    <div className={`appShell theme-${preset.sector}`}>
-      <Sidebar preset={preset} activeSection={activeSection} onSectionChange={setActiveSection} />
+    <div className={`appShell theme-${preset.sector}`} style={themeStyle}>
+      <Sidebar preset={preset} activeSection={activeSection} onSectionChange={setActiveSection} brandName={activeBrandName} logoUrl={appearance.logoUrl} />
       <main className="mainArea">
         <Header displayName={displayName} roleLabel={preset.userRoleLabel} searchPlaceholder={preset.searchPlaceholder} />
         <section className="content">

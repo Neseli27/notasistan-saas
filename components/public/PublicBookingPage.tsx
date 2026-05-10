@@ -5,6 +5,7 @@ import { listenPublicServiceItems } from "@/lib/services/catalog-service";
 import { getSectorPreset } from "@/lib/sector-presets";
 import type { PublicTenant, ServiceItem } from "@/types/domain";
 import { CalendarDays, CheckCircle2, Clock3, Loader2, LogIn, Mail, Phone, Send, Sparkles, UserRound } from "lucide-react";
+import type { CSSProperties, FormEvent } from "react";
 import { useEffect, useMemo, useState } from "react";
 
 interface PublicBookingPageProps {
@@ -102,6 +103,16 @@ export function PublicBookingPage({ slug }: PublicBookingPageProps) {
   }, [tenant?.tenantId]);
 
   const preset = useMemo(() => getSectorPreset(tenant?.sector), [tenant?.sector]);
+  const publicThemeStyle = tenant?.appearance?.themeMode === "custom"
+    ? ({
+        "--theme-primary": tenant.appearance.primaryColor,
+        "--theme-primary-dark": tenant.appearance.primaryColor,
+        "--theme-accent": tenant.appearance.accentColor,
+        "--theme-soft": `${tenant.appearance.accentColor}18`,
+      } as CSSProperties)
+    : undefined;
+  const publicBrandName = tenant?.appearance?.brandName || tenant?.name || "Not Asistan";
+
   const serviceOptions = useMemo(() => {
     if (publicServices.length > 0) {
       return publicServices.map((item) => item.name);
@@ -111,7 +122,7 @@ export function PublicBookingPage({ slug }: PublicBookingPageProps) {
     return unique.length > 0 ? unique : ["Randevu"];
   }, [preset.appointments, publicServices]);
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setFormError("");
 
@@ -177,11 +188,11 @@ export function PublicBookingPage({ slug }: PublicBookingPageProps) {
   }
 
   return (
-    <main className={`publicBookingPage theme-${tenant.sector}`}>
+    <main className={`publicBookingPage theme-${tenant.sector}`} style={publicThemeStyle}>
       <section className="publicBookingShell">
         <div className="publicBookingHero">
-          <div className="publicBrandPill"><Sparkles size={16} /> Not Asistan</div>
-          <h1>{tenant.name}</h1>
+          <div className="publicBrandPill">{tenant.appearance?.logoUrl ? <img src={tenant.appearance.logoUrl} alt="Logo" /> : <Sparkles size={16} />} Not Asistan</div>
+          <h1>{publicBrandName}</h1>
           <p>{getSectorHeroText(tenant.sector)}</p>
           <div className="publicHeroBadges">
             <span><CalendarDays size={16} /> Kolay randevu talebi</span>
