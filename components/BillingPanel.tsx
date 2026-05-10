@@ -19,7 +19,7 @@ const planLabels: Record<TenantPlan, string> = {
 };
 
 const planDetails: Record<TenantPlan, string[]> = {
-  Starter: ["Demo ve başlangıç kullanımı", "Temel müşteri ve randevu takibi", "Sınırlı AI metin üretimi"],
+  Starter: ["Başlangıç kullanımı", "Temel müşteri ve randevu takibi", "Sınırlı AI metin üretimi"],
   Pro: ["Aktif işletmeler için tam randevu yönetimi", "Müşteri paneli + PWA", "Mesaj merkezi ve takipler"],
   Klinik: ["Klinik, danışmanlık ve yoğun takip isteyen işletmeler", "Gelişmiş işlem notları", "Güvenlik ve kayıt disiplini"],
   Enterprise: ["Çok şubeli yapı", "Özel entegrasyon hazırlığı", "Özel destek ve kurumsal süreç"],

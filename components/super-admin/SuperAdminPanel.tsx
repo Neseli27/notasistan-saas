@@ -46,8 +46,8 @@ const planConfig: Record<TenantPlan, { label: string; price: string; description
   Starter: {
     label: "Başlangıç",
     price: "₺0 / deneme",
-    description: "Tek kişi veya küçük işletme demosu için temel kullanım.",
-    limits: ["1 işletme kullanıcısı", "50 müşteri", "100 randevu", "Demo AI metinleri"],
+    description: "Tek kişi veya küçük işletme için temel kullanım.",
+    limits: ["1 işletme kullanıcısı", "50 müşteri", "100 randevu", "Temel AI metinleri"],
   },
   Pro: {
     label: "Profesyonel",

@@ -25,9 +25,8 @@ export function Header({ displayName, roleLabel, searchPlaceholder }: HeaderProp
       </div>
 
       <div className="profileArea">
-        <div className="notification">
+        <div className="notification emptyNotification" title="Bildirim yok">
           <Bell size={22} />
-          <span>3</span>
         </div>
         <div className="avatar avatarPhoto">{initials(displayName)}</div>
         <div>

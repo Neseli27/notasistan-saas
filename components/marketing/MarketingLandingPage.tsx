@@ -68,7 +68,7 @@ export function MarketingLandingPage({ focus = "landing" }: MarketingLandingPage
     <main className="marketingPage">
       <header className="marketingNav">
         <a href="/tanitim" className="marketingBrand" aria-label="Not Asistan tanıtım sayfası">
-          <span className="marketingBrandMark"><Sparkles size={22} /></span>
+          <span className="marketingBrandMark"><img src="/icons/icon-192.png" alt="Not Asistan" /></span>
           <strong>Not Asistan</strong>
         </a>
         <nav>
@@ -100,7 +100,7 @@ export function MarketingLandingPage({ focus = "landing" }: MarketingLandingPage
 
         <div className="marketingHeroCard" aria-label="Not Asistan ürün özeti">
           <div className="heroCardHeader">
-            <span><Store size={18} /> Gülizar Güzellik Merkezi</span>
+            <span><Store size={18} /> İşletme Paneli</span>
             <b>Bugün</b>
           </div>
           <div className="heroStatsMini">
@@ -109,13 +109,13 @@ export function MarketingLandingPage({ focus = "landing" }: MarketingLandingPage
             <div><strong>42</strong><span>Mesaj</span></div>
           </div>
           <div className="heroTimeline">
-            <div><b>09:30</b><span>Ayşe Demir - Cilt Bakımı</span><em>Onaylandı</em></div>
-            <div><b>11:00</b><span>Mehmet Kaya - Kontrol</span><em>Bekliyor</em></div>
-            <div><b>14:00</b><span>Servet Aydın - Periyodik Bakım</span><em>Tamamlandı</em></div>
+            <div><b>09:30</b><span>Müşteri Randevusu</span><em>Onaylandı</em></div>
+            <div><b>11:00</b><span>Kontrol / Takip Görüşmesi</span><em>Bekliyor</em></div>
+            <div><b>14:00</b><span>İşlem Sonrası Özet</span><em>Tamamlandı</em></div>
           </div>
           <div className="heroAiBox">
             <MessageSquareText size={22} />
-            <p><b>AI önerisi:</b> 32 gündür gelmeyen müşteriye nazik bir geri çağırma mesajı hazırlayın.</p>
+            <p><b>AI önerisi:</b> uzun süredir gelmeyen müşteriye nazik bir geri çağırma mesajı hazırlayın.</p>
           </div>
         </div>
       </section>

@@ -3802,7 +3802,6 @@ h1 { font-size: 36px; line-height: 1.1; margin: 0 0 8px; letter-spacing: -1px; }
 .messageActionButton.positive { color: #0a8159; border-color: #bfe7d6; background: #f1fff8; }
 .messageActionButton.danger { color: #d9273e; border-color: #ffd0d8; background: #fff7f8; }
 .messageActionButton:disabled { opacity: .48; cursor: not-allowed; }
-.messageDemoHint { color: #7b879b; font-size: 12px; font-weight: 800; }
 .messageEmptyState { min-height: 170px; display: grid; place-items: center; text-align: center; gap: 8px; color: var(--muted); border: 1px dashed #d5dfed; border-radius: 18px; background: #fbfcff; padding: 24px; }
 .messageEmptyState b { color: #07183f; }
 
@@ -4494,4 +4493,59 @@ h1 { font-size: 36px; line-height: 1.1; margin: 0 0 8px; letter-spacing: -1px; }
   .billingPlanCards {
     grid-template-columns: 1fr;
   }
+}
+
+/* v3.1 - final branding / boş durum / form temizliği */
+.authLogoImage {
+  width: 50px;
+  height: 50px;
+  border-radius: 18px;
+  object-fit: cover;
+  box-shadow: 0 0 30px rgba(35,211,238,.25);
+}
+
+.marketingBrandMark img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+}
+
+.brandMark {
+  overflow: hidden;
+  background: rgba(255,255,255,.04);
+}
+
+.emptyNotification {
+  color: #7d89a6;
+}
+
+.compactEmptyState,
+.tableEmptyState {
+  width: 100%;
+  min-height: 150px;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.emptyCustomerCard .compactEmptyState {
+  min-height: 280px;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: transparent;
+}
+
+input:focus::placeholder,
+textarea:focus::placeholder {
+  color: transparent;
+}
+
+.customerPortalMark img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
 }

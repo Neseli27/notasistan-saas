@@ -170,7 +170,7 @@ export function CustomerPortal({ slug }: CustomerPortalProps) {
     return (
       <main className="customerPortalPage">
         <section className="customerPortalCard customerPortalLoading">
-          <div className="customerPortalMark">✦</div>
+          <div className="customerPortalMark"><img src="/icons/icon-192.png" alt="Not Asistan" /></div>
           <h1>Müşteri paneliniz hazırlanıyor...</h1>
           <p>İşletme ve oturum bilgileri kontrol ediliyor.</p>
         </section>
@@ -182,7 +182,7 @@ export function CustomerPortal({ slug }: CustomerPortalProps) {
     return (
       <main className="customerPortalPage">
         <section className="customerPortalCard customerPortalLoading">
-          <div className="customerPortalMark">!</div>
+          <div className="customerPortalMark"><img src="/icons/icon-192.png" alt="Not Asistan" /></div>
           <h1>Randevu sayfası bulunamadı</h1>
           <p>Bu bağlantı aktif bir Not Asistan işletmesine bağlı görünmüyor.</p>
         </section>
@@ -210,7 +210,7 @@ export function CustomerPortal({ slug }: CustomerPortalProps) {
     <main className={`customerPortalPage customer-theme-${tenant.sector} theme-${tenant.sector}`} style={publicThemeStyle}>
       <section className="customerPortalHero">
         <div className="customerPortalBrand">
-          <div className="customerPortalMark">{tenant.appearance?.logoUrl ? <img src={tenant.appearance.logoUrl} alt="Logo" /> : "✦"}</div>
+          <div className="customerPortalMark">{tenant.appearance?.logoUrl ? <img src={tenant.appearance.logoUrl} alt="Logo" /> : <img src="/icons/icon-192.png" alt="Not Asistan" />}</div>
           <span>Not Asistan</span>
         </div>
         <h1>{publicBrandName} müşteri paneli</h1>
@@ -237,23 +237,23 @@ export function CustomerPortal({ slug }: CustomerPortalProps) {
             <>
               <label>
                 <span>Ad soyad</span>
-                <div className="inputWithIcon"><UserRound size={18} /><input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Murat Aydın" required /></div>
+                <div className="inputWithIcon"><UserRound size={18} /><input value={displayName} onChange={(e) => setDisplayName(e.target.value)} required /></div>
               </label>
               <label>
                 <span>Telefon</span>
-                <div className="inputWithIcon"><Phone size={18} /><input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="0555 123 45 67" required /></div>
+                <div className="inputWithIcon"><Phone size={18} /><input value={phone} onChange={(e) => setPhone(e.target.value)} required /></div>
               </label>
             </>
           )}
 
           <label>
             <span>E-posta</span>
-            <div className="inputWithIcon"><Mail size={18} /><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="ornek@mail.com" required /></div>
+            <div className="inputWithIcon"><Mail size={18} /><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required /></div>
           </label>
 
           <label>
             <span>Şifre</span>
-            <div className="inputWithIcon"><LockKeyhole size={18} /><input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="En az 6 karakter" required minLength={6} /></div>
+            <div className="inputWithIcon"><LockKeyhole size={18} /><input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} /></div>
           </label>
 
           {isWrongAccount && <p className="formMessage errorMessage">Bu oturum bu işletmenin müşteri paneliyle eşleşmiyor. Lütfen çıkış yapıp doğru müşteri hesabıyla giriş yapın.</p>}

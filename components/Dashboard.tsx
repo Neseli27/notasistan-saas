@@ -55,8 +55,8 @@ function buildNoteSuggestions(notes: AppointmentNote[]) {
 }
 
 export function Dashboard({ user, profile }: DashboardProps) {
-  const displayName = profile?.displayName || user?.displayName || "Murat Yılmaz";
-  const firstName = displayName.split(" ")[0] || "Murat";
+  const displayName = profile?.displayName || user?.displayName || user?.email || "Not Asistan Kullanıcısı";
+  const firstName = displayName.split(" ")[0] || "Merhaba";
   const preset = getSectorPreset(profile?.sector);
   const [appearance, setAppearance] = useState<TenantAppearance>(() => getDefaultAppearance(preset.sector, profile?.tenantName));
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -89,10 +89,6 @@ export function Dashboard({ user, profile }: DashboardProps) {
   const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
   const [selectedAppointmentForNote, setSelectedAppointmentForNote] = useState<Appointment | null>(null);
   const [selectedAppointmentForEdit, setSelectedAppointmentForEdit] = useState<Appointment | null>(null);
-  const demoHiddenStorageKey = `notasistan:hidden-demo-appointments:${profile?.tenantId || "guest"}:${preset.sector}`;
-  const [hiddenDemoAppointmentIds, setHiddenDemoAppointmentIds] = useState<string[]>([]);
-
-
   useEffect(() => {
     if (typeof window !== "undefined") {
       setAppOrigin(window.location.origin);
@@ -115,17 +111,6 @@ export function Dashboard({ user, profile }: DashboardProps) {
 
     return unsubscribe;
   }, [profile?.tenantId, profile?.tenantName, preset.sector]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    try {
-      const stored = window.localStorage.getItem(demoHiddenStorageKey);
-      setHiddenDemoAppointmentIds(stored ? JSON.parse(stored) : []);
-    } catch {
-      setHiddenDemoAppointmentIds([]);
-    }
-  }, [demoHiddenStorageKey]);
 
   useEffect(() => {
     if (!profile?.tenantId || !profile?.tenantName || !profile?.sector) return;
@@ -262,15 +247,14 @@ export function Dashboard({ user, profile }: DashboardProps) {
   }, [profile?.tenantId]);
 
   const historyLabel = preset.sector === "auto" ? "Servis Geçmişi" : preset.sector === "clinic" ? "Tedavi Geçmişi" : preset.sector === "education" ? "Görüşme Geçmişi" : "Hizmet Geçmişi";
-  const featuredCustomer = customers[0] ?? preset.featuredCustomer;
+  const featuredCustomer = customers[0] ?? null;
   const realCustomerCount = customers.length;
   const realAppointmentCount = appointments.length;
   const realNoteCount = appointmentNotes.length;
-  const visibleDemoAppointments = preset.appointments.filter((appointment) => !hiddenDemoAppointmentIds.includes(appointment.id));
-  const visibleAppointments = realAppointmentCount > 0 ? appointments : visibleDemoAppointments;
-  const visibleFollowUps = realFollowUps.length > 0 ? realFollowUps : preset.followUps;
-  const visibleReminders = realReminders.length > 0 ? realReminders : preset.reminders;
-  const visibleSuggestions = realNoteCount > 0 ? buildNoteSuggestions(appointmentNotes) : preset.aiSuggestions;
+  const visibleAppointments = appointments;
+  const visibleFollowUps = realFollowUps;
+  const visibleReminders = realReminders;
+  const visibleSuggestions = realNoteCount > 0 ? buildNoteSuggestions(appointmentNotes) : [];
   const publicBookingUrl = publicSlug && appOrigin ? `${appOrigin}/randevu/${publicSlug}` : "";
   const customerPortalUrl = publicSlug && appOrigin ? `${appOrigin}/musteri/${publicSlug}` : "";
   const activeBrandName = appearance.brandName || profile?.tenantName || "Not Asistan";
@@ -286,40 +270,25 @@ export function Dashboard({ user, profile }: DashboardProps) {
 
   const stats = useMemo(() => {
     return preset.stats.map((stat, index) => {
-      if (index === 0 && realAppointmentCount > 0) {
-        return {
-          ...stat,
-          value: String(realAppointmentCount),
-          detail: `Firestore’da ${realAppointmentCount} randevu`,
-        };
+      if (index === 0) {
+        return { ...stat, value: String(realAppointmentCount), detail: realAppointmentCount > 0 ? "Gerçek randevu kaydı" : "Henüz randevu yok" };
       }
-      if (index === 2 && visibleFollowUps.length > 0 && realFollowUps.length > 0) {
-        return {
-          ...stat,
-          value: String(realFollowUps.length),
-          detail: `Gerçek takip kaydı`,
-        };
+      if (index === 1) {
+        return { ...stat, value: String(realReminders.length), detail: realReminders.length > 0 ? "Gerçek hatırlatma kaydı" : "Henüz hatırlatma yok" };
       }
-      if (index === 3 && realCustomerCount > 0) {
-        return {
-          ...stat,
-          value: String(realCustomerCount),
-          detail: `Firestore’da ${realCustomerCount} kayıt`,
-        };
+      if (index === 2) {
+        return { ...stat, value: String(realFollowUps.length), detail: realFollowUps.length > 0 ? "Gerçek takip kaydı" : "Henüz takip yok" };
+      }
+      if (index === 3) {
+        return { ...stat, value: String(realCustomerCount), detail: realCustomerCount > 0 ? "Gerçek müşteri kaydı" : "Henüz müşteri yok" };
       }
       return stat;
     });
-  }, [preset.stats, realCustomerCount, realAppointmentCount, realFollowUps.length, visibleFollowUps.length]);
+  }, [preset.stats, realCustomerCount, realAppointmentCount, realFollowUps.length, realReminders.length]);
 
 
   async function handleAppointmentStatusChange(appointment: Appointment, status: AppointmentStatus) {
     if (!appointment.id || appointment.status === status) return;
-
-    if (appointment.tenantId === "demo") {
-      setAppointmentError("Demo randevular gerçek Firestore kaydı değildir. Durum değiştirmek için önce gerçek randevu oluşturun.");
-      window.setTimeout(() => setAppointmentError(""), 3500);
-      return;
-    }
 
     setAppointmentError("");
     setAppointmentStatusMessage("");
@@ -342,12 +311,7 @@ export function Dashboard({ user, profile }: DashboardProps) {
   async function handleDeleteAppointment(appointment: Appointment) {
     if (!appointment.id) return;
 
-    const isDemoAppointment = appointment.tenantId === "demo";
-    const approved = window.confirm(
-      isDemoAppointment
-        ? `${appointment.customerName} demo randevusunu ekrandan kaldırmak istiyor musunuz? Bu kayıt Firestore'da olmadığı için sadece bu tarayıcıda gizlenir.`
-        : `${appointment.customerName} için ${appointment.date || "tarihsiz"} ${appointment.time} randevusunu silmek istiyor musunuz? Bu işlem randevu kaydını kaldırır.`
-    );
+    const approved = window.confirm(`${appointment.customerName} için ${appointment.date || "tarihsiz"} ${appointment.time} randevusunu silmek istiyor musunuz? Bu işlem randevu kaydını kaldırır.`);
     if (!approved) return;
 
     setAppointmentError("");
@@ -355,19 +319,6 @@ export function Dashboard({ user, profile }: DashboardProps) {
     setDeletingAppointmentId(appointment.id);
 
     try {
-      if (isDemoAppointment) {
-        setHiddenDemoAppointmentIds((current) => {
-          const next = Array.from(new Set([...current, appointment.id]));
-          if (typeof window !== "undefined") {
-            window.localStorage.setItem(demoHiddenStorageKey, JSON.stringify(next));
-          }
-          return next;
-        });
-        setAppointmentStatusMessage(`${appointment.customerName} demo randevusu ekrandan kaldırıldı.`);
-        window.setTimeout(() => setAppointmentStatusMessage(""), 2800);
-        return;
-      }
-
       await deleteAppointment(appointment.id);
       setAppointmentStatusMessage(`${appointment.customerName} randevusu silindi.`);
       window.setTimeout(() => setAppointmentStatusMessage(""), 2800);
@@ -509,12 +460,6 @@ export function Dashboard({ user, profile }: DashboardProps) {
   }
 
   async function handleReminderStatusChange(reminder: Reminder, status: Reminder["status"]) {
-    if (!reminder.id || reminder.tenantId === "demo") {
-      setNoteError("Demo hatırlatmalar gerçek Firestore kaydı değildir. Gerçek işlem notu oluşturunca mesaj merkezi güncellenir.");
-      window.setTimeout(() => setNoteError(""), 3200);
-      return;
-    }
-
     setNoteError("");
     try {
       await updateReminderStatus(reminder.id, status);
@@ -527,12 +472,6 @@ export function Dashboard({ user, profile }: DashboardProps) {
   }
 
   async function handleFollowUpStatusChange(followUp: FollowUp, status: FollowUp["status"]) {
-    if (!followUp.id || followUp.tenantId === "demo") {
-      setNoteError("Demo takipler gerçek Firestore kaydı değildir. Gerçek işlem notu oluşturunca mesaj merkezi güncellenir.");
-      window.setTimeout(() => setNoteError(""), 3200);
-      return;
-    }
-
     setNoteError("");
     try {
       await updateFollowUpStatus(followUp.id, status);

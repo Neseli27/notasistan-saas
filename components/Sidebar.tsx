@@ -62,7 +62,7 @@ export function Sidebar({ preset, activeSection, onSectionChange, brandName, log
     <aside className="sidebar">
       <div className="brand">
         <div className="brandMark">
-          {logoUrl ? <img src={logoUrl} alt="İşletme logosu" /> : <Sparkles size={24} />}
+          {logoUrl ? <img src={logoUrl} alt="İşletme logosu" /> : <img src="/icons/icon-192.png" alt="Not Asistan" />}
         </div>
         <span>{brandName || "Not Asistan"}</span>
       </div>

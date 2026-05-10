@@ -22,7 +22,13 @@ export function AiSuggestions({ suggestions, sector }: AiSuggestionsProps) {
         <a href="#">Tümünü Gör →</a>
       </div>
       <div className="suggestionList">
-        {suggestions.map((suggestion, index) => {
+        {suggestions.length === 0 ? (
+          <div className="emptyStateBox compactEmptyState">
+            <Sparkles size={30} />
+            <b>Henüz AI önerisi yok.</b>
+            <p>İşlem notu, takip ve müşteri geçmişi oluştukça öneriler burada görünecek.</p>
+          </div>
+        ) : suggestions.map((suggestion, index) => {
           const Icon = iconMap[index] ?? Sparkles;
           return (
             <button className="suggestionItem" key={suggestion.id}>

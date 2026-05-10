@@ -79,3 +79,13 @@ Yeni geliştirmelerde marketing sayfaları public kalmalı; Firebase auth zorunl
 - Ödeme Alındı seçildiğinde ilgili işletmenin paketi Aktif duruma alınır.
 - Firestore `paymentRequests` koleksiyonu ve güvenlik kuralları eklendi.
 
+
+## v3.1 final polish notları
+
+- Demo veri tekrar ekleme. Yeni tenant oluşturulduğunda sistem boş başlamalıdır.
+- `lib/sector-presets.ts` yalnızca sektör etiketleri, menü dili ve boş istatistik şablonları içermelidir.
+- Formlarda hazır kişi adı, telefon, e-posta veya işletme adı başlangıç değeri kullanılmamalıdır.
+- Public/marketing sayfalarında gerçek kişi adı gibi algılanabilecek örnek veriler kullanılmamalıdır.
+- PWA ikonları `/public/icons` içinde tutulur; genel marka görselleri `/public/brand` içindedir.
+- Manifest, metadata ve service worker ikon yolları güncel tutulmalıdır.
+- Yeni boş durum tasarımlarını koru; randevu/müşteri yokken demo tablo göstermeyin.

@@ -15,14 +15,6 @@ interface AppointmentFormModalProps {
   onCreated?: () => void;
 }
 
-const fallbackServiceSuggestions: Record<Sector, string[]> = {
-  beauty: ["Cilt Bakımı", "Saç Boyama", "Kaş Laminasyonu", "Protez Tırnak", "Lazer Epilasyon"],
-  clinic: ["Diş Kontrolü", "Kontrol Muayenesi", "Diyetisyen Görüşmesi", "Fizik Tedavi Seansı", "Sonuç Bilgilendirme"],
-  auto: ["Periyodik Bakım", "Yağ Değişimi", "Fren Balata Kontrolü", "Klima Bakımı", "Lastik Rot-Balans"],
-  education: ["Öğrenci Görüşmesi", "Veli Bilgilendirme", "Deneme Analizi", "Ödev Kontrolü", "Konu Takibi"],
-  consulting: ["Strateji Görüşmesi", "Teklif Değerlendirme", "Aylık Kontrol", "Rapor Görüşmesi", "Takip Toplantısı"],
-};
-
 const statusOptions: AppointmentStatus[] = ["Bekliyor", "Onaylandı", "Tamamlandı", "Gelmedi", "İptal"];
 
 function todayIso() {
@@ -40,13 +32,13 @@ export function AppointmentFormModal({ tenantId, sector, customers, onClose, onC
   const [catalogError, setCatalogError] = useState("");
 
   const activeServices = useMemo(() => serviceItems.filter((item) => item.isActive), [serviceItems]);
-  const services = useMemo(() => activeServices.length > 0 ? activeServices.map((item) => item.name) : fallbackServiceSuggestions[sector], [activeServices, sector]);
+  const services = useMemo(() => activeServices.map((item) => item.name), [activeServices]);
   const activeStaff = useMemo(() => staffMembers.filter((item) => item.isActive), [staffMembers]);
 
   const [customerId, setCustomerId] = useState(customers[0]?.id ?? "");
   const [date, setDate] = useState(todayIso());
   const [time, setTime] = useState("09:00");
-  const [service, setService] = useState(services[0] ?? "Randevu");
+  const [service, setService] = useState(services[0] ?? "Genel Randevu");
   const [staffId, setStaffId] = useState("");
   const [subService, setSubService] = useState("");
   const [status, setStatus] = useState<AppointmentStatus>("Bekliyor");
@@ -66,7 +58,7 @@ export function AppointmentFormModal({ tenantId, sector, customers, onClose, onC
 
   useEffect(() => {
     if (!service || !services.includes(service)) {
-      setService(services[0] ?? "Randevu");
+      setService(services[0] ?? "Genel Randevu");
     }
   }, [services, service]);
 
@@ -184,7 +176,7 @@ export function AppointmentFormModal({ tenantId, sector, customers, onClose, onC
               </label>
               <label>
                 Kısa açıklama / alt işlem
-                <input value={subService} onChange={(event) => setSubService(event.target.value)} placeholder="Örn. 10.000 km, HydraFacial, veli görüşmesi..." />
+                <input value={subService} onChange={(event) => setSubService(event.target.value)} />
               </label>
             </div>
 
@@ -199,7 +191,7 @@ export function AppointmentFormModal({ tenantId, sector, customers, onClose, onC
 
             <label>
               Ön not
-              <textarea value={notes} onChange={(event) => setNotes(event.target.value)} placeholder="Randevu öncesi bilinmesi gereken kısa bilgi..." rows={4} />
+              <textarea value={notes} onChange={(event) => setNotes(event.target.value)} rows={4} />
             </label>
 
             {selectedCustomer && (

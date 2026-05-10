@@ -38,7 +38,7 @@ function getFirebaseErrorMessage(error: unknown) {
 
 export function AuthForm() {
   const [mode, setMode] = useState<Mode>("login");
-  const [displayName, setDisplayName] = useState("Murat Yılmaz");
+  const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState<string | null>(null);
@@ -88,7 +88,7 @@ export function AuthForm() {
     <main className="authPage">
       <section className="authHero">
         <div className="authBrand">
-          <div className="authLogo">✦</div>
+          <img className="authLogoImage" src="/icons/icon-192.png" alt="Not Asistan" />
           <span>Not Asistan</span>
         </div>
         <h1>Randevuyu kaydeder, işlemi özetler, sonraki adımı hatırlatır.</h1>
@@ -125,18 +125,18 @@ export function AuthForm() {
           {mode === "register" && (
             <label>
               <span>Ad soyad</span>
-              <div className="inputWithIcon"><UserRound size={18} /><input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Murat Yılmaz" /></div>
+              <div className="inputWithIcon"><UserRound size={18} /><input value={displayName} onChange={(e) => setDisplayName(e.target.value)} /></div>
             </label>
           )}
 
           <label>
             <span>E-posta</span>
-            <div className="inputWithIcon"><Mail size={18} /><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="ornek@mail.com" required /></div>
+            <div className="inputWithIcon"><Mail size={18} /><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required /></div>
           </label>
 
           <label>
             <span>Şifre</span>
-            <div className="inputWithIcon"><LockKeyhole size={18} /><input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="En az 6 karakter" required minLength={6} /></div>
+            <div className="inputWithIcon"><LockKeyhole size={18} /><input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} /></div>
           </label>
 
           {error && <p className="formMessage errorMessage">{error}</p>}

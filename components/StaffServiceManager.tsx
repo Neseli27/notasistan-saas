@@ -186,18 +186,18 @@ export function StaffServiceManager({ tenantId, sector }: StaffServiceManagerPro
         <div className="catalogContentGrid">
           <form className="catalogMiniForm" onSubmit={handleCreateStaff}>
             <h3><Plus size={17} /> Personel Ekle</h3>
-            <label>Ad soyad<input value={staffName} onChange={(event) => setStaffName(event.target.value)} placeholder="Örn. Mehmet Usta" /></label>
+            <label>Ad soyad<input value={staffName} onChange={(event) => setStaffName(event.target.value)} /></label>
             <div className="formGridTwo">
               <label>Görev / unvan
                 <select value={staffTitle} onChange={(event) => setStaffTitle(event.target.value)}>
                   {titleSuggestions[sector].map((item) => <option key={item}>{item}</option>)}
                 </select>
               </label>
-              <label>Uzmanlık<input value={staffSpecialty} onChange={(event) => setStaffSpecialty(event.target.value)} placeholder="Örn. Mekanik bakım" /></label>
+              <label>Uzmanlık<input value={staffSpecialty} onChange={(event) => setStaffSpecialty(event.target.value)} /></label>
             </div>
             <div className="formGridTwo">
-              <label>Telefon<input value={staffPhone} onChange={(event) => setStaffPhone(event.target.value)} placeholder="05xx xxx xx xx" /></label>
-              <label>E-posta<input value={staffEmail} onChange={(event) => setStaffEmail(event.target.value)} placeholder="personel@mail.com" /></label>
+              <label>Telefon<input value={staffPhone} onChange={(event) => setStaffPhone(event.target.value)} /></label>
+              <label>E-posta<input value={staffEmail} onChange={(event) => setStaffEmail(event.target.value)} /></label>
             </div>
             <button className="primaryButton compactButton" type="submit">Personel Kaydet</button>
           </form>
@@ -224,7 +224,7 @@ export function StaffServiceManager({ tenantId, sector }: StaffServiceManagerPro
         <div className="catalogContentGrid">
           <form className="catalogMiniForm" onSubmit={handleCreateService}>
             <h3><Plus size={17} /> Hizmet / İşlem Ekle</h3>
-            <label>Hizmet adı<input value={serviceName} onChange={(event) => setServiceName(event.target.value)} placeholder="Örn. Periyodik Bakım" /></label>
+            <label>Hizmet adı<input value={serviceName} onChange={(event) => setServiceName(event.target.value)} /></label>
             <div className="formGridTwo">
               <label>Kategori
                 <select value={serviceCategory} onChange={(event) => setServiceCategory(event.target.value)}>

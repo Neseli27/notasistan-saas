@@ -124,3 +124,25 @@ Test:
 - Ödeme Alındı seçildiğinde ilgili işletmenin paketi Aktif duruma alınır.
 - Firestore `paymentRequests` koleksiyonu ve güvenlik kuralları eklendi.
 
+
+## v3.1 Final polish / demo temizliği / PWA ve marka ikonları
+
+Bu sürümde uygulama beta yayına daha temiz hazırlanmıştır.
+
+- Giriş ve kayıt formlarındaki hazır örnek yazılar kaldırıldı.
+- İlk işletme oluşturma ekranındaki hazır işletme adı kaldırıldı.
+- İşletme panelindeki demo randevu, demo müşteri, demo hatırlatma, demo takip ve demo AI öneri verileri kaldırıldı.
+- Yeni işletmeler artık otomatik demo müşteri/personel/hizmet kaydı oluşturmadan boş başlar.
+- Boş randevu, müşteri, takip, hatırlatma ve AI öneri kartları profesyonel boş durum ekranlarıyla gösterilir.
+- Not Asistan logo, PWA icon, favicon ve apple-touch-icon dosyaları yenilendi.
+- Manifest ve service worker icon yolları güncellendi.
+- Browser favicon ve mobil ana ekran ikonu profesyonel Not Asistan simgesiyle değiştirildi.
+- Landing page içindeki örnek kişi/işletme isimleri genel ifadelerle değiştirildi.
+- PWA cache adı v3.1.0 olarak güncellendi.
+
+Kontrol:
+1. `npm run build` ile production build alın.
+2. Giriş/kayıt alanlarında hazır metin kalmadığını kontrol edin.
+3. Yeni işletme oluşturulduğunda panelin boş ama düzgün açıldığını kontrol edin.
+4. PWA manifest ve ikonları tarayıcı geliştirici araçlarından kontrol edin.
+5. Vercel deploy sonrası favicon, logo ve müşteri paneli ikonlarının doğru göründüğünü kontrol edin.

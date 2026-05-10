@@ -1,11 +1,13 @@
-const CACHE_NAME = "notasistan-pwa-v0.7.0";
+const CACHE_NAME = "notasistan-pwa-v3.1.0";
 const APP_SHELL = [
   "/",
   "/manifest.webmanifest",
   "/icons/icon-192.png",
   "/icons/icon-512.png",
   "/icons/maskable-512.png",
-  "/icons/apple-touch-icon.png"
+  "/icons/apple-touch-icon.png",
+  "/icons/favicon.png",
+  "/favicon.ico"
 ];
 
 self.addEventListener("install", (event) => {

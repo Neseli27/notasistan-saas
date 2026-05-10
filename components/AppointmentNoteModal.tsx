@@ -180,7 +180,7 @@ export function AppointmentNoteModal({ tenantId, sector, appointment, onClose, o
         <form className="customerForm" onSubmit={handleSubmit}>
           <label>
             Yapılan işlem / görüşme notu *
-            <textarea value={rawNote} onChange={(event) => setRawNote(event.target.value)} placeholder="Örn. Araç yağ değişimi yapıldı, filtreler kontrol edildi. Bir sonraki bakım 10.000 km sonra..." rows={5} />
+            <textarea value={rawNote} onChange={(event) => setRawNote(event.target.value)} rows={5} />
           </label>
 
           <button type="button" className="smartSummaryButton" onClick={handleSmartSummary} disabled={aiLoading}>
@@ -190,18 +190,18 @@ export function AppointmentNoteModal({ tenantId, sector, appointment, onClose, o
 
           <label>
             Müşteriye gönderilecek kısa özet *
-            <textarea value={customerSummary} onChange={(event) => setCustomerSummary(event.target.value)} placeholder="Müşteriye gönderilecek sade ve profesyonel işlem özeti..." rows={4} />
+            <textarea value={customerSummary} onChange={(event) => setCustomerSummary(event.target.value)} rows={4} />
           </label>
 
           <label>
             İç not / personel notu
-            <textarea value={internalNote} onChange={(event) => setInternalNote(event.target.value)} placeholder="Sadece işletme/personel tarafından görülecek ek not..." rows={3} />
+            <textarea value={internalNote} onChange={(event) => setInternalNote(event.target.value)} rows={3} />
           </label>
 
           <div className="formGridTwo">
             <label>
               Sonraki yapılacak iş
-              <input value={nextAction} onChange={(event) => setNextAction(event.target.value)} placeholder="Örn. 30 gün sonra kontrol için ara" />
+              <input value={nextAction} onChange={(event) => setNextAction(event.target.value)} />
             </label>
             <label>
               Takip tarihi

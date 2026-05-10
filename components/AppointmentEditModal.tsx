@@ -14,14 +14,6 @@ interface AppointmentEditModalProps {
   onUpdated?: () => void;
 }
 
-const fallbackServiceSuggestions: Record<Sector, string[]> = {
-  beauty: ["Cilt Bakımı", "Saç Boyama", "Kaş Laminasyonu", "Protez Tırnak", "Lazer Epilasyon"],
-  clinic: ["Diş Kontrolü", "Kontrol Muayenesi", "Diyetisyen Görüşmesi", "Fizik Tedavi Seansı", "Sonuç Bilgilendirme"],
-  auto: ["Periyodik Bakım", "Yağ Değişimi", "Fren Balata Kontrolü", "Klima Bakımı", "Lastik Rot-Balans"],
-  education: ["Öğrenci Görüşmesi", "Veli Bilgilendirme", "Deneme Analizi", "Ödev Kontrolü", "Konu Takibi"],
-  consulting: ["Strateji Görüşmesi", "Teklif Değerlendirme", "Aylık Kontrol", "Rapor Görüşmesi", "Takip Toplantısı"],
-};
-
 const statusOptions: AppointmentStatus[] = ["Bekliyor", "Onaylandı", "Tamamlandı", "Gelmedi", "İptal"];
 
 function fallbackDate(date?: string) {
@@ -36,7 +28,7 @@ export function AppointmentEditModal({ sector, appointment, onClose, onUpdated }
   const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
 
   useEffect(() => {
-    if (!appointment.tenantId || appointment.tenantId === "demo") return;
+    if (!appointment.tenantId) return;
     const unsubscribeServices = listenServiceItems(appointment.tenantId, setServiceItems);
     const unsubscribeStaff = listenStaffMembers(appointment.tenantId, setStaffMembers);
     return () => {
@@ -48,9 +40,9 @@ export function AppointmentEditModal({ sector, appointment, onClose, onUpdated }
   const activeServices = useMemo(() => serviceItems.filter((item) => item.isActive), [serviceItems]);
   const services = useMemo(() => {
     const dynamic = activeServices.map((item) => item.name);
-    const defaults = dynamic.length > 0 ? dynamic : fallbackServiceSuggestions[sector];
-    return defaults.includes(appointment.service) ? defaults : [appointment.service, ...defaults];
-  }, [sector, appointment.service, activeServices]);
+    const base = appointment.service ? [appointment.service, ...dynamic.filter((item) => item !== appointment.service)] : dynamic;
+    return base.length > 0 ? base : ["Genel Randevu"];
+  }, [appointment.service, activeServices]);
   const activeStaff = useMemo(() => staffMembers.filter((item) => item.isActive), [staffMembers]);
 
   const [date, setDate] = useState(fallbackDate(appointment.date));
@@ -158,7 +150,7 @@ export function AppointmentEditModal({ sector, appointment, onClose, onUpdated }
             </label>
             <label>
               Kısa açıklama / alt işlem
-              <input value={subService} onChange={(event) => setSubService(event.target.value)} placeholder="Örn. 10.000 km, HydraFacial, veli görüşmesi..." />
+              <input value={subService} onChange={(event) => setSubService(event.target.value)} />
             </label>
           </div>
 
@@ -173,7 +165,7 @@ export function AppointmentEditModal({ sector, appointment, onClose, onUpdated }
 
           <label>
             Ön not
-            <textarea value={notes} onChange={(event) => setNotes(event.target.value)} placeholder="Randevu öncesi bilinmesi gereken kısa not..." rows={4} />
+            <textarea value={notes} onChange={(event) => setNotes(event.target.value)} rows={4} />
           </label>
 
           {error && <p className="formMessage errorMessage">{error}</p>}

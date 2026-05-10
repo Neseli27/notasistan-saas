@@ -20,7 +20,7 @@ const sectorOptions: { value: Sector; label: string; description: string }[] = [
 ];
 
 export function TenantSetup({ user, onCompleted }: TenantSetupProps) {
-  const [tenantName, setTenantName] = useState("Gülizar Güzellik Merkezi");
+  const [tenantName, setTenantName] = useState("");
   const [sector, setSector] = useState<Sector>("beauty");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);

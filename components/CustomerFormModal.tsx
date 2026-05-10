@@ -104,17 +104,17 @@ export function CustomerFormModal({ tenantId, sector, onClose, onCreated }: Cust
           <div className="formGridTwo">
             <label>
               {preset.customerLabel} adı *
-              <input value={name} onChange={(event) => setName(event.target.value)} placeholder="Ad Soyad" />
+              <input value={name} onChange={(event) => setName(event.target.value)} />
             </label>
             <label>
               Telefon *
-              <input value={phone} onChange={(event) => setPhone(event.target.value)} placeholder="05xx xxx xx xx" />
+              <input value={phone} onChange={(event) => setPhone(event.target.value)} />
             </label>
           </div>
 
           <label>
             E-posta
-            <input value={email} onChange={(event) => setEmail(event.target.value)} placeholder="ornek@notasistan.com" />
+            <input value={email} onChange={(event) => setEmail(event.target.value)} />
           </label>
 
           <div className="sectorFieldGrid">
@@ -132,7 +132,7 @@ export function CustomerFormModal({ tenantId, sector, onClose, onCreated }: Cust
 
           <label>
             Genel not
-            <textarea value={notes} onChange={(event) => setNotes(event.target.value)} placeholder="Müşteriyle ilgili kısa not, tercih veya sonraki adım..." rows={4} />
+            <textarea value={notes} onChange={(event) => setNotes(event.target.value)} rows={4} />
           </label>
 
           {error && <p className="formMessage errorMessage">{error}</p>}

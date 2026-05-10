@@ -181,8 +181,6 @@ export function MessageCenter({ tenantName, sector, reminders, followUps, onRemi
           {filteredItems.map((item) => {
             const ChannelIcon = getChannelIcon(item.channel);
             const isCompleted = item.status === "Gönderildi" || item.status === "Tamamlandı" || item.status === "İptal";
-            const isDemo = item.sourceType === "reminder" ? !item.reminder?.tenantId || item.reminder.tenantId === "demo" : !item.followUp?.tenantId || item.followUp.tenantId === "demo";
-
             return (
               <article className="messageItem" key={item.id}>
                 <div className="messageIcon"><ChannelIcon size={19} /></div>
@@ -205,25 +203,24 @@ export function MessageCenter({ tenantName, sector, reminders, followUps, onRemi
                     </button>
                     {item.sourceType === "reminder" && item.reminder && (
                       <>
-                        <button type="button" className="messageActionButton positive" disabled={isCompleted || isDemo} onClick={() => onReminderStatusChange?.(item.reminder as Reminder, "Gönderildi")}>
+                        <button type="button" className="messageActionButton positive" disabled={isCompleted} onClick={() => onReminderStatusChange?.(item.reminder as Reminder, "Gönderildi")}>
                           <CheckCircle2 size={15} /> Gönderildi
                         </button>
-                        <button type="button" className="messageActionButton danger" disabled={isCompleted || isDemo} onClick={() => onReminderStatusChange?.(item.reminder as Reminder, "İptal")}>
+                        <button type="button" className="messageActionButton danger" disabled={isCompleted} onClick={() => onReminderStatusChange?.(item.reminder as Reminder, "İptal")}>
                           <XCircle size={15} /> İptal
                         </button>
                       </>
                     )}
                     {item.sourceType === "followUp" && item.followUp && (
                       <>
-                        <button type="button" className="messageActionButton positive" disabled={isCompleted || isDemo} onClick={() => onFollowUpStatusChange?.(item.followUp as FollowUp, "Tamamlandı")}>
+                        <button type="button" className="messageActionButton positive" disabled={isCompleted} onClick={() => onFollowUpStatusChange?.(item.followUp as FollowUp, "Tamamlandı")}>
                           <CheckCircle2 size={15} /> Tamamla
                         </button>
-                        <button type="button" className="messageActionButton danger" disabled={isCompleted || isDemo} onClick={() => onFollowUpStatusChange?.(item.followUp as FollowUp, "İptal")}>
+                        <button type="button" className="messageActionButton danger" disabled={isCompleted} onClick={() => onFollowUpStatusChange?.(item.followUp as FollowUp, "İptal")}>
                           <XCircle size={15} /> İptal
                         </button>
                       </>
                     )}
-                    {isDemo && <span className="messageDemoHint">Demo kayıt</span>}
                   </div>
                 </div>
               </article>

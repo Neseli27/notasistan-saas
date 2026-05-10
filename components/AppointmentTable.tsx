@@ -56,11 +56,15 @@ export function AppointmentTable({
         <span className="alignRight">Durum</span>
       </div>
 
-      {appointments.map((item) => {
+      {appointments.length === 0 ? (
+        <div className="emptyStateBox compactEmptyState tableEmptyState">
+          <CalendarDays size={32} />
+          <b>Henüz randevu yok.</b>
+          <p>Yeni Randevu butonuyla ilk gerçek randevuyu oluşturabilirsiniz.</p>
+        </div>
+      ) : appointments.map((item) => {
         const isUpdating = updatingAppointmentId === item.id;
         const isDeleting = deletingAppointmentId === item.id;
-        const isDemoAppointment = item.tenantId === "demo";
-
         return (
           <div className={`${gridClass} tableRow`} key={item.id}>
             <strong>{item.time}</strong>
@@ -83,7 +87,7 @@ export function AppointmentTable({
             </div>
             <div className="statusCell">
               <div className="statusActionGroup">
-                {onStatusChange && !isDemoAppointment ? (
+                {onStatusChange ? (
                   <select
                     className={`statusSelect ${statusClass(item.status)}`}
                     value={item.status}
@@ -100,7 +104,7 @@ export function AppointmentTable({
                 )}
 
                 <div className="appointmentActionButtons">
-                  {onAddNote && item.customerId && !isDemoAppointment ? (
+                  {onAddNote && item.customerId ? (
                     <button className="noteActionButton" onClick={() => onAddNote(item)} title="İşlem notu ekle" type="button">
                       <FileText size={15} /> Not
                     </button>
@@ -110,7 +114,7 @@ export function AppointmentTable({
                     </button>
                   )}
 
-                  {onEdit && !isDemoAppointment && (
+                  {onEdit && (
                     <button className="rowIconButton editRowButton" type="button" title="Randevuyu düzenle" onClick={() => onEdit(item)}>
                       <Edit3 size={15} />
                     </button>
@@ -120,7 +124,7 @@ export function AppointmentTable({
                     <button
                       className="rowIconButton dangerRowButton"
                       type="button"
-                      title={isDemoAppointment ? "Demo randevuyu ekrandan kaldır" : "Randevuyu sil"}
+                      title="Randevuyu sil"
                       disabled={isDeleting}
                       onClick={() => onDelete(item)}
                     >
@@ -133,7 +137,7 @@ export function AppointmentTable({
           </div>
         );
       })}
-      <button className="moreLink">+ {showResourceColumn ? "2" : "3"} randevu daha⌄</button>
+      {appointments.length > 5 && <button className="moreLink">+ {appointments.length - 5} randevu daha⌄</button>}
     </section>
   );
 }
