@@ -1,24 +1,26 @@
-# Not Asistan v2.0 Codex Notu
+# Not Asistan v2.2 Codex Notu
 
-Bu sürümde müşteri panelinin mobil/PWA deneyimi güçlendirildi.
+Bu sürümde randevu yönetimi güçlendirildi.
 
 ## Beklenen davranış
 
-1. Müşteri paneli mobil ekranda uygulama hissi vermelidir.
-2. Üstte işletme adı, güvenli giriş bilgisi ve müşteri uygulaması vurgusu görünmelidir.
-3. Sıradaki randevu ayrı bir büyük kartta gösterilmelidir.
-4. Yeni randevu talebi, randevularım, işlem özetlerim ve taleplerim için hızlı işlem kartları olmalıdır.
-5. Mobilde altta sabit hızlı gezinme menüsü görünmelidir.
-6. PWA bannerı alttaki menüyle çakışmamalıdır.
-7. Mevcut randevu, erteleme, iptal ve işlem özeti akışları bozulmamalıdır.
+1. `AppointmentTable` içinde her randevu satırında durum seçimi, Not, Düzenle ve Sil aksiyonları görünmelidir.
+2. Düzenle aksiyonu `AppointmentEditModal` bileşenini açmalıdır.
+3. Düzenleme modalında tarih, saat, hizmet/işlem, alt açıklama, durum ve ön not alanları düzenlenebilmelidir.
+4. Kaydetme işlemi `updateAppointment` servisini çağırarak Firestore `appointments` belgesini güncellemelidir.
+5. Silme aksiyonu onay penceresi göstermeli ve onaydan sonra `deleteAppointment` servisiyle ilgili randevuyu silmelidir.
+6. Otomotiv panelinde tablo sağ aksiyon alanı taşmamalıdır.
+7. Mevcut müşteri, müşteri paneli, randevu talebi, erteleme/iptal talebi ve işlem notu akışları bozulmamalıdır.
 
 ## Kontrol edilecek dosyalar
 
-- `components/customer/CustomerPanel.tsx`
+- `components/AppointmentTable.tsx`
+- `components/AppointmentEditModal.tsx`
+- `components/Dashboard.tsx`
+- `lib/services/appointment-service.ts`
+- `types/domain.ts`
 - `app/globals.css`
-- `components/PwaInstallBanner.tsx`
-- `public/manifest.webmanifest`
 
 ## Sonraki önerilen adım
 
-v2.1 kapsamında işletme tarafında müşteri listesi ve müşteri detay sayfası geliştirilmelidir. Bu sayede müşteri kartı, işlem geçmişi, randevu geçmişi ve sektör özel alanları tek yerde yönetilebilir.
+v2.3 kapsamında personel ve hizmet/işlem tanımlama sistemi eklenmelidir. Randevu oluşturma ve düzenleme formları daha sonra bu gerçek hizmet/personel kayıtlarından beslenmelidir.

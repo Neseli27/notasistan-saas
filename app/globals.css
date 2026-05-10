@@ -3036,3 +3036,464 @@ h1 { font-size: 36px; line-height: 1.1; margin: 0 0 8px; letter-spacing: -1px; }
     bottom: 86px;
   }
 }
+
+/* v2.1 - Müşteri listesi ve müşteri detay sayfası */
+.customerDirectoryPanel {
+  grid-column: 1 / -1;
+}
+
+.customerDirectoryHeader {
+  align-items: flex-start;
+}
+
+.miniPrimaryButton {
+  min-height: 40px;
+  border: 0;
+  border-radius: 999px;
+  padding: 0 16px;
+  color: #fff;
+  background: linear-gradient(180deg, var(--theme-primary, #082c8a), var(--theme-primary-dark, #071d62));
+  font-weight: 850;
+  box-shadow: 0 10px 22px rgba(4, 25, 91, .16);
+}
+
+.customerDirectoryToolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 190px;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.customerSearchBox {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #dce5f3;
+  border-radius: 14px;
+  padding: 0 14px;
+  color: #64748b;
+  background: #fff;
+}
+
+.customerSearchBox input,
+.customerDirectoryToolbar select {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  color: var(--text);
+  background: transparent;
+  font-weight: 700;
+}
+
+.customerDirectoryToolbar select {
+  min-height: 48px;
+  border: 1px solid #dce5f3;
+  border-radius: 14px;
+  padding: 0 14px;
+  background: #fff;
+}
+
+.customerDirectoryStats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.customerDirectoryStats div {
+  border: 1px solid #e3eaf5;
+  border-radius: 15px;
+  background: linear-gradient(180deg, #fff, #f8fbff);
+  padding: 13px 14px;
+}
+
+.customerDirectoryStats span {
+  display: block;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.customerDirectoryStats strong {
+  display: block;
+  margin-top: 4px;
+  color: #0f172a;
+  font-size: 24px;
+}
+
+.customerEmptyDirectory {
+  min-height: 180px;
+  display: grid;
+  place-items: center;
+  gap: 8px;
+  text-align: center;
+  color: #64748b;
+  border: 1px dashed #d6e0ee;
+  border-radius: 18px;
+  background: #f8fbff;
+  padding: 28px;
+}
+
+.customerEmptyDirectory b {
+  color: #0f172a;
+  font-size: 18px;
+}
+
+.customerDirectoryTable {
+  overflow: hidden;
+  border: 1px solid #e6edf7;
+  border-radius: 17px;
+}
+
+.customerDirectoryTableHeader,
+.customerDirectoryRow {
+  display: grid;
+  grid-template-columns: minmax(230px, 1.1fr) minmax(210px, 1fr) 120px minmax(220px, 1fr) 34px;
+  gap: 12px;
+  align-items: center;
+}
+
+.customerDirectoryTableHeader {
+  padding: 12px 14px;
+  color: #64748b;
+  background: #f8fbff;
+  font-size: 12px;
+  font-weight: 900;
+  border-bottom: 1px solid #e6edf7;
+}
+
+.customerDirectoryRow {
+  width: 100%;
+  min-height: 78px;
+  border: 0;
+  border-bottom: 1px solid #e6edf7;
+  background: #fff;
+  padding: 12px 14px;
+  text-align: left;
+  color: var(--text);
+}
+
+.customerDirectoryRow:last-child {
+  border-bottom: 0;
+}
+
+.customerDirectoryRow:hover {
+  background: #f8fbff;
+}
+
+.customerDirectoryPerson {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.customerDirectoryPerson b,
+.customerDirectoryResource b {
+  display: block;
+  color: #0f172a;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.customerDirectoryPerson span,
+.customerDirectoryResource span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #64748b;
+  font-size: 12px;
+  margin-top: 3px;
+  min-width: 0;
+}
+
+.customerDirectoryResource {
+  min-width: 0;
+}
+
+.customerSegment {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 82px;
+  border-radius: 999px;
+  padding: 7px 11px;
+  color: #0c4a6e;
+  background: #e8f1ff;
+  font-size: 12px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.customerDirectoryNextAction {
+  color: #475569;
+  font-size: 13px;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.customerDirectoryNoResult {
+  margin: 0;
+  padding: 22px;
+  color: #64748b;
+  text-align: center;
+  font-weight: 800;
+}
+
+.customerDetailModal {
+  width: min(100%, 1040px);
+}
+
+.customerDetailGrid {
+  display: grid;
+  grid-template-columns: 1fr 1.3fr;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.customerDetailHero,
+.customerDetailKpis {
+  border: 1px solid #e4ebf6;
+  border-radius: 18px;
+  background: #f8fbff;
+  padding: 16px;
+}
+
+.customerDetailHero {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.customerDetailHero b,
+.customerDetailHero span {
+  display: block;
+}
+
+.customerDetailHero b {
+  color: var(--theme-primary, #0c48c7);
+  margin-bottom: 6px;
+}
+
+.customerDetailHero span {
+  color: #475569;
+  line-height: 1.35;
+}
+
+.customerDetailKpis {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.customerDetailKpis div {
+  border-radius: 15px;
+  background: #fff;
+  padding: 12px;
+  border: 1px solid #e8eef8;
+}
+
+.customerDetailKpis svg {
+  color: var(--theme-accent, #23d3ee);
+}
+
+.customerDetailKpis span,
+.customerDetailKpis strong {
+  display: block;
+}
+
+.customerDetailKpis span {
+  margin-top: 8px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.customerDetailKpis strong {
+  margin-top: 3px;
+  color: #0f172a;
+  font-size: 18px;
+}
+
+.customerDetailSections {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.customerDetailSections section {
+  border: 1px solid #e4ebf6;
+  border-radius: 18px;
+  background: #fff;
+  padding: 16px;
+}
+
+.customerDetailSections h3 {
+  margin: 0 0 10px;
+  color: #0f172a;
+  font-size: 16px;
+}
+
+.customerDetailSections p {
+  margin: 0;
+  color: #475569;
+  line-height: 1.5;
+}
+
+.customerDetailNextAction {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin-top: 12px;
+  border-radius: 14px;
+  padding: 12px;
+  color: #075985;
+  background: #e8f5ff;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.customerSectorDataList,
+.customerDetailMiniList {
+  display: grid;
+  gap: 8px;
+}
+
+.customerSectorDataList div,
+.customerDetailMiniList div {
+  display: grid;
+  gap: 2px;
+  border-bottom: 1px solid #edf2f8;
+  padding-bottom: 8px;
+}
+
+.customerSectorDataList div:last-child,
+.customerDetailMiniList div:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.customerSectorDataList span,
+.customerDetailMiniList span {
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.customerSectorDataList b,
+.customerDetailMiniList b {
+  color: #0f172a;
+  font-size: 13px;
+}
+
+@media (max-width: 1050px) {
+  .customerDirectoryTable {
+    overflow-x: auto;
+  }
+
+  .customerDirectoryTableHeader,
+  .customerDirectoryRow {
+    min-width: 900px;
+  }
+
+  .customerDetailGrid,
+  .customerDetailSections {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .customerDirectoryToolbar,
+  .customerDirectoryStats {
+    grid-template-columns: 1fr;
+  }
+
+  .customerDirectoryHeader {
+    flex-direction: column;
+  }
+
+  .miniPrimaryButton {
+    width: 100%;
+  }
+
+  .customerDetailKpis {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* v2.2 - Randevu düzenleme / silme / erteleme aksiyonları */
+.appointmentGrid {
+  grid-template-columns: 62px minmax(118px, 1.15fr) minmax(126px, 1fr) 220px;
+}
+
+.appointmentGridWithResource {
+  grid-template-columns: 54px minmax(112px, .85fr) minmax(128px, .95fr) minmax(112px, .85fr) 244px;
+}
+
+.statusActionGroup {
+  gap: 8px;
+}
+
+.appointmentActionButtons {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex: 0 0 auto;
+}
+
+.editRowButton {
+  color: var(--theme-primary, #0c48c7);
+  border-color: color-mix(in srgb, var(--theme-primary, #0c48c7) 20%, #d9e4f5);
+}
+
+.dangerRowButton {
+  color: #b91c1c;
+  border-color: #fecaca;
+  background: #fffafa;
+}
+
+.rowIconButton:disabled {
+  cursor: progress;
+  opacity: .62;
+}
+
+.appointmentEditModalCard {
+  width: min(900px, 100%);
+}
+
+.compactSummaryBox {
+  margin-bottom: 20px;
+}
+
+@media (max-width: 1450px) {
+  .appointmentGridWithResource {
+    grid-template-columns: 52px minmax(104px, .78fr) minmax(118px, .9fr) minmax(104px, .78fr) 232px;
+  }
+
+  .appointmentGrid {
+    grid-template-columns: 58px minmax(112px, 1.05fr) minmax(118px, .95fr) 210px;
+  }
+
+  .appointmentActionButtons { gap: 4px; }
+  .rowIconButton { width: 32px; height: 32px; }
+}
+
+@media (max-width: 1280px) {
+  .appointmentGridWithResource {
+    min-width: 760px;
+  }
+  .appointmentGrid:not(.appointmentGridWithResource) {
+    min-width: 660px;
+  }
+}
+
+@media (max-width: 760px) {
+  .appointmentActionButtons {
+    flex-wrap: wrap;
+  }
+}

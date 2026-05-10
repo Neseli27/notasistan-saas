@@ -1,7 +1,7 @@
 "use client";
 
 import type { Appointment, AppointmentStatus } from "@/types/domain";
-import { CalendarDays, FileText, MoreVertical } from "lucide-react";
+import { CalendarDays, Edit3, FileText, MoreVertical, Trash2 } from "lucide-react";
 
 interface AppointmentTableProps {
   title: string;
@@ -11,7 +11,10 @@ interface AppointmentTableProps {
   showResourceColumn?: boolean;
   onAddNote?: (appointment: Appointment) => void;
   onStatusChange?: (appointment: Appointment, status: AppointmentStatus) => Promise<void> | void;
+  onEdit?: (appointment: Appointment) => void;
+  onDelete?: (appointment: Appointment) => Promise<void> | void;
   updatingAppointmentId?: string | null;
+  deletingAppointmentId?: string | null;
 }
 
 const statusOptions: AppointmentStatus[] = ["Bekliyor", "Onaylandı", "Tamamlandı", "Gelmedi", "İptal"];
@@ -31,7 +34,10 @@ export function AppointmentTable({
   showResourceColumn,
   onAddNote,
   onStatusChange,
+  onEdit,
+  onDelete,
   updatingAppointmentId,
+  deletingAppointmentId,
 }: AppointmentTableProps) {
   const gridClass = showResourceColumn ? "appointmentGrid appointmentGridWithResource" : "appointmentGrid";
 
@@ -52,6 +58,7 @@ export function AppointmentTable({
 
       {appointments.map((item) => {
         const isUpdating = updatingAppointmentId === item.id;
+        const isDeleting = deletingAppointmentId === item.id;
 
         return (
           <div className={`${gridClass} tableRow`} key={item.id}>
@@ -91,15 +98,35 @@ export function AppointmentTable({
                   <span className={`status ${statusClass(item.status)}`} title={item.status}>{item.status}</span>
                 )}
 
-                {onAddNote && item.customerId ? (
-                  <button className="noteActionButton" onClick={() => onAddNote(item)} title="İşlem notu ekle">
-                    <FileText size={16} /> Not
-                  </button>
-                ) : (
-                  <button className="rowIconButton" type="button" title="Diğer işlemler">
-                    <MoreVertical size={18} />
-                  </button>
-                )}
+                <div className="appointmentActionButtons">
+                  {onAddNote && item.customerId ? (
+                    <button className="noteActionButton" onClick={() => onAddNote(item)} title="İşlem notu ekle" type="button">
+                      <FileText size={15} /> Not
+                    </button>
+                  ) : (
+                    <button className="rowIconButton" type="button" title="Diğer işlemler">
+                      <MoreVertical size={18} />
+                    </button>
+                  )}
+
+                  {onEdit && (
+                    <button className="rowIconButton editRowButton" type="button" title="Randevuyu düzenle" onClick={() => onEdit(item)}>
+                      <Edit3 size={15} />
+                    </button>
+                  )}
+
+                  {onDelete && (
+                    <button
+                      className="rowIconButton dangerRowButton"
+                      type="button"
+                      title="Randevuyu sil"
+                      disabled={isDeleting}
+                      onClick={() => onDelete(item)}
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           </div>

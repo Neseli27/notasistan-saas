@@ -1,6 +1,6 @@
 import { db } from "@/lib/firebase";
-import type { Appointment, AppointmentStatusLog, NewAppointmentInput, Sector } from "@/types/domain";
-import { addDoc, collection, doc, onSnapshot, query, serverTimestamp, updateDoc, where } from "firebase/firestore";
+import type { Appointment, AppointmentStatusLog, NewAppointmentInput, Sector, UpdateAppointmentInput } from "@/types/domain";
+import { addDoc, collection, deleteDoc, doc, onSnapshot, query, serverTimestamp, updateDoc, where } from "firebase/firestore";
 
 function getCustomerResource(sector: Sector, sectorData?: Record<string, string>) {
   if (!sectorData) return { resourceName: "", resourceDetail: "" };
@@ -168,6 +168,58 @@ export async function updateAppointmentStatus(appointment: Appointment, status: 
     service: appointment.service,
     previousStatus: appointment.status,
     newStatus: status,
+    message,
+    updatedBy: updatedBy || "",
+    createdAt: serverTimestamp(),
+  });
+
+  return message;
+}
+
+
+export async function updateAppointment(input: UpdateAppointmentInput) {
+  if (!input.appointmentId) throw new Error("Randevu kimliği bulunamadı.");
+
+  await updateDoc(doc(db, "appointments", input.appointmentId), {
+    date: input.date,
+    time: input.time,
+    service: input.service.trim(),
+    subService: input.subService.trim() || input.notes.trim() || "Ön not yok",
+    status: input.status,
+    notes: input.notes.trim(),
+    updatedAt: serverTimestamp(),
+  });
+}
+
+export async function deleteAppointment(appointmentId: string) {
+  if (!appointmentId) throw new Error("Randevu kimliği bulunamadı.");
+  await deleteDoc(doc(db, "appointments", appointmentId));
+}
+
+export async function rescheduleAppointment(appointment: Appointment, newDate: string, newTime: string, tenantName?: string, updatedBy?: string) {
+  if (!appointment.id) throw new Error("Randevu kimliği bulunamadı.");
+
+  const previousTime = [appointment.date, appointment.time].filter(Boolean).join(" ");
+  const newTimeText = [newDate, newTime].filter(Boolean).join(" ");
+  const businessName = tenantName || "Not Asistan";
+  const message = `Merhaba ${appointment.customerName}, ${businessName} için ${appointment.service} randevunuz ${previousTime} zamanından ${newTimeText} zamanına ertelenmiştir. Sizi bekliyoruz.`;
+
+  await updateDoc(doc(db, "appointments", appointment.id), {
+    date: newDate,
+    time: newTime,
+    status: "Onaylandı",
+    updatedAt: serverTimestamp(),
+  });
+
+  await addDoc(collection(db, "appointmentStatusLogs"), {
+    tenantId: appointment.tenantId,
+    appointmentId: appointment.id,
+    customerId: appointment.customerId || "",
+    customerName: appointment.customerName,
+    customerPhone: appointment.customerPhone,
+    service: appointment.service,
+    previousStatus: appointment.status,
+    newStatus: "Onaylandı",
     message,
     updatedBy: updatedBy || "",
     createdAt: serverTimestamp(),

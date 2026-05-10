@@ -1,0 +1,147 @@
+"use client";
+
+import { updateAppointment } from "@/lib/services/appointment-service";
+import { getSectorPreset } from "@/lib/sector-presets";
+import type { Appointment, AppointmentStatus, Sector } from "@/types/domain";
+import { CalendarClock, X } from "lucide-react";
+import { FormEvent, useMemo, useState } from "react";
+
+interface AppointmentEditModalProps {
+  sector: Sector;
+  appointment: Appointment;
+  onClose: () => void;
+  onUpdated?: () => void;
+}
+
+const serviceSuggestions: Record<Sector, string[]> = {
+  beauty: ["Cilt Bakımı", "Saç Boyama", "Kaş Laminasyonu", "Protez Tırnak", "Lazer Epilasyon"],
+  clinic: ["Diş Kontrolü", "Kontrol Muayenesi", "Diyetisyen Görüşmesi", "Fizik Tedavi Seansı", "Sonuç Bilgilendirme"],
+  auto: ["Periyodik Bakım", "Yağ Değişimi", "Fren Balata Kontrolü", "Klima Bakımı", "Lastik Rot-Balans"],
+  education: ["Öğrenci Görüşmesi", "Veli Bilgilendirme", "Deneme Analizi", "Ödev Kontrolü", "Konu Takibi"],
+  consulting: ["Strateji Görüşmesi", "Teklif Değerlendirme", "Aylık Kontrol", "Rapor Görüşmesi", "Takip Toplantısı"],
+};
+
+const statusOptions: AppointmentStatus[] = ["Bekliyor", "Onaylandı", "Tamamlandı", "Gelmedi", "İptal"];
+
+function fallbackDate(date?: string) {
+  if (date) return date;
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+}
+
+export function AppointmentEditModal({ sector, appointment, onClose, onUpdated }: AppointmentEditModalProps) {
+  const preset = getSectorPreset(sector);
+  const services = useMemo(() => {
+    const defaults = serviceSuggestions[sector];
+    return defaults.includes(appointment.service) ? defaults : [appointment.service, ...defaults];
+  }, [sector, appointment.service]);
+
+  const [date, setDate] = useState(fallbackDate(appointment.date));
+  const [time, setTime] = useState(appointment.time || "09:00");
+  const [service, setService] = useState(appointment.service || services[0]);
+  const [subService, setSubService] = useState(appointment.subService || "");
+  const [status, setStatus] = useState<AppointmentStatus>(appointment.status || "Bekliyor");
+  const [notes, setNotes] = useState(appointment.notes || "");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError("");
+
+    if (!date || !time || !service.trim()) {
+      setError("Tarih, saat ve işlem/hizmet alanı zorunludur.");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      await updateAppointment({
+        appointmentId: appointment.id,
+        date,
+        time,
+        service,
+        subService,
+        status,
+        notes,
+      });
+      onUpdated?.();
+      onClose();
+    } catch (err) {
+      console.error(err);
+      setError("Randevu güncellenemedi. Firebase bağlantısı ve Firestore kurallarını kontrol edin.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="modalBackdrop" role="dialog" aria-modal="true">
+      <section className="modalCard appointmentEditModalCard">
+        <div className="modalHeader">
+          <div>
+            <span className="eyebrow">{preset.label}</span>
+            <h2>Randevu Düzenle</h2>
+            <p>{appointment.customerName} için tarih, saat, işlem ve durum bilgilerini güncelleyin.</p>
+          </div>
+          <button className="modalClose" onClick={onClose} aria-label="Kapat"><X size={20} /></button>
+        </div>
+
+        <div className="appointmentSummaryBox compactSummaryBox">
+          <div className="avatar smallAvatar">{appointment.avatar}</div>
+          <div>
+            <b>{appointment.customerName}</b>
+            <p>{appointment.customerPhone}</p>
+            {appointment.resourceName && <p>{appointment.resourceName} {appointment.resourceDetail ? `• ${appointment.resourceDetail}` : ""}</p>}
+          </div>
+          <span className="status approved"><CalendarClock size={14} /> {appointment.date} {appointment.time}</span>
+        </div>
+
+        <form className="customerForm" onSubmit={handleSubmit}>
+          <div className="formGridTwo">
+            <label>
+              Randevu tarihi *
+              <input type="date" value={date} onChange={(event) => setDate(event.target.value)} />
+            </label>
+            <label>
+              Randevu saati *
+              <input type="time" value={time} onChange={(event) => setTime(event.target.value)} />
+            </label>
+          </div>
+
+          <div className="formGridTwo">
+            <label>
+              {preset.serviceColumnLabel} / hizmet *
+              <select value={service} onChange={(event) => setService(event.target.value)}>
+                {services.map((item) => <option key={item} value={item}>{item}</option>)}
+              </select>
+            </label>
+            <label>
+              Durum
+              <select value={status} onChange={(event) => setStatus(event.target.value as AppointmentStatus)}>
+                {statusOptions.map((item) => <option key={item} value={item}>{item}</option>)}
+              </select>
+            </label>
+          </div>
+
+          <label>
+            Kısa açıklama / alt işlem
+            <input value={subService} onChange={(event) => setSubService(event.target.value)} placeholder="Örn. 10.000 km, HydraFacial, veli görüşmesi..." />
+          </label>
+
+          <label>
+            Ön not
+            <textarea value={notes} onChange={(event) => setNotes(event.target.value)} placeholder="Randevu öncesi bilinmesi gereken kısa not..." rows={4} />
+          </label>
+
+          {error && <p className="formMessage errorMessage">{error}</p>}
+
+          <div className="modalActions">
+            <button type="button" className="secondaryButton compactButton" onClick={onClose}>Vazgeç</button>
+            <button type="submit" className="primaryButton compactButton" disabled={saving}>{saving ? "Güncelleniyor..." : "Randevuyu Güncelle"}</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  );
+}

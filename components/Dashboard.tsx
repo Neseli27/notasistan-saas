@@ -2,11 +2,13 @@
 
 import { AiSuggestions } from "@/components/AiSuggestions";
 import { AppointmentFormModal } from "@/components/AppointmentFormModal";
+import { AppointmentEditModal } from "@/components/AppointmentEditModal";
 import { AppointmentNoteModal } from "@/components/AppointmentNoteModal";
 import { AppointmentTable } from "@/components/AppointmentTable";
 import { BookingRequestsCard } from "@/components/BookingRequestsCard";
 import { CalendarCard } from "@/components/CalendarCard";
 import { CustomerCard } from "@/components/CustomerCard";
+import { CustomerDirectory } from "@/components/CustomerDirectory";
 import { CustomerActionRequestsCard } from "@/components/CustomerActionRequestsCard";
 import { CustomerFormModal } from "@/components/CustomerFormModal";
 import { FollowUpsCard } from "@/components/FollowUpsCard";
@@ -16,7 +18,7 @@ import { Sidebar } from "@/components/Sidebar";
 import { StatCard } from "@/components/StatCard";
 import { StatusHistoryCard } from "@/components/StatusHistoryCard";
 import { StatusMessageBanner } from "@/components/StatusMessageBanner";
-import { listenAppointments, listenAppointmentStatusLogs, updateAppointmentStatus } from "@/lib/services/appointment-service";
+import { deleteAppointment, listenAppointments, listenAppointmentStatusLogs, updateAppointmentStatus } from "@/lib/services/appointment-service";
 import { listenAppointmentNotes, listenFollowUps, listenReminders } from "@/lib/services/appointment-note-service";
 import { listenCustomers } from "@/lib/services/customer-service";
 import { convertBookingRequestToAppointment, ensurePublicTenant, listenBookingRequests, rejectBookingRequest } from "@/lib/services/public-booking-service";
@@ -70,12 +72,14 @@ export function Dashboard({ user, profile }: DashboardProps) {
   const [appointmentStatusMessage, setAppointmentStatusMessage] = useState("");
   const [statusDraftMessage, setStatusDraftMessage] = useState<{ customerName: string; message: string } | null>(null);
   const [updatingAppointmentId, setUpdatingAppointmentId] = useState<string | null>(null);
+  const [deletingAppointmentId, setDeletingAppointmentId] = useState<string | null>(null);
   const [convertingRequestId, setConvertingRequestId] = useState<string | null>(null);
   const [rejectingRequestId, setRejectingRequestId] = useState<string | null>(null);
   const [processingActionRequestId, setProcessingActionRequestId] = useState<string | null>(null);
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
   const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
   const [selectedAppointmentForNote, setSelectedAppointmentForNote] = useState<Appointment | null>(null);
+  const [selectedAppointmentForEdit, setSelectedAppointmentForEdit] = useState<Appointment | null>(null);
 
 
   useEffect(() => {
@@ -275,6 +279,29 @@ export function Dashboard({ user, profile }: DashboardProps) {
       setAppointmentError("Randevu durumu güncellenemedi. Firestore bağlantısını kontrol edin.");
     } finally {
       setUpdatingAppointmentId(null);
+    }
+  }
+
+
+  async function handleDeleteAppointment(appointment: Appointment) {
+    if (!appointment.id) return;
+
+    const approved = window.confirm(`${appointment.customerName} için ${appointment.date || "tarihsiz"} ${appointment.time} randevusunu silmek istiyor musunuz? Bu işlem randevu kaydını kaldırır.`);
+    if (!approved) return;
+
+    setAppointmentError("");
+    setAppointmentStatusMessage("");
+    setDeletingAppointmentId(appointment.id);
+
+    try {
+      await deleteAppointment(appointment.id);
+      setAppointmentStatusMessage(`${appointment.customerName} randevusu silindi.`);
+      window.setTimeout(() => setAppointmentStatusMessage(""), 2800);
+    } catch (error) {
+      console.error("Randevu silinemedi:", error);
+      setAppointmentError("Randevu silinemedi. Firestore bağlantısını ve kurallarını kontrol edin.");
+    } finally {
+      setDeletingAppointmentId(null);
     }
   }
 
@@ -481,10 +508,22 @@ export function Dashboard({ user, profile }: DashboardProps) {
               showResourceColumn={preset.sector === "auto"}
               onAddNote={setSelectedAppointmentForNote}
               onStatusChange={handleAppointmentStatusChange}
+              onEdit={setSelectedAppointmentForEdit}
+              onDelete={handleDeleteAppointment}
               updatingAppointmentId={updatingAppointmentId}
+              deletingAppointmentId={deletingAppointmentId}
             />
             <AiSuggestions suggestions={visibleSuggestions} sector={preset.sector} />
             <CustomerCard customer={featuredCustomer} customerLabel={preset.sector === "auto" ? "Müşteri & Araç" : preset.customerLabel} historyLabel={historyLabel} />
+            <CustomerDirectory
+              customers={customers}
+              appointments={appointments}
+              appointmentNotes={appointmentNotes}
+              customerLabel={preset.customerLabel}
+              sector={preset.sector}
+              historyLabel={historyLabel}
+              onAddCustomer={() => setIsCustomerModalOpen(true)}
+            />
             <BookingRequestsCard
               requests={bookingRequests}
               publicUrl={publicBookingUrl}
@@ -533,6 +572,18 @@ export function Dashboard({ user, profile }: DashboardProps) {
           sector={preset.sector}
           appointment={selectedAppointmentForNote}
           onClose={() => setSelectedAppointmentForNote(null)}
+        />
+      )}
+
+      {selectedAppointmentForEdit && (
+        <AppointmentEditModal
+          sector={preset.sector}
+          appointment={selectedAppointmentForEdit}
+          onClose={() => setSelectedAppointmentForEdit(null)}
+          onUpdated={() => {
+            setAppointmentStatusMessage(`${selectedAppointmentForEdit.customerName} randevusu güncellendi.`);
+            window.setTimeout(() => setAppointmentStatusMessage(""), 2800);
+          }}
         />
       )}
     </div>
