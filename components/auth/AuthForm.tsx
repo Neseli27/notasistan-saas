@@ -9,7 +9,7 @@ import {
   updateProfile,
 } from "firebase/auth";
 import { ArrowRight, LockKeyhole, Mail, Sparkles, UserRound } from "lucide-react";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 
 type Mode = "login" | "register";
 
@@ -45,6 +45,23 @@ export function AuthForm() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  function clearAuthFields() {
+    setDisplayName("");
+    setEmail("");
+    setPassword("");
+  }
+
+  function handleModeChange(nextMode: Mode) {
+    setMode(nextMode);
+    setError(null);
+    setStatus(null);
+    clearAuthFields();
+  }
+
+  useEffect(() => {
+    clearAuthFields();
+  }, []);
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSubmitting(true);
@@ -55,9 +72,11 @@ export function AuthForm() {
       if (mode === "register") {
         const credential = await createUserWithEmailAndPassword(auth, email, password);
         await updateProfile(credential.user, { displayName: displayName.trim() || "Not Asistan Kullanıcısı" });
+        clearAuthFields();
         setStatus("Kayıt başarılı. Şimdi işletme bilgilerinizi oluşturalım.");
       } else {
         await signInWithEmailAndPassword(auth, email, password);
+        clearAuthFields();
         setStatus("Giriş başarılı. Panel hazırlanıyor.");
       }
     } catch (err) {
@@ -117,26 +136,26 @@ export function AuthForm() {
         </div>
 
         <div className="authSwitch">
-          <button className={mode === "login" ? "selected" : ""} onClick={() => setMode("login")}>Giriş</button>
-          <button className={mode === "register" ? "selected" : ""} onClick={() => setMode("register")}>Kayıt</button>
+          <button type="button" className={mode === "login" ? "selected" : ""} onClick={() => handleModeChange("login")}>Giriş</button>
+          <button type="button" className={mode === "register" ? "selected" : ""} onClick={() => handleModeChange("register")}>Kayıt</button>
         </div>
 
-        <form onSubmit={handleSubmit} className="authForm">
+        <form onSubmit={handleSubmit} className="authForm" autoComplete="off" key={mode}>
           {mode === "register" && (
             <label>
               <span>Ad soyad</span>
-              <div className="inputWithIcon"><UserRound size={18} /><input value={displayName} onChange={(e) => setDisplayName(e.target.value)} /></div>
+              <div className="inputWithIcon"><UserRound size={18} /><input name={`not-asistan-display-${mode}`} autoComplete="off" value={displayName} onChange={(e) => setDisplayName(e.target.value)} /></div>
             </label>
           )}
 
           <label>
             <span>E-posta</span>
-            <div className="inputWithIcon"><Mail size={18} /><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required /></div>
+            <div className="inputWithIcon"><Mail size={18} /><input name={`not-asistan-email-${mode}`} type="email" autoComplete="off" inputMode="email" value={email} onChange={(e) => setEmail(e.target.value)} required /></div>
           </label>
 
           <label>
             <span>Şifre</span>
-            <div className="inputWithIcon"><LockKeyhole size={18} /><input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} /></div>
+            <div className="inputWithIcon"><LockKeyhole size={18} /><input name={`not-asistan-password-${mode}`} type="password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} /></div>
           </label>
 
           {error && <p className="formMessage errorMessage">{error}</p>}

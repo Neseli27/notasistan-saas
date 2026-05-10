@@ -89,3 +89,9 @@ Yeni geliştirmelerde marketing sayfaları public kalmalı; Firebase auth zorunl
 - PWA ikonları `/public/icons` içinde tutulur; genel marka görselleri `/public/brand` içindedir.
 - Manifest, metadata ve service worker ikon yolları güncel tutulmalıdır.
 - Yeni boş durum tasarımlarını koru; randevu/müşteri yokken demo tablo göstermeyin.
+
+
+## v3.1.1 Form Temizleme Düzeltmesi
+- Giriş ve kayıt formlarında önceki yazılan ad, e-posta ve şifre değerlerinin görünmesi engellendi.
+- İşletme paneli, müşteri paneli ve ilk kurulum formlarında otomatik doldurma/persist sorunlarına karşı `autocomplete` ayarları güncellendi.
+- Giriş/kayıt modu değişince form alanları temizlenir. Başarılı giriş/kayıt sonrası hassas alanlar sıfırlanır.

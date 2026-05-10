@@ -146,3 +146,9 @@ Kontrol:
 3. Yeni işletme oluşturulduğunda panelin boş ama düzgün açıldığını kontrol edin.
 4. PWA manifest ve ikonları tarayıcı geliştirici araçlarından kontrol edin.
 5. Vercel deploy sonrası favicon, logo ve müşteri paneli ikonlarının doğru göründüğünü kontrol edin.
+
+
+## v3.1.1 Form Temizleme Düzeltmesi
+- Giriş ve kayıt formlarında önceki yazılan ad, e-posta ve şifre değerlerinin görünmesi engellendi.
+- İşletme paneli, müşteri paneli ve ilk kurulum formlarında otomatik doldurma/persist sorunlarına karşı `autocomplete` ayarları güncellendi.
+- Giriş/kayıt modu değişince form alanları temizlenir. Başarılı giriş/kayıt sonrası hassas alanlar sıfırlanır.

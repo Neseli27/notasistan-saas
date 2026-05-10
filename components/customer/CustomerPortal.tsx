@@ -109,6 +109,24 @@ export function CustomerPortal({ slug }: CustomerPortalProps) {
     return unsubscribe;
   }, []);
 
+  function clearAuthFields() {
+    setDisplayName("");
+    setPhone("");
+    setEmail("");
+    setPassword("");
+  }
+
+  function handleModeChange(nextMode: Mode) {
+    setMode(nextMode);
+    setError(null);
+    setStatus(null);
+    clearAuthFields();
+  }
+
+  useEffect(() => {
+    clearAuthFields();
+  }, []);
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!tenant) return;
@@ -137,9 +155,11 @@ export function CustomerPortal({ slug }: CustomerPortalProps) {
           phone,
         });
         setProfile(createdProfile);
+        clearAuthFields();
         setStatus("Müşteri hesabınız oluşturuldu. Paneliniz hazırlanıyor.");
       } else {
         await signInWithEmailAndPassword(auth, email, password);
+        clearAuthFields();
         setStatus("Giriş başarılı. Müşteri paneliniz hazırlanıyor.");
       }
     } catch (err) {
@@ -228,32 +248,32 @@ export function CustomerPortal({ slug }: CustomerPortalProps) {
         <p>{mode === "login" ? "Daha önce hesap oluşturduysanız giriş yapın." : "Randevularınızı takip etmek için müşteri hesabınızı oluşturun."}</p>
 
         <div className="authSwitch customerSwitch">
-          <button className={mode === "login" ? "selected" : ""} onClick={() => setMode("login")}>Giriş</button>
-          <button className={mode === "register" ? "selected" : ""} onClick={() => setMode("register")}>Kayıt</button>
+          <button type="button" className={mode === "login" ? "selected" : ""} onClick={() => handleModeChange("login")}>Giriş</button>
+          <button type="button" className={mode === "register" ? "selected" : ""} onClick={() => handleModeChange("register")}>Kayıt</button>
         </div>
 
-        <form onSubmit={handleSubmit} className="authForm">
+        <form onSubmit={handleSubmit} className="authForm" autoComplete="off" key={mode}>
           {mode === "register" && (
             <>
               <label>
                 <span>Ad soyad</span>
-                <div className="inputWithIcon"><UserRound size={18} /><input value={displayName} onChange={(e) => setDisplayName(e.target.value)} required /></div>
+                <div className="inputWithIcon"><UserRound size={18} /><input name={`not-asistan-customer-name-${mode}`} autoComplete="off" value={displayName} onChange={(e) => setDisplayName(e.target.value)} required /></div>
               </label>
               <label>
                 <span>Telefon</span>
-                <div className="inputWithIcon"><Phone size={18} /><input value={phone} onChange={(e) => setPhone(e.target.value)} required /></div>
+                <div className="inputWithIcon"><Phone size={18} /><input name={`not-asistan-customer-phone-${mode}`} autoComplete="off" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} required /></div>
               </label>
             </>
           )}
 
           <label>
             <span>E-posta</span>
-            <div className="inputWithIcon"><Mail size={18} /><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required /></div>
+            <div className="inputWithIcon"><Mail size={18} /><input name={`not-asistan-customer-email-${mode}`} type="email" autoComplete="off" inputMode="email" value={email} onChange={(e) => setEmail(e.target.value)} required /></div>
           </label>
 
           <label>
             <span>Şifre</span>
-            <div className="inputWithIcon"><LockKeyhole size={18} /><input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} /></div>
+            <div className="inputWithIcon"><LockKeyhole size={18} /><input name={`not-asistan-customer-password-${mode}`} type="password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} /></div>
           </label>
 
           {isWrongAccount && <p className="formMessage errorMessage">Bu oturum bu işletmenin müşteri paneliyle eşleşmiyor. Lütfen çıkış yapıp doğru müşteri hesabıyla giriş yapın.</p>}
@@ -267,7 +287,7 @@ export function CustomerPortal({ slug }: CustomerPortalProps) {
         </form>
 
         {mode === "login" && <button className="textButton" onClick={handlePasswordReset}>Şifremi unuttum</button>}
-        {firebaseUser && <button className="textButton" onClick={() => signOut(auth)}>Bu oturumdan çık</button>}
+        {firebaseUser && <button className="textButton" onClick={async () => { clearAuthFields(); await signOut(auth); }}>Bu oturumdan çık</button>}
       </section>
     </main>
   );

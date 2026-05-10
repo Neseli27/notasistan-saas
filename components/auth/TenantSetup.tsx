@@ -35,9 +35,10 @@ export function TenantSetup({ user, onCompleted }: TenantSetupProps) {
         uid: user.uid,
         email: user.email || "",
         displayName: user.displayName || "Not Asistan Kullanıcısı",
-        tenantName,
+        tenantName: tenantName.trim(),
         sector,
       });
+      setTenantName("");
       onCompleted(profile);
     } catch (err) {
       console.error(err);
@@ -56,10 +57,10 @@ export function TenantSetup({ user, onCompleted }: TenantSetupProps) {
           Not Asistan çok işletmeli SaaS mantığıyla çalışır. Her işletmenin müşterileri, randevuları ve işlem notları ayrı tutulur.
         </p>
 
-        <form className="tenantForm" onSubmit={handleSubmit}>
+        <form className="tenantForm" onSubmit={handleSubmit} autoComplete="off">
           <label>
             <span>İşletme adı</span>
-            <div className="inputWithIcon"><Building2 size={18} /><input value={tenantName} onChange={(e) => setTenantName(e.target.value)} required /></div>
+            <div className="inputWithIcon"><Building2 size={18} /><input name="not-asistan-tenant-name" autoComplete="off" value={tenantName} onChange={(e) => setTenantName(e.target.value)} required /></div>
           </label>
 
           <div className="sectorGrid">
