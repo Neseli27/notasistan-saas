@@ -55,3 +55,16 @@ ayrı ayrı düşünülmelidir. Geniş `match /{document=**}` kuralı kapalıdı
 ## v2.8 kapsamı
 
 Tema ve marka ayarları eklendi. `components/AppearanceSettings.tsx` ve `lib/services/appearance-service.ts` dosyaları görünüm ayarlarını yönetir. Ayarlar Firestore'da tenant belgesinin `appearance` alanına ve public profilin `appearance` alanına yazılır. Public sayfa ve müşteri paneli `--theme-primary`, `--theme-accent` CSS değişkenleriyle dinamik renklendirilir.
+
+## v2.9 kapsamı
+
+Public landing page ve fiyatlandırma sayfası eklendi.
+
+Kritik dosyalar:
+- `components/marketing/MarketingLandingPage.tsx`
+- `app/tanitim/page.tsx`
+- `app/fiyatlandirma/page.tsx`
+- `components/auth/AuthForm.tsx`
+- `app/globals.css`
+
+Yeni geliştirmelerde marketing sayfaları public kalmalı; Firebase auth zorunluluğu olmamalıdır. `/` mevcut işletme giriş/panel akışını korur.

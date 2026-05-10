@@ -101,6 +101,10 @@ export function AuthForm() {
           <div><strong>Hatırlatma</strong><span>Tekrar geliş ve kontrol zamanı</span></div>
           <div><strong>AI Asistan</strong><span>Mesaj ve özet taslakları</span></div>
         </div>
+        <div className="authMarketingLinks">
+          <a href="/tanitim">Tanıtım sayfasını gör</a>
+          <a href="/fiyatlandirma">Paketleri incele</a>
+        </div>
       </section>
 
       <section className="authCard">

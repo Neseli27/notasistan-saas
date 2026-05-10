@@ -97,3 +97,19 @@ Test:
 2. Özel tema seçip renkleri değiştirin.
 3. Kaydet butonuna basın.
 4. Randevu sayfası ve müşteri paneli linklerini açıp renklerin yansıdığını kontrol edin.
+
+## v2.9 - Landing page ve fiyatlandırma
+
+Bu sürümde uygulamanın dış dünyaya görünen tanıtım yüzü eklendi.
+
+- `/tanitim` public tanıtım sayfası oluşturuldu.
+- `/fiyatlandirma` fiyatlandırma/paket sayfası oluşturuldu.
+- Özellikler, sektörler, paketler ve çağrı alanları eklendi.
+- Login ekranından tanıtım ve paket sayfalarına bağlantı eklendi.
+- Tasarım Not Asistan marka diliyle uyumlu, mobil uyumlu ve public erişime açıktır.
+
+Test:
+1. `http://localhost:3000/tanitim` adresini açın.
+2. `http://localhost:3000/fiyatlandirma` adresini açın.
+3. Giriş ekranındaki tanıtım/paket bağlantılarını kontrol edin.
+4. Vercel deploy sonrası aynı sayfaları canlı linkte kontrol edin.

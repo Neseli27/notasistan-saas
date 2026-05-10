@@ -4091,3 +4091,173 @@ h1 { font-size: 36px; line-height: 1.1; margin: 0 0 8px; letter-spacing: -1px; }
   vertical-align: middle;
   margin-right: 6px;
 }
+
+/* v2.9 Marketing landing and pricing */
+.marketingPage {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 8% 8%, rgba(35, 211, 238, .18), transparent 34%),
+    radial-gradient(circle at 88% 0%, rgba(12, 72, 199, .12), transparent 30%),
+    linear-gradient(180deg, #f7fbff 0%, #eef4fb 100%);
+  color: var(--text);
+  padding: 24px;
+}
+.marketingNav {
+  max-width: 1180px;
+  margin: 0 auto 38px;
+  min-height: 72px;
+  border: 1px solid rgba(226, 234, 246, .95);
+  border-radius: 24px;
+  background: rgba(255,255,255,.78);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 18px 50px rgba(24, 45, 90, .07);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 14px 18px;
+}
+.marketingBrand { display: inline-flex; align-items: center; gap: 12px; font-size: 22px; font-weight: 900; }
+.marketingBrandMark {
+  width: 42px;
+  height: 42px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  background: linear-gradient(135deg, var(--navy-900), var(--cyan-400));
+  box-shadow: 0 12px 28px rgba(8, 40, 109, .18);
+}
+.marketingNav nav { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.marketingNav nav a {
+  padding: 10px 13px;
+  border-radius: 12px;
+  color: #243554;
+  font-weight: 800;
+  font-size: 14px;
+}
+.marketingNav nav a:hover { background: #eef5ff; color: #0c48c7; }
+.marketingHero {
+  max-width: 1180px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1.02fr) minmax(360px, .82fr);
+  gap: 28px;
+  align-items: center;
+}
+.marketingHeroText, .marketingHeroCard, .marketingSection, .marketingCta {
+  border: 1px solid rgba(226, 234, 246, .95);
+  border-radius: 30px;
+  background: rgba(255,255,255,.86);
+  box-shadow: 0 24px 70px rgba(24, 45, 90, .09);
+}
+.marketingHeroText { padding: 54px; }
+.marketingEyebrow, .sectionHeading span, .marketingCta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 999px;
+  background: #e9f6ff;
+  color: #0c48c7;
+  padding: 9px 13px;
+  font-weight: 900;
+  font-size: 14px;
+}
+.marketingHero h1 {
+  margin: 22px 0 18px;
+  font-size: clamp(42px, 5vw, 70px);
+  line-height: .98;
+  letter-spacing: -2.4px;
+  color: #061642;
+}
+.marketingHero p, .sectionHeading p, .marketingCta p {
+  color: var(--muted);
+  font-size: 18px;
+  line-height: 1.7;
+  margin: 0;
+}
+.marketingActions { display: flex; gap: 14px; flex-wrap: wrap; margin: 30px 0 22px; }
+.marketingPrimary, .marketingSecondary {
+  min-height: 52px;
+  border-radius: 15px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 0 22px;
+  font-weight: 900;
+}
+.marketingPrimary {
+  color: #fff;
+  background: linear-gradient(180deg, #08308e, #061b4f);
+  box-shadow: 0 16px 34px rgba(7, 31, 91, .20);
+}
+.marketingSecondary { color: #0c2270; border: 1px solid #b9c7df; background: #fff; }
+.marketingPrimary.full, .marketingSecondary.full { width: 100%; margin-top: 20px; }
+.marketingTrustRow { display: flex; flex-wrap: wrap; gap: 10px; color: #254061; font-weight: 800; }
+.marketingTrustRow span { display: inline-flex; align-items: center; gap: 6px; background: #f4f8fe; border: 1px solid #e4ecf8; padding: 8px 10px; border-radius: 999px; font-size: 13px; }
+.marketingHeroCard { padding: 26px; }
+.heroCardHeader { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; color: #0b1a42; }
+.heroCardHeader span { display: inline-flex; align-items: center; gap: 8px; font-weight: 900; }
+.heroStatsMini { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+.heroStatsMini div { border-radius: 18px; padding: 18px; background: #f3f7fd; border: 1px solid #e6eefb; }
+.heroStatsMini strong { display: block; font-size: 32px; color: #061b4f; }
+.heroStatsMini span { color: var(--muted); font-weight: 800; font-size: 13px; }
+.heroTimeline { display: grid; gap: 10px; }
+.heroTimeline div { display: grid; grid-template-columns: 64px 1fr auto; gap: 12px; align-items: center; padding: 14px; background: #fff; border: 1px solid #e6eefb; border-radius: 16px; }
+.heroTimeline b { color: #0c48c7; }
+.heroTimeline span { font-weight: 850; }
+.heroTimeline em { font-style: normal; border-radius: 999px; background: #e8f8ef; color: #0b7e5f; padding: 7px 10px; font-weight: 900; font-size: 12px; }
+.heroAiBox { display: flex; gap: 14px; align-items: flex-start; margin-top: 14px; border-radius: 18px; padding: 16px; color: #0a3b58; background: #e8f9ff; border: 1px solid #cdeffa; }
+.heroAiBox p { font-size: 15px; line-height: 1.5; }
+.marketingSection { max-width: 1180px; margin: 28px auto 0; padding: 42px; }
+.sectionHeading { text-align: center; max-width: 760px; margin: 0 auto 28px; }
+.sectionHeading.alignLeft { text-align: left; margin: 0; }
+.sectionHeading h2, .marketingCta h2 { font-size: clamp(30px, 3vw, 48px); line-height: 1.05; letter-spacing: -1.5px; margin: 16px 0 12px; }
+.featureGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.featureCard, .priceCard, .sectorItem {
+  border-radius: 22px;
+  background: #fff;
+  border: 1px solid #e5edf8;
+  box-shadow: 0 16px 40px rgba(24, 45, 90, .055);
+}
+.featureCard { padding: 24px; }
+.featureCard svg { color: #0c48c7; }
+.featureCard h3 { margin: 16px 0 8px; font-size: 20px; }
+.featureCard p, .sectorItem p, .priceCard p { color: var(--muted); line-height: 1.55; margin: 0; }
+.marketingSection.split { display: grid; grid-template-columns: .9fr 1.1fr; gap: 28px; align-items: center; }
+.sectorList { display: grid; gap: 14px; }
+.sectorItem { display: flex; gap: 14px; padding: 20px; align-items: flex-start; }
+.sectorItem svg { color: var(--green); flex-shrink: 0; }
+.sectorItem b { display: block; font-size: 18px; margin-bottom: 5px; }
+.pricingGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.priceCard { padding: 26px; position: relative; }
+.priceCard.highlighted { border-color: #0c48c7; box-shadow: 0 24px 70px rgba(12, 72, 199, .14); transform: translateY(-6px); }
+.priceCard > span { display: inline-flex; border-radius: 999px; background: #eef5ff; color: #0c48c7; padding: 7px 10px; font-weight: 900; font-size: 13px; }
+.priceCard h3 { font-size: 24px; margin: 18px 0 8px; }
+.priceCard strong { display: block; font-size: 42px; color: #061b4f; margin-bottom: 12px; }
+.priceCard small { font-size: 15px; color: var(--muted); }
+.priceCard ul { list-style: none; padding: 0; margin: 22px 0 0; display: grid; gap: 12px; }
+.priceCard li { display: flex; align-items: center; gap: 9px; color: #233451; font-weight: 760; }
+.priceCard li svg { color: var(--green); flex-shrink: 0; }
+.pricingFocus { outline: 3px solid rgba(35, 211, 238, .18); }
+.marketingCta { max-width: 1180px; margin: 28px auto 0; padding: 40px; display: flex; align-items: center; justify-content: space-between; gap: 24px; background: linear-gradient(135deg, #071d62, #0a4d9a); color: #fff; }
+.marketingCta h2, .marketingCta p { color: #fff; }
+.marketingCta span { background: rgba(255,255,255,.12); color: #dff8ff; }
+.marketingCta .marketingPrimary { background: #fff; color: #061b4f; box-shadow: none; }
+.authMarketingLinks { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 10px; }
+.authMarketingLinks a { color: #fff; font-weight: 900; border: 1px solid rgba(255,255,255,.24); border-radius: 999px; padding: 10px 14px; background: rgba(255,255,255,.12); }
+
+@media (max-width: 980px) {
+  .marketingHero, .marketingSection.split, .pricingGrid, .featureGrid { grid-template-columns: 1fr; }
+  .marketingHeroText { padding: 34px; }
+  .marketingCta { align-items: flex-start; flex-direction: column; }
+}
+
+@media (max-width: 620px) {
+  .marketingPage { padding: 12px; }
+  .marketingNav { border-radius: 18px; align-items: flex-start; flex-direction: column; }
+  .marketingNav nav { justify-content: flex-start; }
+  .marketingHeroText, .marketingHeroCard, .marketingSection, .marketingCta { border-radius: 22px; padding: 24px; }
+  .heroStatsMini, .heroTimeline div { grid-template-columns: 1fr; }
+}
