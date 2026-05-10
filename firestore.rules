@@ -6,25 +6,61 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    // Müşteri tarafındaki randevu sayfası için genel işletme profili okunabilir.
-    // Bu dokümanlarda yalnızca işletme adı, sektör, slug ve tenantId tutulmalıdır.
-    match /publicTenants/{slug} {
-      allow read: if true;
-      allow write: if isSignedIn();
+    function userPath() {
+      return /databases/$(database)/documents/users/$(request.auth.uid);
     }
 
-
-    // Public randevu sayfasında aktif ve görünür hizmetlerin listelenebilmesi için okunabilir.
-    // Yönetim paneli hizmetleri giriş yapan kullanıcı üzerinden yönetir.
-    match /services/{serviceId} {
-      allow read: if true;
-      allow write: if isSignedIn();
+    function hasProfile() {
+      return isSignedIn() && exists(userPath());
     }
 
-    // Müşteri tarafındaki PWA randevu talebi formu giriş yapmadan talep oluşturabilir.
-    // Yönetim paneli talepleri giriş yapan işletme kullanıcısı üzerinden okur.
-    match /bookingRequests/{requestId} {
-      allow create: if request.resource.data.keys().hasOnly([
+    function profile() {
+      return get(userPath()).data;
+    }
+
+    function isSuperAdmin() {
+      return hasProfile() && profile().role == "super_admin";
+    }
+
+    function isTenantMember(tenantId) {
+      return isSuperAdmin()
+        || (
+          hasProfile()
+          && profile().tenantId == tenantId
+          && profile().role in ["owner", "manager", "staff"]
+        );
+    }
+
+    function isTenantAdmin(tenantId) {
+      return isSuperAdmin()
+        || (
+          hasProfile()
+          && profile().tenantId == tenantId
+          && profile().role in ["owner", "manager"]
+        );
+    }
+
+    function isCustomerProfile(tenantId) {
+      return hasProfile()
+        && profile().tenantId == tenantId
+        && profile().role == "customer";
+    }
+
+    function isCustomerById(tenantId, customerId) {
+      return isCustomerProfile(tenantId)
+        && profile().customerId == customerId;
+    }
+
+    function isCustomerByPhoneOrEmail(tenantId, phone, email) {
+      return isCustomerProfile(tenantId)
+        && (
+          (profile().customerPhone != null && profile().customerPhone == phone)
+          || (profile().email != null && profile().email == email)
+        );
+    }
+
+    function validPublicBookingCreate() {
+      return request.resource.data.keys().hasOnly([
           "tenantId",
           "tenantSlug",
           "sector",
@@ -50,15 +86,186 @@ service cloud.firestore {
         && request.resource.data.preferredTime is string
         && request.resource.data.status == "Yeni Talep"
         && request.resource.data.source == "public-pwa";
-
-      allow read, update, delete: if isSignedIn();
     }
 
-    // Geliştirme aşaması kuralı:
-    // Sadece Firebase Authentication ile giriş yapan kullanıcılar yönetim verisini okuyabilir/yazabilir.
-    // Tenant bazlı nihai kural sonraki sürümde sıkılaştırılacaktır.
+    // Kullanıcı profilleri
+    match /users/{userId} {
+      allow get: if isSignedIn() && (request.auth.uid == userId || isSuperAdmin());
+      allow list: if isSuperAdmin();
+
+      // İlk işletme sahibi veya müşteri hesabı kendi profilini oluşturabilir.
+      allow create: if isSignedIn()
+        && request.auth.uid == userId
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.role in ["owner", "customer"];
+
+      // Kullanıcı kendi temel profilini güncelleyebilir; rol ve tenant değişimi yalnızca süper admindedir.
+      allow update: if isSuperAdmin()
+        || (
+          isSignedIn()
+          && request.auth.uid == userId
+          && request.resource.data.uid == resource.data.uid
+          && request.resource.data.role == resource.data.role
+          && request.resource.data.tenantId == resource.data.tenantId
+        );
+
+      allow delete: if isSuperAdmin();
+    }
+
+    // İşletme kayıtları
+    match /tenants/{tenantId} {
+      allow read: if isSuperAdmin() || isTenantMember(tenantId);
+
+      // İşletme kurulum ekranında henüz users profili oluşmadan tenant oluşturulur.
+      allow create: if isSignedIn()
+        && request.resource.data.ownerUid == request.auth.uid;
+
+      allow update: if isSuperAdmin()
+        || (
+          isTenantAdmin(tenantId)
+          && request.resource.data.ownerUid == resource.data.ownerUid
+        );
+
+      allow delete: if isSuperAdmin();
+    }
+
+    // Public işletme profili: randevu sayfası için herkes okuyabilir.
+    match /publicTenants/{slug} {
+      allow read: if true;
+
+      // İlk kurulumda public profil oluşturulabilir. Güncelleme/silme yetkili kullanıcıya ait.
+      allow create: if isSignedIn()
+        && request.resource.data.tenantId is string
+        && request.resource.data.slug == slug;
+
+      allow update, delete: if isSuperAdmin() || isTenantAdmin(resource.data.tenantId);
+    }
+
+    // Hizmetler: public aktif hizmetler randevu sayfasında okunabilir.
+    match /services/{serviceId} {
+      allow read: if (resource.data.isActive == true && resource.data.isPublic == true)
+        || isTenantMember(resource.data.tenantId)
+        || isSuperAdmin();
+
+      allow create: if isTenantAdmin(request.resource.data.tenantId);
+      allow update: if isTenantAdmin(resource.data.tenantId)
+        && request.resource.data.tenantId == resource.data.tenantId;
+      allow delete: if isTenantAdmin(resource.data.tenantId);
+    }
+
+    // Personel
+    match /staff/{staffId} {
+      allow read: if isTenantMember(resource.data.tenantId) || isSuperAdmin();
+      allow create: if isTenantAdmin(request.resource.data.tenantId);
+      allow update: if isTenantAdmin(resource.data.tenantId)
+        && request.resource.data.tenantId == resource.data.tenantId;
+      allow delete: if isTenantAdmin(resource.data.tenantId);
+    }
+
+    // Müşteriler
+    match /customers/{customerId} {
+      allow read: if isSuperAdmin()
+        || isTenantMember(resource.data.tenantId)
+        || isCustomerById(resource.data.tenantId, customerId)
+        || isCustomerByPhoneOrEmail(resource.data.tenantId, resource.data.phone, resource.data.email);
+
+      allow create: if isSuperAdmin()
+        || isTenantMember(request.resource.data.tenantId)
+        || (
+          isCustomerProfile(request.resource.data.tenantId)
+          && request.resource.data.userId == request.auth.uid
+        );
+
+      allow update: if isSuperAdmin()
+        || isTenantMember(resource.data.tenantId)
+        || isCustomerById(resource.data.tenantId, customerId)
+        || isCustomerByPhoneOrEmail(resource.data.tenantId, resource.data.phone, resource.data.email);
+
+      allow delete: if isSuperAdmin() || isTenantAdmin(resource.data.tenantId);
+    }
+
+    // Randevular
+    match /appointments/{appointmentId} {
+      allow read: if isSuperAdmin()
+        || isTenantMember(resource.data.tenantId)
+        || isCustomerById(resource.data.tenantId, resource.data.customerId);
+
+      allow create: if isTenantMember(request.resource.data.tenantId) || isSuperAdmin();
+
+      allow update: if (isTenantMember(resource.data.tenantId) || isSuperAdmin())
+        && request.resource.data.tenantId == resource.data.tenantId;
+
+      allow delete: if isSuperAdmin() || isTenantAdmin(resource.data.tenantId);
+    }
+
+    // Randevu durum geçmişi
+    match /appointmentStatusLogs/{logId} {
+      allow read: if isSuperAdmin()
+        || isTenantMember(resource.data.tenantId)
+        || isCustomerById(resource.data.tenantId, resource.data.customerId);
+
+      allow create: if isTenantMember(request.resource.data.tenantId) || isSuperAdmin();
+      allow update, delete: if isSuperAdmin() || isTenantAdmin(resource.data.tenantId);
+    }
+
+    // İşlem notları: müşteri yalnızca kendi işlem notlarını okuyabilir.
+    // Not: Müşteriye açık özetler ileride ayrı koleksiyona taşınarak daha da sıkılaştırılabilir.
+    match /appointmentNotes/{noteId} {
+      allow read: if isSuperAdmin()
+        || isTenantMember(resource.data.tenantId)
+        || isCustomerById(resource.data.tenantId, resource.data.customerId);
+
+      allow create: if isTenantMember(request.resource.data.tenantId) || isSuperAdmin();
+      allow update: if (isTenantMember(resource.data.tenantId) || isSuperAdmin())
+        && request.resource.data.tenantId == resource.data.tenantId;
+      allow delete: if isSuperAdmin() || isTenantAdmin(resource.data.tenantId);
+    }
+
+    // Public randevu talepleri
+    match /bookingRequests/{requestId} {
+      allow create: if validPublicBookingCreate();
+
+      allow read: if isSuperAdmin()
+        || isTenantMember(resource.data.tenantId)
+        || isCustomerByPhoneOrEmail(resource.data.tenantId, resource.data.customerPhone, resource.data.customerEmail);
+
+      allow update, delete: if isSuperAdmin() || isTenantMember(resource.data.tenantId);
+    }
+
+    // Müşteri erteleme/iptal talepleri
+    match /customerActionRequests/{requestId} {
+      allow read: if isSuperAdmin()
+        || isTenantMember(resource.data.tenantId)
+        || isCustomerById(resource.data.tenantId, resource.data.customerId);
+
+      allow create: if isCustomerById(request.resource.data.tenantId, request.resource.data.customerId)
+        && request.resource.data.status == "Yeni Talep";
+
+      allow update: if isSuperAdmin() || isTenantMember(resource.data.tenantId);
+      allow delete: if isSuperAdmin() || isTenantAdmin(resource.data.tenantId);
+    }
+
+    // Takipler
+    match /followUps/{followUpId} {
+      allow read: if isSuperAdmin() || isTenantMember(resource.data.tenantId);
+      allow create: if isTenantMember(request.resource.data.tenantId) || isSuperAdmin();
+      allow update: if (isTenantMember(resource.data.tenantId) || isSuperAdmin())
+        && request.resource.data.tenantId == resource.data.tenantId;
+      allow delete: if isSuperAdmin() || isTenantAdmin(resource.data.tenantId);
+    }
+
+    // Hatırlatmalar
+    match /reminders/{reminderId} {
+      allow read: if isSuperAdmin() || isTenantMember(resource.data.tenantId);
+      allow create: if isTenantMember(request.resource.data.tenantId) || isSuperAdmin();
+      allow update: if (isTenantMember(resource.data.tenantId) || isSuperAdmin())
+        && request.resource.data.tenantId == resource.data.tenantId;
+      allow delete: if isSuperAdmin() || isTenantAdmin(resource.data.tenantId);
+    }
+
+    // Tanımlanmayan koleksiyonlar kapalıdır.
     match /{document=**} {
-      allow read, write: if isSignedIn();
+      allow read, write: if false;
     }
   }
 }

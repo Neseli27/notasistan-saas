@@ -23,15 +23,17 @@ button, input { font: inherit; }
 button { cursor: pointer; }
 
 .appShell { min-height: 100vh; display: grid; grid-template-columns: 292px 1fr; }
-.sidebar { min-height: 100vh; background: linear-gradient(180deg, #051a4d 0%, #03133b 100%); padding: 30px 18px; color: #fff; position: sticky; top: 0; }
-.brand { display: flex; align-items: center; gap: 14px; font-size: 28px; font-weight: 800; margin-bottom: 36px; padding: 0 10px; }
+.sidebar { height: 100vh; min-height: 100vh; background: linear-gradient(180deg, #051a4d 0%, #03133b 100%); padding: 30px 18px; color: #fff; position: sticky; top: 0; display: flex; flex-direction: column; overflow: hidden; }
+.brand { display: flex; align-items: center; gap: 14px; font-size: 28px; font-weight: 800; margin-bottom: 28px; padding: 0 10px; flex-shrink: 0; }
 .brandMark { width: 42px; height: 42px; border: 2px solid rgba(35, 211, 238, 0.75); border-radius: 16px; display: grid; place-items: center; color: var(--cyan-400); box-shadow: 0 0 28px rgba(35, 211, 238, 0.28); }
-.navList { display: flex; flex-direction: column; gap: 8px; }
-.navItem { width: 100%; display: flex; align-items: center; gap: 15px; padding: 15px 16px; border-radius: 14px; color: rgba(255, 255, 255, .86); font-size: 18px; font-weight: 650; transition: .2s ease; background: transparent; border: 0; text-align: left; }
+.navList { display: flex; flex-direction: column; gap: 8px; flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; padding-right: 4px; padding-bottom: 14px; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.24) transparent; }
+.navList::-webkit-scrollbar { width: 5px; }
+.navList::-webkit-scrollbar-thumb { background: rgba(255,255,255,.24); border-radius: 999px; }
+.navItem { width: 100%; display: flex; align-items: center; gap: 15px; padding: 13px 16px; border-radius: 14px; color: rgba(255, 255, 255, .86); font-size: 17px; font-weight: 650; transition: .2s ease; background: transparent; border: 0; text-align: left; flex-shrink: 0; }
 .navItem.active, .navItem:hover { background: rgba(35, 211, 238, .12); color: #fff; }
 .navItem.active svg { color: var(--cyan-400); }
-.sidebarCta { position: absolute; left: 18px; right: 18px; bottom: 24px; border-radius: 20px; padding: 23px; background: linear-gradient(145deg, rgba(255,255,255,.12), rgba(255,255,255,.05)); border: 1px solid rgba(255,255,255,.08); }
-.sidebarCta p { line-height: 1.6; margin: 12px 0 17px; color: rgba(255,255,255,.9); }
+.sidebarCta { position: static; margin-top: 16px; flex-shrink: 0; border-radius: 20px; padding: 18px; background: linear-gradient(145deg, rgba(255,255,255,.12), rgba(255,255,255,.05)); border: 1px solid rgba(255,255,255,.08); }
+.sidebarCta p { line-height: 1.55; margin: 10px 0 14px; color: rgba(255,255,255,.9); font-size: 15px; }
 .sidebarCta a, .sidebarCtaButton { color: var(--cyan-400); font-weight: 800; background: transparent; border: 0; padding: 0; text-align: left; }
 .mainArea { min-width: 0; }
 .topbar { height: 86px; background: rgba(255, 255, 255, .78); backdrop-filter: blur(16px); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; padding: 0 34px 0 40px; position: sticky; top: 0; z-index: 10; }
@@ -130,6 +132,7 @@ h1 { font-size: 36px; line-height: 1.1; margin: 0 0 8px; letter-spacing: -1px; }
 
 @media (max-width: 1200px) {
   .appShell { grid-template-columns: 92px 1fr; }
+  .sidebar { overflow: visible; }
   .brand span, .navItem span, .sidebarCta { display: none; }
   .brand { justify-content: center; padding: 0; }
   .navItem { justify-content: center; }
@@ -140,7 +143,7 @@ h1 { font-size: 36px; line-height: 1.1; margin: 0 0 8px; letter-spacing: -1px; }
 
 @media (max-width: 760px) {
   .appShell { display: block; }
-  .sidebar { position: relative; min-height: auto; }
+  .sidebar { position: relative; height: auto; min-height: auto; overflow: visible; }
   .topbar { position: relative; height: auto; padding: 18px; flex-direction: column; align-items: stretch; gap: 14px; }
   .searchBox { width: 100%; }
   .content { padding: 22px; }

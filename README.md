@@ -59,3 +59,23 @@ GitHub'a push sonrası Vercel otomatik deploy eder.
 - Seçilen menü aktif olarak vurgulanır.
 - Randevular, müşteriler, personel, hizmetler, işlem notları, hatırlatmalar, takipler, sadakat, AI Asistan, raporlar ve ayarlar bölümleri ayrı içerik görünümüne geçer.
 - AI Asistan çağrı kartı doğrudan AI Asistan bölümünü açar.
+
+
+## v2.6.1 - Sidebar taşma düzeltmesi
+
+- Sol menüde Ayarlar/AI Asistan/Raporlar bölümünde CTA kutusunun menü üzerine binmesi düzeltildi.
+- Sidebar artık yüksekliği sabit, menü alanı kaydırılabilir, alt CTA kutusu menüden bağımsız çalışır.
+- Dar ekranlarda mevcut kompakt sidebar davranışı korunur.
+
+
+## v2.7 - Firestore tenant ve rol bazlı güvenlik
+
+- Geniş geliştirme kuralı kaldırıldı.
+- Süper admin, işletme kullanıcıları ve müşteri kullanıcıları ayrıştırıldı.
+- İşletme kullanıcıları yalnızca kendi `tenantId` verilerine erişir.
+- Müşteri paneli yalnızca kendi `customerId`, telefon/e-posta eşleşmesi ve kendi randevularını okuyabilir.
+- Public randevu formu yalnızca gerekli alanlarla `bookingRequests` oluşturabilir.
+- Public randevu sayfası yalnızca aktif ve public hizmetleri okuyabilir.
+- Müşteri portal kayıt akışı güvenlik kurallarına uygun hâle getirildi.
+
+> Not: Sağlık sektöründe iç notların müşteriye görünmemesi için ileride müşteri özetleri ayrı bir public summary koleksiyonuna taşınacaktır.

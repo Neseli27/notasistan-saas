@@ -142,6 +142,32 @@ export async function registerCustomerPortalAccount(params: {
   const phone = params.phone.trim();
   let customerId = "";
 
+  // Güvenlik kuralları sıkılaştırıldığı için, müşteri kaydı eşleştirmesi yapılmadan
+  // önce geçici bir müşteri profil kaydı oluşturulur. Böylece kullanıcı yalnızca
+  // kendi telefon/e-posta eşleşmesine sahip müşteri kaydını okuyabilir.
+  const initialProfile: UserProfile = {
+    uid: params.user.uid,
+    email,
+    displayName: name,
+    role: "customer",
+    tenantId: params.tenant.tenantId,
+    tenantName: params.tenant.name,
+    tenantSlug: params.tenant.slug,
+    sector: params.tenant.sector,
+    customerId: "",
+    customerPhone: phone,
+  };
+
+  await setDoc(
+    doc(db, "users", params.user.uid),
+    {
+      ...initialProfile,
+      updatedAt: serverTimestamp(),
+      createdAt: serverTimestamp(),
+    },
+    { merge: true }
+  );
+
   if (phone) {
     const phoneQuery = query(
       collection(db, "customers"),

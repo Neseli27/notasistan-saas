@@ -32,3 +32,22 @@ AI Asistan gerçek entegrasyon altyapısını eklemek:
 - Seçilen menü aktif olarak vurgulanır.
 - Randevular, müşteriler, personel, hizmetler, işlem notları, hatırlatmalar, takipler, sadakat, AI Asistan, raporlar ve ayarlar bölümleri ayrı içerik görünümüne geçer.
 - AI Asistan çağrı kartı doğrudan AI Asistan bölümünü açar.
+
+
+## v2.6.1 - Sidebar taşma düzeltmesi
+
+- Sol menüde Ayarlar/AI Asistan/Raporlar bölümünde CTA kutusunun menü üzerine binmesi düzeltildi.
+- Sidebar artık yüksekliği sabit, menü alanı kaydırılabilir, alt CTA kutusu menüden bağımsız çalışır.
+- Dar ekranlarda mevcut kompakt sidebar davranışı korunur.
+
+
+## v2.7 Güvenlik Notu
+
+Firestore rules artık role ve tenantId bazlıdır. Yeni geliştirmelerde her yeni koleksiyon için:
+
+- super_admin erişimi,
+- tenant member/admin erişimi,
+- customer kendi verisi erişimi,
+- public create/read gereksinimi
+
+ayrı ayrı düşünülmelidir. Geniş `match /{document=**}` kuralı kapalıdır.
