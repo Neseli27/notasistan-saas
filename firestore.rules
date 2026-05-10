@@ -263,6 +263,22 @@ service cloud.firestore {
       allow delete: if isSuperAdmin() || isTenantAdmin(resource.data.tenantId);
     }
 
+
+    // Ödeme / paket yükseltme talepleri
+    match /paymentRequests/{requestId} {
+      allow read: if isSuperAdmin() || isTenantAdmin(resource.data.tenantId);
+
+      allow create: if isTenantAdmin(request.resource.data.tenantId)
+        && request.resource.data.status == "Bekliyor"
+        && request.resource.data.tenantId is string
+        && request.resource.data.tenantName is string
+        && request.resource.data.requestedPlan in ["Starter", "Pro", "Klinik", "Enterprise"];
+
+      allow update: if isSuperAdmin()
+        || (isTenantAdmin(resource.data.tenantId) && request.resource.data.tenantId == resource.data.tenantId);
+      allow delete: if isSuperAdmin();
+    }
+
     // Tanımlanmayan koleksiyonlar kapalıdır.
     match /{document=**} {
       allow read, write: if false;

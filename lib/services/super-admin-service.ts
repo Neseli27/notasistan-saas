@@ -1,5 +1,5 @@
 import { db } from "@/lib/firebase";
-import type { AppointmentStatus, BookingRequest, CustomerActionRequest, Role, Sector, TenantPlan, TenantPlanStatus } from "@/types/domain";
+import type { AppointmentStatus, BookingRequest, CustomerActionRequest, PaymentRequest, PaymentRequestStatus, Role, Sector, TenantPlan, TenantPlanStatus } from "@/types/domain";
 import { collection, doc, onSnapshot, serverTimestamp, updateDoc } from "firebase/firestore";
 
 export interface SuperAdminTenant {
@@ -75,6 +75,35 @@ function normalizePlanStatus(value: unknown): TenantPlanStatus {
     return status as TenantPlanStatus;
   }
   return "Deneme";
+}
+
+function normalizePaymentStatus(value: unknown): PaymentRequestStatus {
+  const status = String(value || "Bekliyor");
+  if (["Bekliyor", "Ödeme Alındı", "Reddedildi", "İptal"].includes(status)) {
+    return status as PaymentRequestStatus;
+  }
+  return "Bekliyor";
+}
+
+function mapPaymentRequest(id: string, data: Record<string, unknown>): PaymentRequest {
+  return {
+    id,
+    tenantId: String(data.tenantId ?? ""),
+    tenantName: String(data.tenantName ?? "İşletme"),
+    requestedPlan: normalizePlan(data.requestedPlan),
+    currentPlan: data.currentPlan ? normalizePlan(data.currentPlan) : undefined,
+    amountLabel: String(data.amountLabel ?? ""),
+    billingName: String(data.billingName ?? ""),
+    taxNumber: String(data.taxNumber ?? ""),
+    billingAddress: String(data.billingAddress ?? ""),
+    contactEmail: String(data.contactEmail ?? ""),
+    note: String(data.note ?? ""),
+    status: normalizePaymentStatus(data.status),
+    createdAt: data.createdAt,
+    updatedAt: data.updatedAt,
+    handledAt: data.handledAt,
+    handledBy: data.handledBy ? String(data.handledBy) : undefined,
+  };
 }
 
 function normalizeRole(value: unknown): Role {
@@ -271,6 +300,30 @@ export function listenSuperAdminCustomerActionRequests(onChange: (items: Custome
       onError?.(error as Error);
     }
   );
+}
+
+export function listenSuperAdminPaymentRequests(onChange: (items: PaymentRequest[]) => void, onError?: (error: Error) => void) {
+  return onSnapshot(
+    collection(db, "paymentRequests"),
+    (snapshot) => {
+      const records = snapshot.docs.map((docSnap) => mapPaymentRequest(docSnap.id, docSnap.data()));
+      records.sort((a, b) => String(b.createdAt ?? "").localeCompare(String(a.createdAt ?? ""), "tr"));
+      onChange(records);
+    },
+    (error) => {
+      console.error("Süper admin ödeme talepleri okunamadı:", error);
+      onError?.(error as Error);
+    }
+  );
+}
+
+export async function updateSuperAdminPaymentRequestStatus(requestId: string, status: PaymentRequestStatus, handledBy?: string) {
+  await updateDoc(doc(db, "paymentRequests", requestId), {
+    status,
+    handledBy: handledBy || "Süper Admin",
+    handledAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
 }
 
 export async function updateTenantStatus(tenantId: string, isActive: boolean) {

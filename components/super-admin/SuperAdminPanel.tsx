@@ -6,8 +6,10 @@ import {
   listenSuperAdminBookingRequests,
   listenSuperAdminCustomerActionRequests,
   listenSuperAdminCustomers,
+  listenSuperAdminPaymentRequests,
   listenSuperAdminTenants,
   listenSuperAdminUsers,
+  updateSuperAdminPaymentRequestStatus,
   updateTenantPlan,
   updateTenantStatus,
   type SuperAdminAppointment,
@@ -15,7 +17,7 @@ import {
   type SuperAdminTenant,
   type SuperAdminUser,
 } from "@/lib/services/super-admin-service";
-import type { BookingRequest, CustomerActionRequest, Sector, TenantPlan, TenantPlanStatus, UserProfile } from "@/types/domain";
+import type { BookingRequest, CustomerActionRequest, PaymentRequest, PaymentRequestStatus, Sector, TenantPlan, TenantPlanStatus, UserProfile } from "@/types/domain";
 import type { User } from "firebase/auth";
 import { signOut } from "firebase/auth";
 import { Activity, Building2, CalendarClock, CheckCircle2, Copy, CreditCard, Crown, Database, LogOut, Search, ShieldCheck, Sparkles, UsersRound, XCircle } from "lucide-react";
@@ -26,7 +28,7 @@ interface SuperAdminPanelProps {
   profile?: UserProfile;
 }
 
-type AdminTab = "overview" | "tenants" | "users" | "requests" | "plans" | "system";
+type AdminTab = "overview" | "tenants" | "users" | "requests" | "plans" | "payments" | "system";
 
 const sectorLabels: Record<Sector, string> = {
   beauty: "Güzellik",
@@ -38,6 +40,7 @@ const sectorLabels: Record<Sector, string> = {
 
 const planOptions: TenantPlan[] = ["Starter", "Pro", "Klinik", "Enterprise"];
 const planStatusOptions: TenantPlanStatus[] = ["Deneme", "Aktif", "Askıda", "İptal"];
+const paymentStatusOptions: PaymentRequestStatus[] = ["Bekliyor", "Ödeme Alındı", "Reddedildi", "İptal"];
 
 const planConfig: Record<TenantPlan, { label: string; price: string; description: string; limits: string[] }> = {
   Starter: {
@@ -90,12 +93,14 @@ export function SuperAdminPanel({ user, profile }: SuperAdminPanelProps) {
   const [appointments, setAppointments] = useState<SuperAdminAppointment[]>([]);
   const [bookingRequests, setBookingRequests] = useState<BookingRequest[]>([]);
   const [customerActionRequests, setCustomerActionRequests] = useState<CustomerActionRequest[]>([]);
+  const [paymentRequests, setPaymentRequests] = useState<PaymentRequest[]>([]);
   const [activeTab, setActiveTab] = useState<AdminTab>("overview");
   const [searchTerm, setSearchTerm] = useState("");
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [busyTenantId, setBusyTenantId] = useState("");
   const [busyPlanTenantId, setBusyPlanTenantId] = useState("");
+  const [busyPaymentRequestId, setBusyPaymentRequestId] = useState("");
   const [appOrigin, setAppOrigin] = useState("");
 
   useEffect(() => {
@@ -112,6 +117,7 @@ export function SuperAdminPanel({ user, profile }: SuperAdminPanelProps) {
       listenSuperAdminAppointments(setAppointments, () => setError("Randevu kayıtları okunamadı.")),
       listenSuperAdminBookingRequests(setBookingRequests, () => setError("Randevu talepleri okunamadı.")),
       listenSuperAdminCustomerActionRequests(setCustomerActionRequests, () => setError("Müşteri erteleme/iptal talepleri okunamadı.")),
+      listenSuperAdminPaymentRequests(setPaymentRequests, () => setError("Ödeme talepleri okunamadı.")),
     ];
 
     return () => unsubscribers.forEach((unsubscribe) => unsubscribe());
@@ -153,6 +159,7 @@ export function SuperAdminPanel({ user, profile }: SuperAdminPanelProps) {
   const planCounts = planOptions.reduce((acc, plan) => ({ ...acc, [plan]: tenants.filter((tenant) => (tenant.plan || "Starter") === plan).length }), {} as Record<TenantPlan, number>);
   const trialTenants = tenants.filter((tenant) => (tenant.planStatus || "Deneme") === "Deneme").length;
   const paidTenants = tenants.filter((tenant) => (tenant.planStatus || "Deneme") === "Aktif").length;
+  const openPaymentRequests = paymentRequests.filter((request) => request.status === "Bekliyor").length;
   const customerUsers = users.filter((item) => item.role === "customer").length;
   const ownerUsers = users.filter((item) => item.role === "owner" || item.role === "manager" || item.role === "staff").length;
 
@@ -187,6 +194,25 @@ export function SuperAdminPanel({ user, profile }: SuperAdminPanelProps) {
       setBusyPlanTenantId("");
     }
   }
+  async function handlePaymentRequestStatus(request: PaymentRequest, status: PaymentRequestStatus) {
+    setBusyPaymentRequestId(request.id);
+    setError("");
+    setNotice("");
+
+    try {
+      await updateSuperAdminPaymentRequestStatus(request.id, status, profile?.displayName || user?.email || "Süper Admin");
+      if (status === "Ödeme Alındı") {
+        await updateTenantPlan(request.tenantId, request.requestedPlan, "Aktif");
+      }
+      setNotice(`${request.tenantName} ödeme talebi ${status.toLocaleLowerCase("tr-TR")} olarak işaretlendi.`);
+    } catch (err) {
+      console.error("Ödeme talebi güncellenemedi:", err);
+      setError("Ödeme talebi güncellenemedi. Firestore kurallarını kontrol edin.");
+    } finally {
+      setBusyPaymentRequestId("");
+    }
+  }
+
 
   return (
     <main className="superAdminShell">
@@ -205,6 +231,7 @@ export function SuperAdminPanel({ user, profile }: SuperAdminPanelProps) {
           <button className={activeTab === "users" ? "active" : ""} onClick={() => setActiveTab("users")}><UsersRound size={18} /> Kullanıcılar</button>
           <button className={activeTab === "requests" ? "active" : ""} onClick={() => setActiveTab("requests")}><CalendarClock size={18} /> Talepler</button>
           <button className={activeTab === "plans" ? "active" : ""} onClick={() => setActiveTab("plans")}><CreditCard size={18} /> Paketler</button>
+          <button className={activeTab === "payments" ? "active" : ""} onClick={() => setActiveTab("payments")}><CreditCard size={18} /> Ödemeler</button>
           <button className={activeTab === "system" ? "active" : ""} onClick={() => setActiveTab("system")}><Database size={18} /> Sistem</button>
         </nav>
 
@@ -239,6 +266,7 @@ export function SuperAdminPanel({ user, profile }: SuperAdminPanelProps) {
           <article><span>Randevu</span><strong>{appointments.length}</strong><small>{appointments.filter((item) => item.status === "Bekliyor").length} bekleyen</small></article>
           <article><span>Açık Talep</span><strong>{totalOpenRequests}</strong><small>Randevu + erteleme/iptal</small></article>
           <article><span>Aktif Paket</span><strong>{paidTenants}</strong><small>{trialTenants} deneme · {planCounts.Pro + planCounts.Klinik + planCounts.Enterprise} ücretli aday</small></article>
+          <article><span>Ödeme Talebi</span><strong>{openPaymentRequests}</strong><small>{paymentRequests.length} toplam ödeme kaydı</small></article>
         </div>
 
         {activeTab === "overview" && (
@@ -359,6 +387,37 @@ export function SuperAdminPanel({ user, profile }: SuperAdminPanelProps) {
               busyPlanTenantId={busyPlanTenantId}
               onPlanChange={handleTenantPlan}
             />
+          </section>
+        )}
+
+        {activeTab === "payments" && (
+          <section className="superAdminPanel wideOnly">
+            <div className="superAdminPanelHeader"><h2>Ödeme Talepleri</h2><span>{paymentRequests.length} kayıt</span></div>
+            <div className="superAdminRequestGrid paymentRequestGrid">
+              {paymentRequests.length === 0 && <p className="superAdminEmpty">Henüz ödeme talebi yok.</p>}
+              {paymentRequests.map((request) => (
+                <article className="superAdminRequest paymentRequestCard" key={request.id}>
+                  <span>{request.status}</span>
+                  <b>{request.tenantName}</b>
+                  <small>{planConfig[request.requestedPlan].label} · {request.amountLabel}</small>
+                  <i>{request.billingName || "Fatura adı yok"} · {request.contactEmail || "E-posta yok"}</i>
+                  {request.taxNumber && <i>Vergi/T.C.: {request.taxNumber}</i>}
+                  {request.note && <p>{request.note}</p>}
+                  <div className="paymentRequestActions">
+                    {paymentStatusOptions.map((status) => (
+                      <button
+                        type="button"
+                        key={status}
+                        disabled={busyPaymentRequestId === request.id || request.status === status}
+                        onClick={() => handlePaymentRequestStatus(request, status)}
+                      >
+                        {status}
+                      </button>
+                    ))}
+                  </div>
+                </article>
+              ))}
+            </div>
           </section>
         )}
 

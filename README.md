@@ -113,3 +113,14 @@ Test:
 2. `http://localhost:3000/fiyatlandirma` adresini açın.
 3. Giriş ekranındaki tanıtım/paket bağlantılarını kontrol edin.
 4. Vercel deploy sonrası aynı sayfaları canlı linkte kontrol edin.
+
+
+## v3.0 Abonelik ve ödeme hazırlığı
+
+- İşletme panelindeki Ayarlar bölümüne Abonelik ve Ödeme kartı eklendi.
+- İşletmeler paket yükseltme/ödeme talebi oluşturabilir.
+- Süper Admin paneline Ödemeler sekmesi eklendi.
+- Süper Admin ödeme talebini Bekliyor, Ödeme Alındı, Reddedildi veya İptal olarak güncelleyebilir.
+- Ödeme Alındı seçildiğinde ilgili işletmenin paketi Aktif duruma alınır.
+- Firestore `paymentRequests` koleksiyonu ve güvenlik kuralları eklendi.
+

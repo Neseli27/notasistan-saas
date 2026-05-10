@@ -2,6 +2,7 @@
 
 import { AiSuggestions } from "@/components/AiSuggestions";
 import { AppearanceSettings } from "@/components/AppearanceSettings";
+import { BillingPanel } from "@/components/BillingPanel";
 import { AppointmentFormModal } from "@/components/AppointmentFormModal";
 import { AppointmentEditModal } from "@/components/AppointmentEditModal";
 import { AppointmentNoteModal } from "@/components/AppointmentNoteModal";
@@ -579,6 +580,14 @@ export function Dashboard({ user, profile }: DashboardProps) {
             publicSlug={publicSlug}
             appearance={appearance}
             onAppearanceChange={setAppearance}
+          />
+        )}
+
+        {profile?.tenantId && (
+          <BillingPanel
+            tenantId={profile.tenantId}
+            tenantName={profile.tenantName || "İşletme"}
+            contactEmail={profile.email || user?.email || ""}
           />
         )}
       </div>

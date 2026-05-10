@@ -4261,3 +4261,237 @@ h1 { font-size: 36px; line-height: 1.1; margin: 0 0 8px; letter-spacing: -1px; }
   .marketingHeroText, .marketingHeroCard, .marketingSection, .marketingCta { border-radius: 22px; padding: 24px; }
   .heroStatsMini, .heroTimeline div { grid-template-columns: 1fr; }
 }
+
+/* v3.0 Abonelik ve ödeme hazırlığı */
+.billingPanel {
+  gap: 20px;
+}
+
+.billingSecureBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(20, 184, 166, 0.22);
+  background: rgba(20, 184, 166, 0.08);
+  color: #0f766e;
+  border-radius: 999px;
+  padding: 9px 12px;
+  font-weight: 800;
+  font-size: 0.82rem;
+}
+
+.billingGrid {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.75fr) minmax(0, 1.5fr);
+  gap: 16px;
+}
+
+.billingCurrentCard {
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 24px;
+  padding: 20px;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(30, 64, 175, 0.9));
+  color: white;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 190px;
+}
+
+.billingCurrentCard span,
+.billingCurrentCard small {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.billingCurrentCard strong {
+  font-size: 2rem;
+  letter-spacing: -0.04em;
+}
+
+.billingCurrentCard p {
+  font-weight: 900;
+  color: #67e8f9;
+}
+
+.billingCurrentCard i {
+  width: fit-content;
+  border-radius: 999px;
+  padding: 7px 10px;
+  background: rgba(255, 255, 255, 0.12);
+  color: white;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.billingPlanCards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.billingPlanCard {
+  cursor: pointer;
+  text-align: left;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 22px;
+  background: white;
+  padding: 16px;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.06);
+  transition: 0.2s ease;
+}
+
+.billingPlanCard:hover,
+.billingPlanCard.active {
+  border-color: var(--accent-color, #14b8a6);
+  box-shadow: 0 18px 40px rgba(20, 184, 166, 0.16);
+  transform: translateY(-1px);
+}
+
+.billingPlanCard span {
+  color: #64748b;
+  font-weight: 800;
+  font-size: 0.84rem;
+}
+
+.billingPlanCard strong {
+  display: block;
+  margin-top: 4px;
+  color: #0f172a;
+  font-size: 1.3rem;
+}
+
+.billingPlanCard ul {
+  margin: 10px 0 0;
+  padding-left: 18px;
+  color: #64748b;
+  font-weight: 700;
+  font-size: 0.78rem;
+}
+
+.billingForm {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 24px;
+  padding: 18px;
+  background: rgba(248, 250, 252, 0.9);
+}
+
+.billingForm label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: #0f172a;
+  font-weight: 900;
+  font-size: 0.86rem;
+}
+
+.billingForm input,
+.billingForm textarea {
+  width: 100%;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: 16px;
+  padding: 12px 14px;
+  font: inherit;
+  color: #0f172a;
+  outline: none;
+  background: white;
+}
+
+.billingForm textarea {
+  min-height: 88px;
+  resize: vertical;
+}
+
+.billingWideInput {
+  grid-column: 1 / -1;
+}
+
+.billingForm .primaryButton {
+  width: fit-content;
+}
+
+.billingHistory {
+  border-top: 1px solid rgba(148, 163, 184, 0.18);
+  padding-top: 14px;
+}
+
+.miniPanelHeader {
+  margin-bottom: 10px;
+}
+
+.billingHistory article {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.billingHistory article svg {
+  color: var(--primary-color, #0f3b82);
+  margin-top: 2px;
+}
+
+.billingHistory article div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.billingHistory article b {
+  color: #0f172a;
+}
+
+.billingHistory article span,
+.billingHistory article small {
+  color: #64748b;
+  font-weight: 700;
+}
+
+.paymentRequestGrid {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.paymentRequestCard p {
+  color: #475569;
+  font-weight: 700;
+  margin: 6px 0 0;
+}
+
+.paymentRequestActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.paymentRequestActions button {
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: 999px;
+  background: white;
+  color: #0f172a;
+  padding: 8px 10px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.paymentRequestActions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 900px) {
+  .billingGrid,
+  .billingForm {
+    grid-template-columns: 1fr;
+  }
+
+  .billingPlanCards {
+    grid-template-columns: 1fr;
+  }
+}

@@ -299,6 +299,42 @@ export interface NewServiceItemInput {
   isPublic: boolean;
 }
 
+
+
+export type PaymentRequestStatus = "Bekliyor" | "Ödeme Alındı" | "Reddedildi" | "İptal";
+
+export interface PaymentRequest {
+  id: string;
+  tenantId: string;
+  tenantName: string;
+  requestedPlan: TenantPlan;
+  currentPlan?: TenantPlan;
+  amountLabel: string;
+  billingName: string;
+  taxNumber: string;
+  billingAddress: string;
+  contactEmail: string;
+  note: string;
+  status: PaymentRequestStatus;
+  createdAt?: unknown;
+  updatedAt?: unknown;
+  handledAt?: unknown;
+  handledBy?: string;
+}
+
+export interface NewPaymentRequestInput {
+  tenantId: string;
+  tenantName: string;
+  requestedPlan: TenantPlan;
+  currentPlan?: TenantPlan;
+  amountLabel: string;
+  billingName: string;
+  taxNumber: string;
+  billingAddress: string;
+  contactEmail: string;
+  note: string;
+}
+
 export interface UserProfile {
   uid: string;
   email: string;
