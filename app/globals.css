@@ -27,12 +27,12 @@ button { cursor: pointer; }
 .brand { display: flex; align-items: center; gap: 14px; font-size: 28px; font-weight: 800; margin-bottom: 36px; padding: 0 10px; }
 .brandMark { width: 42px; height: 42px; border: 2px solid rgba(35, 211, 238, 0.75); border-radius: 16px; display: grid; place-items: center; color: var(--cyan-400); box-shadow: 0 0 28px rgba(35, 211, 238, 0.28); }
 .navList { display: flex; flex-direction: column; gap: 8px; }
-.navItem { display: flex; align-items: center; gap: 15px; padding: 15px 16px; border-radius: 14px; color: rgba(255, 255, 255, .86); font-size: 18px; font-weight: 650; transition: .2s ease; }
+.navItem { width: 100%; display: flex; align-items: center; gap: 15px; padding: 15px 16px; border-radius: 14px; color: rgba(255, 255, 255, .86); font-size: 18px; font-weight: 650; transition: .2s ease; background: transparent; border: 0; text-align: left; }
 .navItem.active, .navItem:hover { background: rgba(35, 211, 238, .12); color: #fff; }
 .navItem.active svg { color: var(--cyan-400); }
 .sidebarCta { position: absolute; left: 18px; right: 18px; bottom: 24px; border-radius: 20px; padding: 23px; background: linear-gradient(145deg, rgba(255,255,255,.12), rgba(255,255,255,.05)); border: 1px solid rgba(255,255,255,.08); }
 .sidebarCta p { line-height: 1.6; margin: 12px 0 17px; color: rgba(255,255,255,.9); }
-.sidebarCta a { color: var(--cyan-400); font-weight: 800; }
+.sidebarCta a, .sidebarCtaButton { color: var(--cyan-400); font-weight: 800; background: transparent; border: 0; padding: 0; text-align: left; }
 .mainArea { min-width: 0; }
 .topbar { height: 86px; background: rgba(255, 255, 255, .78); backdrop-filter: blur(16px); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; padding: 0 34px 0 40px; position: sticky; top: 0; z-index: 10; }
 .searchBox { width: min(720px, 48vw); height: 54px; display: flex; align-items: center; gap: 12px; padding: 0 20px; border: 1px solid #d8e0ee; border-radius: 14px; color: #71809d; background: #fff; box-shadow: 0 6px 20px rgba(14, 38, 90, 0.035); }
@@ -288,7 +288,8 @@ h1 { font-size: 36px; line-height: 1.1; margin: 0 0 8px; letter-spacing: -1px; }
   box-shadow: 0 0 28px color-mix(in srgb, var(--theme-accent) 28%, transparent);
 }
 .appShell[class*="theme-"] .navItem.active svg,
-.appShell[class*="theme-"] .sidebarCta a {
+.appShell[class*="theme-"] .sidebarCta a,
+.appShell[class*="theme-"] .sidebarCtaButton {
   color: var(--theme-accent);
 }
 .appShell[class*="theme-"] .navItem.active,

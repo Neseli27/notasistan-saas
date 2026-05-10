@@ -17,27 +17,44 @@ import {
 } from "lucide-react";
 import type { SectorPreset } from "@/lib/sector-presets";
 
+export type SidebarSectionId =
+  | "home"
+  | "appointments"
+  | "customers"
+  | "staff"
+  | "services"
+  | "extra"
+  | "notes"
+  | "reminders"
+  | "followups"
+  | "loyalty"
+  | "ai"
+  | "reports"
+  | "settings";
+
 interface SidebarProps {
   preset: SectorPreset;
+  activeSection: SidebarSectionId;
+  onSectionChange: (section: SidebarSectionId) => void;
 }
 
-export function Sidebar({ preset }: SidebarProps) {
+export function Sidebar({ preset, activeSection, onSectionChange }: SidebarProps) {
   const extraIcon = preset.sidebarExtra?.type === "vehicle" ? Car : preset.sidebarExtra?.type === "student" ? GraduationCap : BriefcaseBusiness;
   const baseItems = [
-    { label: "Ana Panel", icon: Home, active: true },
-    { label: "Randevular", icon: CalendarDays },
-    { label: preset.customerPluralLabel, icon: UsersRound },
-    { label: "Personel", icon: UserRoundCog },
-    { label: "Hizmetler", icon: Wrench },
-    ...(preset.sidebarExtra ? [{ label: preset.sidebarExtra.label, icon: extraIcon }] : []),
-    { label: "İşlem Notları", icon: FileText },
-    { label: "Hatırlatmalar", icon: Bell },
-    { label: "Takipler", icon: Target },
-    { label: "Sadakat", icon: Gift },
-    { label: "AI Asistan", icon: Sparkles },
-    { label: "Raporlar", icon: ChartNoAxesColumnIncreasing },
-    { label: "Ayarlar", icon: Settings }
-  ];
+    { id: "home", label: "Ana Panel", icon: Home },
+    { id: "appointments", label: "Randevular", icon: CalendarDays },
+    { id: "customers", label: preset.customerPluralLabel, icon: UsersRound },
+    { id: "staff", label: "Personel", icon: UserRoundCog },
+    { id: "services", label: "Hizmetler", icon: Wrench },
+    ...(preset.sidebarExtra ? [{ id: "extra", label: preset.sidebarExtra.label, icon: extraIcon }] : []),
+    { id: "notes", label: "İşlem Notları", icon: FileText },
+    { id: "reminders", label: "Hatırlatmalar", icon: Bell },
+    { id: "followups", label: "Takipler", icon: Target },
+    { id: "loyalty", label: "Sadakat", icon: Gift },
+    { id: "ai", label: "AI Asistan", icon: Sparkles },
+    { id: "reports", label: "Raporlar", icon: ChartNoAxesColumnIncreasing },
+    { id: "settings", label: "Ayarlar", icon: Settings }
+  ] as Array<{ id: SidebarSectionId; label: string; icon: typeof Home }>;
 
   return (
     <aside className="sidebar">
@@ -48,14 +65,21 @@ export function Sidebar({ preset }: SidebarProps) {
         <span>Not Asistan</span>
       </div>
 
-      <nav className="navList">
+      <nav className="navList" aria-label="Ana menü">
         {baseItems.map((item) => {
           const Icon = item.icon;
+          const isActive = activeSection === item.id;
           return (
-            <a className={`navItem ${item.active ? "active" : ""}`} href="#" key={item.label}>
+            <button
+              type="button"
+              className={`navItem ${isActive ? "active" : ""}`}
+              key={item.id}
+              onClick={() => onSectionChange(item.id)}
+              aria-current={isActive ? "page" : undefined}
+            >
               <Icon size={21} />
               <span>{item.label}</span>
-            </a>
+            </button>
           );
         })}
       </nav>
@@ -63,7 +87,7 @@ export function Sidebar({ preset }: SidebarProps) {
       <div className="sidebarCta">
         <Sparkles size={20} />
         <p>{preset.ctaText}</p>
-        <a href="#">AI Asistan’ı Keşfet →</a>
+        <button type="button" className="sidebarCtaButton" onClick={() => onSectionChange("ai")}>AI Asistan’ı Keşfet →</button>
       </div>
     </aside>
   );

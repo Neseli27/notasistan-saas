@@ -51,3 +51,11 @@ Bu değerleri GitHub'a göndermeyin. `.env.local` yerelde kalmalıdır.
 ## Yayın
 
 GitHub'a push sonrası Vercel otomatik deploy eder.
+
+
+## v2.6 - Aktif Sol Menü
+
+- Sol menü artık tıklanabilir hale getirildi.
+- Seçilen menü aktif olarak vurgulanır.
+- Randevular, müşteriler, personel, hizmetler, işlem notları, hatırlatmalar, takipler, sadakat, AI Asistan, raporlar ve ayarlar bölümleri ayrı içerik görünümüne geçer.
+- AI Asistan çağrı kartı doğrudan AI Asistan bölümünü açar.

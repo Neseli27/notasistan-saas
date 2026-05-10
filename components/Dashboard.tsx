@@ -16,6 +16,7 @@ import { FollowUpsCard } from "@/components/FollowUpsCard";
 import { Header } from "@/components/Header";
 import { RemindersCard } from "@/components/RemindersCard";
 import { Sidebar } from "@/components/Sidebar";
+import type { SidebarSectionId } from "@/components/Sidebar";
 import { StatCard } from "@/components/StatCard";
 import { StatusHistoryCard } from "@/components/StatusHistoryCard";
 import { StatusMessageBanner } from "@/components/StatusMessageBanner";
@@ -78,6 +79,7 @@ export function Dashboard({ user, profile }: DashboardProps) {
   const [convertingRequestId, setConvertingRequestId] = useState<string | null>(null);
   const [rejectingRequestId, setRejectingRequestId] = useState<string | null>(null);
   const [processingActionRequestId, setProcessingActionRequestId] = useState<string | null>(null);
+  const [activeSection, setActiveSection] = useState<SidebarSectionId>("home");
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
   const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
   const [selectedAppointmentForNote, setSelectedAppointmentForNote] = useState<Appointment | null>(null);
@@ -510,9 +512,295 @@ export function Dashboard({ user, profile }: DashboardProps) {
     }
   }
 
+
+
+  function renderSettingsPanel() {
+    return (
+      <div className="dashboardGrid">
+        <div className="panel widePanel">
+          <div className="panelHeader">
+            <div>
+              <h3>Ayarlar</h3>
+              <p>İşletme bağlantıları, sektör bilgisi ve tema altyapısı.</p>
+            </div>
+          </div>
+          <div className="publicLinkBanner compactPublicLinkBanner">
+            <Sparkles size={20} />
+            <div>
+              <b>{profile?.tenantName || "İşletme"}</b>
+              <span>Sektör: {preset.sector}</span>
+              {publicBookingUrl && <span>Randevu sayfası: {publicBookingUrl}</span>}
+              {customerPortalUrl && <span>Müşteri paneli: {customerPortalUrl}</span>}
+            </div>
+          </div>
+          <div className="miniList">
+            <div><b>Tema</b><span>Sektöre göre otomatik tema aktif. İşletmeye özel renk seçimi sonraki sürümde eklenebilir.</span></div>
+            <div><b>PWA</b><span>Müşteri paneli telefona eklenebilir şekilde hazırlanmıştır.</span></div>
+            <div><b>Güvenlik</b><span>Tenant ve rol bazlı kurallar v2.6 sonrası sıkılaştırılacaktır.</span></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  function renderActiveSection() {
+    if (activeSection === "appointments") {
+      return (
+        <div className="dashboardGrid">
+          <AppointmentTable
+            title={preset.appointmentTitle}
+            customerLabel={preset.customerLabel}
+            serviceColumnLabel={preset.serviceColumnLabel}
+            appointments={visibleAppointments}
+            showResourceColumn={preset.sector === "auto"}
+            onAddNote={setSelectedAppointmentForNote}
+            onStatusChange={handleAppointmentStatusChange}
+            onEdit={setSelectedAppointmentForEdit}
+            onDelete={handleDeleteAppointment}
+            updatingAppointmentId={updatingAppointmentId}
+            deletingAppointmentId={deletingAppointmentId}
+          />
+          <BookingRequestsCard
+            requests={bookingRequests}
+            publicUrl={publicBookingUrl}
+            tenantName={profile?.tenantName}
+            onConvert={handleConvertBookingRequest}
+            convertingRequestId={convertingRequestId}
+            onReject={handleRejectBookingRequest}
+            rejectingRequestId={rejectingRequestId}
+          />
+          <CustomerActionRequestsCard
+            requests={customerActionRequests}
+            processingRequestId={processingActionRequestId}
+            onApprove={(request) => handleCustomerActionDecision(request, "Tamamlandı")}
+            onApproveReschedule={handleApproveRescheduleRequest}
+            onReject={(request) => handleCustomerActionDecision(request, "Reddedildi")}
+            onCopyMessage={handleCopyCustomerActionMessage}
+          />
+          <CalendarCard />
+          <StatusHistoryCard logs={statusLogs} />
+        </div>
+      );
+    }
+
+    if (activeSection === "customers" || activeSection === "extra") {
+      return (
+        <div className="dashboardGrid">
+          <CustomerDirectory
+            customers={customers}
+            appointments={appointments}
+            appointmentNotes={appointmentNotes}
+            customerLabel={preset.customerLabel}
+            sector={preset.sector}
+            historyLabel={historyLabel}
+            onAddCustomer={() => setIsCustomerModalOpen(true)}
+          />
+          <CustomerCard customer={featuredCustomer} customerLabel={preset.sector === "auto" ? "Müşteri & Araç" : preset.customerLabel} historyLabel={historyLabel} />
+          <CustomerActionRequestsCard
+            requests={customerActionRequests}
+            processingRequestId={processingActionRequestId}
+            onApprove={(request) => handleCustomerActionDecision(request, "Tamamlandı")}
+            onApproveReschedule={handleApproveRescheduleRequest}
+            onReject={(request) => handleCustomerActionDecision(request, "Reddedildi")}
+            onCopyMessage={handleCopyCustomerActionMessage}
+          />
+        </div>
+      );
+    }
+
+    if (activeSection === "staff" || activeSection === "services") {
+      return (
+        <div className="dashboardGrid">
+          {profile?.tenantId && (
+            <StaffServiceManager tenantId={profile.tenantId} sector={preset.sector} />
+          )}
+          <AppointmentTable
+            title="Personel / hizmet bağlantılı randevular"
+            customerLabel={preset.customerLabel}
+            serviceColumnLabel={preset.serviceColumnLabel}
+            appointments={visibleAppointments}
+            showResourceColumn={preset.sector === "auto"}
+            onAddNote={setSelectedAppointmentForNote}
+            onStatusChange={handleAppointmentStatusChange}
+            onEdit={setSelectedAppointmentForEdit}
+            onDelete={handleDeleteAppointment}
+            updatingAppointmentId={updatingAppointmentId}
+            deletingAppointmentId={deletingAppointmentId}
+          />
+        </div>
+      );
+    }
+
+    if (activeSection === "notes") {
+      return (
+        <div className="dashboardGrid">
+          <AiSuggestions suggestions={visibleSuggestions} sector={preset.sector} />
+          <StatusHistoryCard logs={statusLogs} />
+          <MessageCenter
+            tenantName={profile?.tenantName}
+            sector={preset.sector}
+            reminders={visibleReminders}
+            followUps={visibleFollowUps}
+            onReminderStatusChange={handleReminderStatusChange}
+            onFollowUpStatusChange={handleFollowUpStatusChange}
+          />
+        </div>
+      );
+    }
+
+    if (activeSection === "reminders") {
+      return (
+        <div className="dashboardGrid">
+          <MessageCenter
+            tenantName={profile?.tenantName}
+            sector={preset.sector}
+            reminders={visibleReminders}
+            followUps={visibleFollowUps}
+            onReminderStatusChange={handleReminderStatusChange}
+            onFollowUpStatusChange={handleFollowUpStatusChange}
+          />
+          <RemindersCard reminders={visibleReminders} />
+        </div>
+      );
+    }
+
+    if (activeSection === "followups") {
+      return (
+        <div className="dashboardGrid">
+          <MessageCenter
+            tenantName={profile?.tenantName}
+            sector={preset.sector}
+            reminders={visibleReminders}
+            followUps={visibleFollowUps}
+            onReminderStatusChange={handleReminderStatusChange}
+            onFollowUpStatusChange={handleFollowUpStatusChange}
+          />
+          <FollowUpsCard followUps={visibleFollowUps} />
+          <CustomerActionRequestsCard
+            requests={customerActionRequests}
+            processingRequestId={processingActionRequestId}
+            onApprove={(request) => handleCustomerActionDecision(request, "Tamamlandı")}
+            onApproveReschedule={handleApproveRescheduleRequest}
+            onReject={(request) => handleCustomerActionDecision(request, "Reddedildi")}
+            onCopyMessage={handleCopyCustomerActionMessage}
+          />
+        </div>
+      );
+    }
+
+    if (activeSection === "loyalty") {
+      return (
+        <div className="dashboardGrid">
+          <CustomerDirectory
+            customers={customers}
+            appointments={appointments}
+            appointmentNotes={appointmentNotes}
+            customerLabel={preset.customerLabel}
+            sector={preset.sector}
+            historyLabel={historyLabel}
+            onAddCustomer={() => setIsCustomerModalOpen(true)}
+          />
+          <AiSuggestions suggestions={visibleSuggestions} sector={preset.sector} />
+        </div>
+      );
+    }
+
+    if (activeSection === "ai") {
+      return (
+        <div className="dashboardGrid">
+          <AiSuggestions suggestions={visibleSuggestions} sector={preset.sector} />
+          <MessageCenter
+            tenantName={profile?.tenantName}
+            sector={preset.sector}
+            reminders={visibleReminders}
+            followUps={visibleFollowUps}
+            onReminderStatusChange={handleReminderStatusChange}
+            onFollowUpStatusChange={handleFollowUpStatusChange}
+          />
+          <CustomerCard customer={featuredCustomer} customerLabel={preset.sector === "auto" ? "Müşteri & Araç" : preset.customerLabel} historyLabel={historyLabel} />
+        </div>
+      );
+    }
+
+    if (activeSection === "reports") {
+      return (
+        <div className="dashboardGrid">
+          <StatusHistoryCard logs={statusLogs} />
+          <CalendarCard />
+          <RemindersCard reminders={visibleReminders} />
+          <FollowUpsCard followUps={visibleFollowUps} />
+        </div>
+      );
+    }
+
+    if (activeSection === "settings") {
+      return renderSettingsPanel();
+    }
+
+    return (
+      <div className="dashboardGrid">
+        <AppointmentTable
+          title={preset.appointmentTitle}
+          customerLabel={preset.customerLabel}
+          serviceColumnLabel={preset.serviceColumnLabel}
+          appointments={visibleAppointments}
+          showResourceColumn={preset.sector === "auto"}
+          onAddNote={setSelectedAppointmentForNote}
+          onStatusChange={handleAppointmentStatusChange}
+          onEdit={setSelectedAppointmentForEdit}
+          onDelete={handleDeleteAppointment}
+          updatingAppointmentId={updatingAppointmentId}
+          deletingAppointmentId={deletingAppointmentId}
+        />
+        <AiSuggestions suggestions={visibleSuggestions} sector={preset.sector} />
+        <CustomerCard customer={featuredCustomer} customerLabel={preset.sector === "auto" ? "Müşteri & Araç" : preset.customerLabel} historyLabel={historyLabel} />
+        <CustomerDirectory
+          customers={customers}
+          appointments={appointments}
+          appointmentNotes={appointmentNotes}
+          customerLabel={preset.customerLabel}
+          sector={preset.sector}
+          historyLabel={historyLabel}
+          onAddCustomer={() => setIsCustomerModalOpen(true)}
+        />
+        {profile?.tenantId && (
+          <StaffServiceManager tenantId={profile.tenantId} sector={preset.sector} />
+        )}
+        <MessageCenter
+          tenantName={profile?.tenantName}
+          sector={preset.sector}
+          reminders={visibleReminders}
+          followUps={visibleFollowUps}
+          onReminderStatusChange={handleReminderStatusChange}
+          onFollowUpStatusChange={handleFollowUpStatusChange}
+        />
+        <BookingRequestsCard
+          requests={bookingRequests}
+          publicUrl={publicBookingUrl}
+          tenantName={profile?.tenantName}
+          onConvert={handleConvertBookingRequest}
+          convertingRequestId={convertingRequestId}
+          onReject={handleRejectBookingRequest}
+          rejectingRequestId={rejectingRequestId}
+        />
+        <CustomerActionRequestsCard
+          requests={customerActionRequests}
+          processingRequestId={processingActionRequestId}
+          onApprove={(request) => handleCustomerActionDecision(request, "Tamamlandı")}
+          onApproveReschedule={handleApproveRescheduleRequest}
+          onReject={(request) => handleCustomerActionDecision(request, "Reddedildi")}
+          onCopyMessage={handleCopyCustomerActionMessage}
+        />
+        <StatusHistoryCard logs={statusLogs} />
+        <CalendarCard />
+        <RemindersCard reminders={visibleReminders} />
+        <FollowUpsCard followUps={visibleFollowUps} />
+      </div>
+    );
+  }
   return (
     <div className={`appShell theme-${preset.sector}`}>
-      <Sidebar preset={preset} />
+      <Sidebar preset={preset} activeSection={activeSection} onSectionChange={setActiveSection} />
       <main className="mainArea">
         <Header displayName={displayName} roleLabel={preset.userRoleLabel} searchPlaceholder={preset.searchPlaceholder} />
         <section className="content">
@@ -575,64 +863,7 @@ export function Dashboard({ user, profile }: DashboardProps) {
             })}
           </div>
 
-          <div className="dashboardGrid">
-            <AppointmentTable
-              title={preset.appointmentTitle}
-              customerLabel={preset.customerLabel}
-              serviceColumnLabel={preset.serviceColumnLabel}
-              appointments={visibleAppointments}
-              showResourceColumn={preset.sector === "auto"}
-              onAddNote={setSelectedAppointmentForNote}
-              onStatusChange={handleAppointmentStatusChange}
-              onEdit={setSelectedAppointmentForEdit}
-              onDelete={handleDeleteAppointment}
-              updatingAppointmentId={updatingAppointmentId}
-              deletingAppointmentId={deletingAppointmentId}
-            />
-            <AiSuggestions suggestions={visibleSuggestions} sector={preset.sector} />
-            <CustomerCard customer={featuredCustomer} customerLabel={preset.sector === "auto" ? "Müşteri & Araç" : preset.customerLabel} historyLabel={historyLabel} />
-            <CustomerDirectory
-              customers={customers}
-              appointments={appointments}
-              appointmentNotes={appointmentNotes}
-              customerLabel={preset.customerLabel}
-              sector={preset.sector}
-              historyLabel={historyLabel}
-              onAddCustomer={() => setIsCustomerModalOpen(true)}
-            />
-            {profile?.tenantId && (
-              <StaffServiceManager tenantId={profile.tenantId} sector={preset.sector} />
-            )}
-            <MessageCenter
-              tenantName={profile?.tenantName}
-              sector={preset.sector}
-              reminders={visibleReminders}
-              followUps={visibleFollowUps}
-              onReminderStatusChange={handleReminderStatusChange}
-              onFollowUpStatusChange={handleFollowUpStatusChange}
-            />
-            <BookingRequestsCard
-              requests={bookingRequests}
-              publicUrl={publicBookingUrl}
-              tenantName={profile?.tenantName}
-              onConvert={handleConvertBookingRequest}
-              convertingRequestId={convertingRequestId}
-              onReject={handleRejectBookingRequest}
-              rejectingRequestId={rejectingRequestId}
-            />
-            <CustomerActionRequestsCard
-              requests={customerActionRequests}
-              processingRequestId={processingActionRequestId}
-              onApprove={(request) => handleCustomerActionDecision(request, "Tamamlandı")}
-              onApproveReschedule={handleApproveRescheduleRequest}
-              onReject={(request) => handleCustomerActionDecision(request, "Reddedildi")}
-              onCopyMessage={handleCopyCustomerActionMessage}
-            />
-            <StatusHistoryCard logs={statusLogs} />
-            <CalendarCard />
-            <RemindersCard reminders={visibleReminders} />
-            <FollowUpsCard followUps={visibleFollowUps} />
-          </div>
+          {renderActiveSection()}
         </section>
       </main>
 
